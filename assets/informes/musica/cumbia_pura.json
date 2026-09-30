@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/musica/cumbia_pura.mp4",
+  "duracion": 58.52,
+  "bpm": 95.7,
+  "pulso": 0.79,
+  "brillo_hz": 2313.2,
+  "bandas": [
+    0.4899,
+    0.3504,
+    0.0657,
+    0.0338,
+    0.0251,
+    0.0166,
+    0.0141,
+    0.0044
+  ],
+  "golpes_por_s": 4.9,
+  "dinamica": 0.6,
+  "croma": [
+    0.1756,
+    0.0479,
+    0.0901,
+    0.0418,
+    0.0717,
+    0.1195,
+    0.0487,
+    0.0828,
+    0.0551,
+    0.1442,
+    0.0718,
+    0.0506
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "medio",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

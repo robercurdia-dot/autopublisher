@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/audio/lemon_art_negro_b.m4a",
+  "duracion": 9.64,
+  "bpm": 117.5,
+  "pulso": 0.526,
+  "brillo_hz": 1928.6,
+  "bandas": [
+    0.3736,
+    0.2493,
+    0.1749,
+    0.1137,
+    0.0519,
+    0.0225,
+    0.0095,
+    0.0045
+  ],
+  "golpes_por_s": 4.88,
+  "dinamica": 0.697,
+  "croma": [
+    0.1234,
+    0.0617,
+    0.0976,
+    0.0667,
+    0.0764,
+    0.1093,
+    0.0873,
+    0.0768,
+    0.0697,
+    0.0987,
+    0.0768,
+    0.0555
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "medio",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

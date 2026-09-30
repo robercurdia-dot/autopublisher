@@ -1,0 +1,43 @@
+{
+  "referencia": "bar_cabinet_negro_1080",
+  "variante": "cobre",
+  "semilla": 41,
+  "unidades": 4,
+  "atrezzo": [
+    "hendricks",
+    "bombay_sapphire",
+    "patron",
+    "fernet_branca"
+  ],
+  "escena": "a marble bathroom shelf with a rolled towel and a soap dish",
+  "planos": 9,
+  "duracion": 10.0,
+  "duracion_referencia": 10.133,
+  "enmiendas": [
+    "escena_propia",
+    "entrada_corta",
+    "no_repetir_entre_piezas",
+    "mas_unidades",
+    "caption_propio",
+    "marcas_reales_sin_texto",
+    "etiqueta_solo_nativa"
+  ],
+  "evitado": {
+    "atrezzo": [
+      "ron_zacapa",
+      "bombay_sapphire",
+      "clase_azul",
+      "hendricks",
+      "fernet_branca",
+      "jack_daniels",
+      "grey_goose",
+      "corralejo",
+      "patron"
+    ],
+    "escenas": [
+      "a home bar shelf with two empty tumblers and a bottle opener",
+      "a dark wood sideboard with a stack of books and a small brass tray",
+      "a windowsill at dusk with a half-drawn curtain and a coffee cup"
+    ]
+  }
+}

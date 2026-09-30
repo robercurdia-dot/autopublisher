@@ -1,0 +1,17 @@
+{
+  "id": "ugc_tom_hablando",
+  "duracion": 9.2,
+  "proporcion": "576:1024",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 9.2,
+      "duracion": 9.2,
+      "muestra": 4.6,
+      "fotograma": "assets/informes/planos/ugc_tom_hablando/plano_00.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/ugc_tom_hablando/contactos.jpg",
+  "lectura": null
+}

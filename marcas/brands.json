@@ -1,0 +1,125 @@
+{
+ "_comentario": "Catalogo de marcas. 'bloque_botella' es LO UNICO que cambia entre marcas dentro del prompt validado (ver flashboards_replica_video_ugc.md). Sustituye el parrafo que empieza por 'Change the bottles:'. 'foto' es una ruta local relativa a marcas/fotos/ — fal la sube con upload_file, no hace falta URL publica.",
+ "_criterio": "Botella que uno guardaria en vez de tirar, silueta reconocible, cuello estandar donde encaje el topper. Las opacas y las de vidrio de color quedan mejor encendidas: la luz las atraviesa o las recorta.",
+ "marcas": [
+  {
+   "id": "clase_azul",
+   "nombre": "Clase Azul Reposado",
+   "categoria": "tequila",
+   "foto": null,
+   "brilla": "excelente - ceramica opaca, la luz la vuelve farolillo",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Clase Azul Reposado tequila decanter, exactly as in the reference image - an opaque cream-white hand-painted ceramic bottle with a wide rounded body tapering to a narrow neck, covered in intricate cobalt blue hand-painted floral and geometric patterns, with a blue and white crown-shaped collar at the shoulder and a polished silver ball stopper.."
+  },
+  {
+   "id": "jack_daniels",
+   "nombre": "Jack Daniel's Old No. 7",
+   "categoria": "whiskey",
+   "foto": "jack_daniels.png",
+   "brilla": "medio - vidrio transparente, el ambar se enciende",
+   "procedencia": "web",
+   "aviso_procedencia": "asset de marketing: sirve de arranque, pero la etiqueta es el punto debil",
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Jack Daniel's Old No. 7 Tennessee Whiskey bottle, exactly as in the reference image - square-shouldered clear glass bottle, dark amber whiskey inside, black rectangular label with white and gold lettering and the Jack Daniel's arch logo."
+  },
+  {
+   "id": "fernet_branca",
+   "nombre": "Fernet-Branca",
+   "categoria": "amaro",
+   "foto": null,
+   "brilla": "bajo - vidrio verde muy oscuro, queda en silueta",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Fernet-Branca bottle, exactly as in the reference image - tall dark olive-green glass bottle with sloping shoulders and a long neck, cream-coloured rectangular label with an ornate black eagle perched on a globe, red and black serif lettering reading Fernet-Branca."
+  },
+  {
+   "id": "patron",
+   "nombre": "Patron Silver",
+   "categoria": "tequila",
+   "foto": null,
+   "brilla": "alto - vidrio reciclado, difunde la luz",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Patron Silver tequila bottle, exactly as in the reference image - short, stout, slope-shouldered bottle of slightly cloudy recycled glass with a broad round body and a thick neck, clear tequila inside, an orange and cream oval label with a black bee emblem and green banner lettering."
+  },
+  {
+   "id": "grey_goose",
+   "nombre": "Grey Goose",
+   "categoria": "vodka",
+   "foto": null,
+   "brilla": "excelente - vidrio esmerilado, luz difusa",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Grey Goose vodka bottle, exactly as in the reference image - a tall frosted glass bottle, translucent rather than transparent, with a flight of dark grey flying geese silkscreened down the front, blue and grey lettering reading GREY GOOSE above them and a French tricolour accent."
+  },
+  {
+   "id": "bombay_sapphire",
+   "nombre": "Bombay Sapphire",
+   "categoria": "gin",
+   "foto": null,
+   "brilla": "excelente - vidrio azul zafiro, tine la luz",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Bombay Sapphire gin bottle, exactly as in the reference image - a flat-sided rectangular bottle of translucent sapphire blue glass with rounded corners, clear gin inside, a cream label bearing a portrait of Queen Victoria and gold and black lettering reading BOMBAY SAPPHIRE."
+  },
+  {
+   "id": "hendricks",
+   "nombre": "Hendrick's Gin",
+   "categoria": "gin",
+   "foto": null,
+   "brilla": "bajo - vidrio marron opaco, queda en silueta",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Hendrick's Gin bottle, exactly as in the reference image - a squat dark brown apothecary bottle with broad shoulders, a short thick neck and an opaque glass body, carrying a cream Victorian-style label with fine black engraved lettering and curling botanical flourishes reading HENDRICK'S GIN."
+  },
+  {
+   "id": "don_julio_1942",
+   "nombre": "Don Julio 1942",
+   "categoria": "tequila",
+   "foto": null,
+   "brilla": "medio - vidrio transparente, ambar encendido",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Don Julio 1942 anejo tequila bottle, exactly as in the reference image - a tall slender elongated clear glass bottle shaped like an agave leaf, narrowing gently towards a long neck, golden amber tequila inside, with an embossed body, a cream and gold label reading DON JULIO 1942 in elegant serif lettering."
+  },
+  {
+   "id": "absolut",
+   "nombre": "Absolut Vodka",
+   "categoria": "vodka",
+   "foto": null,
+   "brilla": "alto - transparente sin etiqueta de papel, muy limpia",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Absolut Vodka bottle, exactly as in the reference image - a clear glass apothecary-style bottle with rounded shoulders and a short neck, no paper label, with the text ABSOLUT VODKA screen-printed directly onto the glass in blue and silver lettering and a medallion portrait below the shoulder."
+  },
+  {
+   "id": "corralejo",
+   "nombre": "Corralejo Reposado",
+   "categoria": "tequila",
+   "foto": null,
+   "brilla": "excelente - vidrio azul cobalto soplado",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Corralejo Reposado tequila bottle, exactly as in the reference image - a very tall, slim, elongated bottle of deep cobalt blue hand-blown glass with a rounded base and a long tapering neck, carrying a small cream and gold label with ornate lettering reading CORRALEJO."
+  },
+  {
+   "id": "ron_zacapa",
+   "nombre": "Ron Zacapa 23",
+   "categoria": "ron",
+   "foto": null,
+   "brilla": "medio - la banda de palma recorta la luz",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Ron Zacapa 23 bottle, exactly as in the reference image - a rounded clear glass bottle with dark amber rum inside and a wide band of woven natural palm leaf (petate) wrapped around its middle, with a cream and gold label above reading ZACAPA in serif lettering."
+  },
+  {
+   "id": "tanqueray",
+   "nombre": "Tanqueray London Dry",
+   "categoria": "gin",
+   "foto": null,
+   "brilla": "alto - vidrio verde esmeralda",
+   "procedencia": null,
+   "bloque": "Change the bottles: every bottle that receives the lamp topper is a real Tanqueray London Dry Gin bottle, exactly as in the reference image - a distinctive emerald green glass bottle shaped like a three-sided cocktail shaker with a wide ribbed base, short neck and red wax-style seal, carrying a gold and red medallion label reading TANQUERAY."
+  }
+ ],
+ "_procedencia": {
+  "_por_que": "El origen de la foto decide la calidad del anclaje y hay que dejarlo registrado, no reconstruirlo despues.",
+  "propia": "Foto de una botella tuya, hecha por ti. La mejor: es lo que hace la cuenta de referencia.",
+  "web": "Buscada y descargada o capturada de la web. Valida para forma, color, decorado y escena. RIESGO cuando se usa para reproducir la ETIQUETA de una marca: es el caso que el nodo de inteligencia mide como ilegible, y lo ilegible delata el clip al instante.",
+  "proveedor": "Del catalogo del proveedor (CJ). Ojo: las fichas de cotas NO sirven, solo las fotos reales.",
+  "generada": "Que el modelo invente la etiqueta. Cerrado: sale ilegible siempre."
+ },
+ "_aviso_catalogo": "Estas 12 se eligieron por marcas reconocibles. El anclaje mas fiable sigue siendo una botella tuya fotografiada por ti; la via web queda abierta y marcada, no prohibida.",
+ "_que_es": "Biblioteca de ATREZZO, no catalogo comercial. No vendemos estas marcas: son el soporte sobre el que se ensena el producto. Ver contexto.json -> atrezzo.",
+ "_bloque": "La descripción del elemento para el prompt. Se llama «bloque» y no «bloque_botella» porque mañana la biblioteca puede ser de tazas."
+}

@@ -1,0 +1,37 @@
+{
+  "referencia": "lemon_art_negro",
+  "variante": "negro_mate",
+  "semilla": 21,
+  "unidades": 4,
+  "atrezzo": [
+    "jack_daniels",
+    "grey_goose",
+    "corralejo",
+    "patron"
+  ],
+  "escena": "a windowsill at dusk with a half-drawn curtain and a coffee cup",
+  "planos": 9,
+  "duracion": 9.736,
+  "enmiendas": [
+    "etiquetas_ilegibles",
+    "escena_propia",
+    "entrada_corta",
+    "no_repetir_entre_piezas",
+    "mas_botellas",
+    "caption_propio"
+  ],
+  "evitado": {
+    "atrezzo": [
+      "don_julio_1942",
+      "absolut",
+      "tanqueray",
+      "bombay_sapphire",
+      "fernet_branca",
+      "hendricks",
+      "bombay_sapphire",
+      "fernet_branca",
+      "hendricks"
+    ],
+    "escenas": []
+  }
+}

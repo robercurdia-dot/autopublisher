@@ -1,0 +1,39 @@
+{
+  "archivo": "assets/audio/lemon_art_cobre.m4a",
+  "duracion": 9.03,
+  "bpm": 97.5,
+  "pulso": 0.332,
+  "brillo_hz": 2330.6,
+  "bandas": [
+    0.4971,
+    0.3637,
+    0.0887,
+    0.0144,
+    0.0087,
+    0.0091,
+    0.011,
+    0.0073
+  ],
+  "golpes_por_s": 2.77,
+  "dinamica": 0.567,
+  "croma": [
+    0.1508,
+    0.0705,
+    0.0866,
+    0.0379,
+    0.0702,
+    0.1269,
+    0.038,
+    0.0753,
+    0.0523,
+    0.1703,
+    0.0782,
+    0.0431
+  ],
+  "tonica_aprox": "la",
+  "terminos": [
+    "medio",
+    "equilibrado",
+    "percusivo"
+  ]
+}

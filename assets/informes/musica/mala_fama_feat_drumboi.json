@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/musica/mala_fama_feat_drumboi.mp4",
+  "duracion": 178.84,
+  "bpm": 97.5,
+  "pulso": 0.536,
+  "brillo_hz": 2217.1,
+  "bandas": [
+    0.5783,
+    0.2013,
+    0.1049,
+    0.0561,
+    0.0256,
+    0.0163,
+    0.0122,
+    0.0055
+  ],
+  "golpes_por_s": 4.12,
+  "dinamica": 0.552,
+  "croma": [
+    0.1621,
+    0.0596,
+    0.1052,
+    0.0575,
+    0.0725,
+    0.1224,
+    0.0548,
+    0.0825,
+    0.0479,
+    0.1036,
+    0.0754,
+    0.0564
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "medio",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

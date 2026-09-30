@@ -1,0 +1,37 @@
+{
+  "referencia": "ref_tom_montada",
+  "variante": "negro_mate",
+  "semilla": 3,
+  "unidades": 1,
+  "atrezzo": [
+    "fernet_branca"
+  ],
+  "escena": "a dark wood sideboard with a stack of books and a small brass tray",
+  "planos": 3,
+  "duracion": 6.0,
+  "enmiendas": [
+    "etiquetas_ilegibles",
+    "escena_propia",
+    "no_repetir_entre_piezas",
+    "mas_botellas",
+    "caption_propio"
+  ],
+  "evitado": {
+    "atrezzo": [
+      "bombay_sapphire",
+      "jack_daniels",
+      "grey_goose",
+      "corralejo",
+      "patron",
+      "don_julio_1942",
+      "absolut",
+      "tanqueray"
+    ],
+    "escenas": [
+      "a bare kitchen worktop with a folded tea towel and a glass of water",
+      "a windowsill at dusk with a half-drawn curtain and a coffee cup"
+    ]
+  },
+  "duracion_referencia": 5.0,
+  "_nota": "Se disparó a 6 s para cubrir la locución de 5,28 s; la ficha decía 5,0."
+}

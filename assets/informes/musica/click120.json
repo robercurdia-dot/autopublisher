@@ -1,0 +1,40 @@
+{
+  "archivo": "/private/tmp/claude-501/-Users-robertocurbelodiaz-polymarket-insider-agent/402cda4a-c894-4b0c-bec2-54d07fc75b64/scratchpad/click120.m4a",
+  "duracion": 30.0,
+  "bpm": 60.1,
+  "pulso": 0.955,
+  "brillo_hz": 680.5,
+  "bandas": [
+    0.777,
+    0.0163,
+    0.0175,
+    0.185,
+    0.0031,
+    0.0007,
+    0.0003,
+    0.0001
+  ],
+  "golpes_por_s": 1.97,
+  "dinamica": 1.345,
+  "croma": [
+    0.1698,
+    0.0096,
+    0.0172,
+    0.0083,
+    0.013,
+    0.1212,
+    0.0146,
+    0.0198,
+    0.0397,
+    0.5352,
+    0.0318,
+    0.0199
+  ],
+  "tonica_aprox": "la",
+  "terminos": [
+    "lento",
+    "grave",
+    "percusivo",
+    "con subidas"
+  ]
+}

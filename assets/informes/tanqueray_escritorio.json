@@ -1,0 +1,55 @@
+{
+  "id": "tanqueray_escritorio",
+  "archivo": "assets/videos/tanqueray_escritorio.mp4",
+  "duracion": 9.123,
+  "tamano_bytes": 1539791,
+  "video": {
+    "codec": "h264",
+    "ancho": 720,
+    "alto": 1280,
+    "fps": 30.0,
+    "proporcion": "720:1280"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": 44100,
+    "canales": 2,
+    "extraido": "assets/audio/tanqueray_escritorio.m4a",
+    "silencio_inicial_s": 0.0,
+    "energia_media": 0.431
+  },
+  "cortes": [
+    1.77,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    6.5,
+    7.0,
+    7.5,
+    8.0,
+    8.53
+  ],
+  "golpes_audio": [
+    0.41,
+    0.68,
+    0.91,
+    1.96,
+    3.01,
+    3.51,
+    4.06,
+    4.56,
+    5.61,
+    6.11,
+    7.16,
+    8.21
+  ],
+  "concordancia": {
+    "cortes": 10,
+    "golpes": 12,
+    "encajan": 8,
+    "porcentaje": 80.0,
+    "tolerancia_s": 0.35
+  },
+  "planos": 11
+}

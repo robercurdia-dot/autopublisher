@@ -1,0 +1,233 @@
+{
+  "id": "ugc_tom_bulk",
+  "duracion": 53.767,
+  "proporcion": "576:1024",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 9.2,
+      "duracion": 9.2,
+      "muestra": 4.6,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 9.2,
+      "hasta": 9.47,
+      "duracion": 0.27,
+      "muestra": 9.34,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_01.jpg"
+    },
+    {
+      "plano": 2,
+      "desde": 9.47,
+      "hasta": 9.83,
+      "duracion": 0.36,
+      "muestra": 9.65,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_02.jpg"
+    },
+    {
+      "plano": 3,
+      "desde": 9.83,
+      "hasta": 10.2,
+      "duracion": 0.37,
+      "muestra": 10.02,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_03.jpg"
+    },
+    {
+      "plano": 4,
+      "desde": 10.2,
+      "hasta": 10.53,
+      "duracion": 0.33,
+      "muestra": 10.36,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_04.jpg"
+    },
+    {
+      "plano": 5,
+      "desde": 10.53,
+      "hasta": 10.9,
+      "duracion": 0.37,
+      "muestra": 10.71,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_05.jpg"
+    },
+    {
+      "plano": 6,
+      "desde": 10.9,
+      "hasta": 11.27,
+      "duracion": 0.37,
+      "muestra": 11.09,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_06.jpg"
+    },
+    {
+      "plano": 7,
+      "desde": 11.27,
+      "hasta": 11.57,
+      "duracion": 0.3,
+      "muestra": 11.42,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_07.jpg"
+    },
+    {
+      "plano": 8,
+      "desde": 11.57,
+      "hasta": 13.23,
+      "duracion": 1.66,
+      "muestra": 12.4,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_08.jpg"
+    },
+    {
+      "plano": 9,
+      "desde": 13.23,
+      "hasta": 16.4,
+      "duracion": 3.17,
+      "muestra": 14.81,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_09.jpg"
+    },
+    {
+      "plano": 10,
+      "desde": 16.4,
+      "hasta": 17.23,
+      "duracion": 0.83,
+      "muestra": 16.81,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_10.jpg"
+    },
+    {
+      "plano": 11,
+      "desde": 17.23,
+      "hasta": 18.8,
+      "duracion": 1.57,
+      "muestra": 18.02,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_11.jpg"
+    },
+    {
+      "plano": 12,
+      "desde": 18.8,
+      "hasta": 20.57,
+      "duracion": 1.77,
+      "muestra": 19.69,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_12.jpg"
+    },
+    {
+      "plano": 13,
+      "desde": 20.57,
+      "hasta": 22.07,
+      "duracion": 1.5,
+      "muestra": 21.32,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_13.jpg"
+    },
+    {
+      "plano": 14,
+      "desde": 22.07,
+      "hasta": 25.17,
+      "duracion": 3.1,
+      "muestra": 23.62,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_14.jpg"
+    },
+    {
+      "plano": 15,
+      "desde": 25.17,
+      "hasta": 27.77,
+      "duracion": 2.6,
+      "muestra": 26.47,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_15.jpg"
+    },
+    {
+      "plano": 16,
+      "desde": 27.77,
+      "hasta": 29.77,
+      "duracion": 2.0,
+      "muestra": 28.77,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_16.jpg"
+    },
+    {
+      "plano": 17,
+      "desde": 29.77,
+      "hasta": 31.27,
+      "duracion": 1.5,
+      "muestra": 30.52,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_17.jpg"
+    },
+    {
+      "plano": 18,
+      "desde": 31.27,
+      "hasta": 32.0,
+      "duracion": 0.73,
+      "muestra": 31.63,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_18.jpg"
+    },
+    {
+      "plano": 19,
+      "desde": 32.0,
+      "hasta": 33.03,
+      "duracion": 1.03,
+      "muestra": 32.52,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_19.jpg"
+    },
+    {
+      "plano": 20,
+      "desde": 33.03,
+      "hasta": 35.93,
+      "duracion": 2.9,
+      "muestra": 34.48,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_20.jpg"
+    },
+    {
+      "plano": 21,
+      "desde": 35.93,
+      "hasta": 36.67,
+      "duracion": 0.74,
+      "muestra": 36.3,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_21.jpg"
+    },
+    {
+      "plano": 22,
+      "desde": 36.67,
+      "hasta": 38.1,
+      "duracion": 1.43,
+      "muestra": 37.39,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_22.jpg"
+    },
+    {
+      "plano": 23,
+      "desde": 38.1,
+      "hasta": 41.23,
+      "duracion": 3.13,
+      "muestra": 39.66,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_23.jpg"
+    },
+    {
+      "plano": 24,
+      "desde": 41.23,
+      "hasta": 45.97,
+      "duracion": 4.74,
+      "muestra": 43.6,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_24.jpg"
+    },
+    {
+      "plano": 25,
+      "desde": 45.97,
+      "hasta": 50.07,
+      "duracion": 4.1,
+      "muestra": 48.02,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_25.jpg"
+    },
+    {
+      "plano": 26,
+      "desde": 50.07,
+      "hasta": 51.77,
+      "duracion": 1.7,
+      "muestra": 50.92,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_26.jpg"
+    },
+    {
+      "plano": 27,
+      "desde": 51.77,
+      "hasta": 53.77,
+      "duracion": 2.0,
+      "muestra": 52.77,
+      "fotograma": "assets/informes/planos/ugc_tom_bulk/plano_27.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/ugc_tom_bulk/contactos.jpg",
+  "lectura": null
+}

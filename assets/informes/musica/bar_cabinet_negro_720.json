@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/audio/bar_cabinet_negro_720.m4a",
+  "duracion": 10.15,
+  "bpm": 156.6,
+  "pulso": 0.34,
+  "brillo_hz": 2089.6,
+  "bandas": [
+    0.3298,
+    0.2751,
+    0.2298,
+    0.099,
+    0.0258,
+    0.0224,
+    0.012,
+    0.006
+  ],
+  "golpes_por_s": 4.34,
+  "dinamica": 0.468,
+  "croma": [
+    0.1663,
+    0.0723,
+    0.0869,
+    0.0602,
+    0.0553,
+    0.1231,
+    0.0503,
+    0.0568,
+    0.0698,
+    0.1235,
+    0.0861,
+    0.0493
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "rápido",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

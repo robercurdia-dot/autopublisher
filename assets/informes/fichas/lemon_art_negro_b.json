@@ -1,0 +1,168 @@
+{
+  "id": "lemon_art_negro_b",
+  "duracion": 9.75,
+  "proporcion": "720:1280",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 3.63,
+      "duracion": 3.63,
+      "muestra": 1.81,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 3.63,
+      "hasta": 4.67,
+      "duracion": 1.04,
+      "muestra": 4.15,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_01.jpg"
+    },
+    {
+      "plano": 2,
+      "desde": 4.67,
+      "hasta": 5.67,
+      "duracion": 1.0,
+      "muestra": 5.17,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_02.jpg"
+    },
+    {
+      "plano": 3,
+      "desde": 5.67,
+      "hasta": 6.67,
+      "duracion": 1.0,
+      "muestra": 6.17,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_03.jpg"
+    },
+    {
+      "plano": 4,
+      "desde": 6.67,
+      "hasta": 7.67,
+      "duracion": 1.0,
+      "muestra": 7.17,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_04.jpg"
+    },
+    {
+      "plano": 5,
+      "desde": 7.67,
+      "hasta": 8.17,
+      "duracion": 0.5,
+      "muestra": 7.92,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_05.jpg"
+    },
+    {
+      "plano": 6,
+      "desde": 8.17,
+      "hasta": 8.67,
+      "duracion": 0.5,
+      "muestra": 8.42,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_06.jpg"
+    },
+    {
+      "plano": 7,
+      "desde": 8.67,
+      "hasta": 9.17,
+      "duracion": 0.5,
+      "muestra": 8.92,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_07.jpg"
+    },
+    {
+      "plano": 8,
+      "desde": 9.17,
+      "hasta": 9.75,
+      "duracion": 0.58,
+      "muestra": 9.46,
+      "fotograma": "assets/informes/planos/lemon_art_negro_b/plano_08.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/lemon_art_negro_b/contactos.jpg",
+  "lectura": {
+    "_fuente": "lectura de visión sobre assets/informes/planos/lemon_art_negro/contactos.jpg, 21 sep 2026",
+    "producto_protagonista": "cap-shaped LED lamp topper that plugs into a bottle neck",
+    "personas": "manos",
+    "escenario": "domestic table corner: framed print, small vase of flowers, potted plant, light wood surface",
+    "iluminacion": "neutral daylight that turns warm and golden once the lamp is on",
+    "accion": {
+      "verbo": "fit and switch on",
+      "fases": {
+        "presentacion": "a hand picks the product up and shows it briefly, close up",
+        "colocar": "a hand lowers the product onto the neck of the support until the prong seats",
+        "encender": "a fingertip taps the top face, the lamp turns on and warm light floods the scene"
+      },
+      "estado_inicial": "support standing bare, product not attached",
+      "estado_final": "product seated on the support and LIT, glowing warm and lighting the objects around it",
+      "se_completa_en_plano": 8
+    },
+    "objetos": [
+      {
+        "tipo": "botella",
+        "cantidad": 3,
+        "papel": "interactua"
+      },
+      {
+        "tipo": "lampara-topper",
+        "cantidad": 3,
+        "papel": "protagonista"
+      }
+    ],
+    "guion": [
+      {
+        "plano": 0,
+        "fase": "presentacion",
+        "unidad": null,
+        "encuadre": "close up"
+      },
+      {
+        "plano": 1,
+        "fase": "colocar",
+        "unidad": 0,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 2,
+        "fase": "colocar",
+        "unidad": 1,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 3,
+        "fase": "colocar",
+        "unidad": 2,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 4,
+        "fase": "encender",
+        "unidad": 0,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 5,
+        "fase": "encender",
+        "unidad": 1,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 6,
+        "fase": "encender",
+        "unidad": 1,
+        "encuadre": "medium, warmer"
+      },
+      {
+        "plano": 7,
+        "fase": "encender",
+        "unidad": 2,
+        "encuadre": "medium"
+      },
+      {
+        "plano": 8,
+        "fase": "cierre",
+        "unidad": 2,
+        "encuadre": "medium, lamp lit"
+      }
+    ],
+    "patron": "presentación del producto y, por cada unidad de atrezzo, un ciclo completo de las fases; cierra con la acción terminada",
+    "_nota": "Es la misma pieza que lemon_art_negro, bajada otra vez. Lectura heredada."
+  }
+}

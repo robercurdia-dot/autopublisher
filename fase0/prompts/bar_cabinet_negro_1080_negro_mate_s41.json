@@ -1,0 +1,59 @@
+{
+  "referencia": "bar_cabinet_negro_1080",
+  "variante": "negro_mate",
+  "semilla": 41,
+  "unidades": 4,
+  "atrezzo": [
+    "corralejo",
+    "grey_goose",
+    "jack_daniels",
+    "don_julio_1942"
+  ],
+  "escena": "a windowsill at dusk with a half-drawn curtain and a coffee cup",
+  "planos": 9,
+  "duracion": 10.0,
+  "duracion_referencia": 10.133,
+  "enmiendas": [
+    "escena_propia",
+    "entrada_corta",
+    "no_repetir_entre_piezas",
+    "mas_unidades",
+    "caption_propio",
+    "marcas_reales_sin_texto",
+    "etiqueta_solo_nativa",
+    "foto_de_producto_obligatoria",
+    "referencia_entra_en_el_modelo"
+  ],
+  "entradas": [
+    {
+      "clase": "video",
+      "papel": "directa",
+      "ref": "bar_cabinet_negro_1080",
+      "archivo": "assets/videos/bar_cabinet_negro_1080.mp4"
+    },
+    {
+      "clase": "imagen",
+      "papel": "producto",
+      "archivo": "producto/negro_mate.jpg"
+    }
+  ],
+  "papel_referencia": "directa",
+  "evitado": {
+    "atrezzo": [
+      "ron_zacapa",
+      "absolut",
+      "clase_azul",
+      "tanqueray",
+      "hendricks",
+      "bombay_sapphire",
+      "patron",
+      "fernet_branca",
+      "fernet_branca"
+    ],
+    "escenas": [
+      "a home bar shelf with two empty tumblers and a bottle opener",
+      "a marble bathroom shelf with a rolled towel and a soap dish",
+      "a dark wood sideboard with a stack of books and a small brass tray"
+    ]
+  }
+}

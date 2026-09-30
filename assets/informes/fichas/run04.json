@@ -1,0 +1,25 @@
+{
+  "id": "run04",
+  "duracion": 6.042,
+  "proporcion": "720:1280",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 2.38,
+      "duracion": 2.38,
+      "muestra": 1.19,
+      "fotograma": "assets/informes/planos/run04/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 2.38,
+      "hasta": 6.04,
+      "duracion": 3.66,
+      "muestra": 4.21,
+      "fotograma": "assets/informes/planos/run04/plano_01.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/run04/contactos.jpg",
+  "lectura": null
+}

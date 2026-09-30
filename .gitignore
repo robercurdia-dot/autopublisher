@@ -1,0 +1,40 @@
+# Credenciales y secretos — nunca, en ningún nivel
+.env
+*.env
+!*.env.ejemplo
+credenciales*
+*_token*
+*.key
+*.pem
+
+# Estado de trabajo de SQLite: temporales, jamás se versionan
+*.db-wal
+*.db-shm
+db/jobs.db
+
+# Material de terceros: los vídeos de referencia son de otras cuentas.
+# Se descargan en local (ver assets/videos.json), no se redistribuyen.
+assets/videos/*.mp4
+assets/videos/*.mov
+
+# Salidas y fotogramas de QA: se regeneran, pesan y no aportan al código
+runs/
+assets/salidas/
+assets/informes/planos/
+.pre_audit_backup/
+
+# Cachés
+.upload_cache.json
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+
+# Pistas de la Colección de sonidos de Meta: su licencia cubre publicar EN
+# productos de Meta, no redistribuirlas. Se descargan en local; el catálogo
+# (assets/musica/catalogo.json) dice cuál es cada una.
+assets/musica/*.mp4
+assets/musica/*.mp3
+assets/musica/*.m4a
+assets/musica/*.wav

@@ -1,0 +1,62 @@
+{
+ "_que_es_esto": "Las identidades de la marca, una por plataforma. El motor no sabe de cuentas: lee esto. Si mañana cambia la marca, se cambia aqui y nada mas.",
+ "marca": {
+  "nombre": "Zulara Lamp",
+  "usuario_preferido": "zularalamp",
+  "bio": "Add a bit of class to your home",
+  "avatar": "marca/avatar_zularalamp.jpg",
+  "avatar_grande": "marca/avatar_zularalamp_800.jpg",
+  "web": "https://zularalamp.vercel.app",
+  "_bio_publicada": {
+   "instagram": "Add a bit of class to your home\nzularalamp.vercel.app",
+   "tiktok": "Add a bit of class to your home\nzularalamp.vercel.app",
+   "facebook": "Add a bit of class to your home - zularalamp.vercel.app (enlace clicable)",
+   "_nota": "El campo Sitio web de Instagram solo se edita desde la app movil; por eso el enlace va en el texto de la bio. TikTok igual. En Facebook si se renderiza como enlace."
+  }
+ },
+ "cuentas": {
+  "instagram": {
+   "usuario": "zularalamp",
+   "id": "28160174283600683",
+   "estado": "activa",
+   "via": "graph api",
+   "credenciales": "credenciales_ig.env (fuera del repo)",
+   "declaracion_ia": "is_ai_generated",
+   "audio": "meta",
+   "fase": 0
+  },
+  "tiktok": {
+   "usuario": "zularalamp.3",
+   "nombre_visible": "Zularalamp.3",
+   "perfil": "https://www.tiktok.com/@zularalamp.3",
+   "estado": "activa",
+   "via": "navegador",
+   "declaracion_ia": "interruptor Contenido generado por IA",
+   "audio": "tiktok_sin_derechos",
+   "bloqueos": {
+    "usuario": "no se puede cambiar hasta el 24 oct 2026 (1 vez cada 30 dias)",
+    "nombre_visible": "no se puede cambiar hasta el 1 oct 2026 (1 vez cada 7 dias)"
+   },
+   "_nota": "El usuario lleva .3 y el nombre visible no es 'Zulara Lamp' porque TikTok los bloquea tras crearlos. Roberto lo da por bueno; si algun dia se unifica la marca, esas son las fechas."
+  },
+  "facebook": {
+   "pagina": "Zulara Lamp",
+   "id": "61594468992342",
+   "url": "https://www.facebook.com/profile.php?id=61594468992342",
+   "categoria": "Tienda de iluminación",
+   "estado": "activa",
+   "via": "navegador",
+   "declaracion_ia": "etiqueta de IA de Meta",
+   "audio": "meta",
+   "_nota": "Creada el 24 sep 2026 desde el perfil de Roberto, que queda como administrador. Sin nombre de usuario todavía: la URL va por id. Sin foto de portada. Publica por navegador; para API haría falta un token de página con pages_manage_posts, distinto del de Instagram Login."
+  },
+  "youtube": {
+   "usuario": null,
+   "estado": "sin decidir",
+   "via": "navegador",
+   "declaracion_ia": "casilla de contenido sintetico en Studio",
+   "audio": "neutro",
+   "pendiente": "el canal con sesion es personal (155 subs): hace falta canal de marca"
+  }
+ }
+}

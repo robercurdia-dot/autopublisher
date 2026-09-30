@@ -1,0 +1,911 @@
+<title>Lámpara Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground:      #EFF1EC;
+    --surface:     #FBFBF8;
+    --surface-2:   #E6E9E1;
+    --ink:         #191D1A;
+    --ink-soft:    #5C655D;
+    --ink-faint:   #8B938B;
+    --line:        #D5DACF;
+    --line-strong: #B9C0B4;
+
+    --verde:       #1E4A38;
+    --verde-suave: #E0EAE2;
+    --ambar:       #C98A22;
+    --ambar-luz:   #F0C46A;
+    --cobre:       #A9673A;
+    --ladrillo:    #A8412D;
+    --ladrillo-bg: #F5E2DC;
+
+    --ok:          #1E4A38;
+    --ok-bg:       #DFEAE0;
+    --espera:      #8A6314;
+    --espera-bg:   #F4E9D0;
+    --stop:        #A8412D;
+    --stop-bg:     #F5E2DC;
+
+    --celda-off:   #DFE3DA;
+
+    --display: "Newsreader", Georgia, "Times New Roman", serif;
+    --body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --r: 5px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #141815;
+      --surface:     #1B201C;
+      --surface-2:   #232924;
+      --ink:         #E7EAE4;
+      --ink-soft:    #A0A89F;
+      --ink-faint:   #6E766D;
+      --line:        #2C332D;
+      --line-strong: #3E463F;
+
+      --verde:       #5CA583;
+      --verde-suave: #1E2C24;
+      --ambar:       #DFAE55;
+      --ambar-luz:   #F2CE84;
+      --cobre:       #C98959;
+      --ladrillo:    #D9705A;
+      --ladrillo-bg: #2E1D19;
+
+      --ok:          #5CA583;
+      --ok-bg:       #1C2A22;
+      --espera:      #D5AB5A;
+      --espera-bg:   #2A2317;
+      --stop:        #D9705A;
+      --stop-bg:     #2E1D19;
+
+      --celda-off:   #272E28;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #141815;
+    --surface:     #1B201C;
+    --surface-2:   #232924;
+    --ink:         #E7EAE4;
+    --ink-soft:    #A0A89F;
+    --ink-faint:   #6E766D;
+    --line:        #2C332D;
+    --line-strong: #3E463F;
+
+    --verde:       #5CA583;
+    --verde-suave: #1E2C24;
+    --ambar:       #DFAE55;
+    --ambar-luz:   #F2CE84;
+    --cobre:       #C98959;
+    --ladrillo:    #D9705A;
+    --ladrillo-bg: #2E1D19;
+
+    --ok:          #5CA583;
+    --ok-bg:       #1C2A22;
+    --espera:      #D5AB5A;
+    --espera-bg:   #2A2317;
+    --stop:        #D9705A;
+    --stop-bg:     #2E1D19;
+
+    --celda-off:   #272E28;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .envoltorio {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 46px;
+  }
+
+  /* ---------- cabecera ---------- */
+
+  .cabecera { display: flex; flex-direction: column; gap: 18px; }
+
+  .marca {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .subtitulo {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink-soft);
+  }
+
+  .aviso {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--stop-bg);
+    border-left: 3px solid var(--stop);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 14px 18px;
+  }
+  .aviso strong { color: var(--stop); }
+  .aviso p { margin: 0; max-width: 62ch; }
+
+  /* ---------- métricas ---------- */
+
+  .metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .metrica {
+    background: var(--surface);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .metrica .cifra {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .metrica .cifra em {
+    font-style: normal;
+    font-size: 16px;
+    color: var(--ink-faint);
+  }
+  .metrica .rotulo {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+  .metrica .pie { font-size: 12.5px; color: var(--ink-soft); }
+
+  /* ---------- secciones ---------- */
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  .titulo-seccion {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line-strong);
+    padding-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .nota-seccion {
+    font-size: 13px;
+    color: var(--ink-soft);
+    max-width: 48ch;
+  }
+
+  /* ---------- bloqueadores ---------- */
+
+  .bloqueadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 14px;
+  }
+
+  .bloqueador {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--stop);
+    border-radius: var(--r);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .bloqueador h3 {
+    margin: 0;
+    font-size: 15.5px;
+    font-weight: 600;
+  }
+  .bloqueador p { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+  .bloqueador code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+  .accion {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--verde);
+    margin-top: 2px;
+  }
+
+  /* ---------- matriz ---------- */
+
+  .matriz-caja {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    overflow-x: auto;
+  }
+
+  table.matriz {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+  }
+
+  table.matriz th, table.matriz td {
+    text-align: left;
+    padding: 0;
+  }
+
+  table.matriz thead th {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 14px 10px 10px;
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--line);
+    line-height: 1.3;
+  }
+  table.matriz thead th.col-video { text-align: center; width: 96px; }
+  table.matriz thead th.col-video .acabado {
+    display: block;
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    font-weight: 500;
+    text-transform: none;
+    margin-top: 3px;
+  }
+  table.matriz thead th.col-marca { padding-left: 20px; }
+
+  table.matriz tbody tr { border-bottom: 1px solid var(--line); }
+  table.matriz tbody tr:last-child { border-bottom: none; }
+
+  td.celda-marca {
+    padding: 11px 10px 11px 20px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .tick {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    flex: 0 0 16px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 3px;
+    background: var(--surface);
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    transition: background .12s, border-color .12s;
+  }
+  .tick:checked {
+    background: var(--verde);
+    border-color: var(--verde);
+  }
+  .tick:checked::after {
+    content: "";
+    width: 9px; height: 5px;
+    border-left: 2px solid var(--surface);
+    border-bottom: 2px solid var(--surface);
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .tick:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+
+  .nombre-marca { font-weight: 500; font-size: 14px; }
+  .meta-marca {
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-family: var(--mono);
+  }
+
+  td.celda { text-align: center; vertical-align: middle; }
+
+  .luz {
+    width: 30px; height: 30px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: var(--celda-off);
+    display: block;
+    transition: background .18s, box-shadow .18s;
+  }
+  tr.tiene-foto .luz {
+    background: var(--ambar-luz);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ambar-luz) 22%, transparent);
+  }
+  tr.tiene-foto .luz.cobre {
+    background: var(--cobre);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--cobre) 22%, transparent);
+  }
+
+  table.matriz td.txt { padding: 11px 14px; font-size: 13px; }
+  table.matriz td.num {
+    font-family: var(--mono); font-size: 12px; text-align: right;
+    padding: 11px 14px; font-variant-numeric: tabular-nums;
+  }
+  table.matriz thead th.num { text-align: right; }
+  tr.viral td { background: var(--espera-bg); }
+  .etq-esc {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 3px;
+    background: var(--surface-2); color: var(--ink-soft);
+  }
+  .etq-esc.a { background: var(--stop-bg); color: var(--stop); }
+
+  .brilla {
+    display: inline-flex;
+    gap: 2px;
+    vertical-align: middle;
+  }
+  .brilla i {
+    width: 4px; height: 11px;
+    border-radius: 1px;
+    background: var(--line-strong);
+    display: block;
+  }
+  .brilla i.on { background: var(--ambar); }
+
+  .pie-matriz {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .pie-matriz b {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .leyenda { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .punto { width: 11px; height: 11px; border-radius: 50%; display: block; }
+
+  /* ---------- fases ---------- */
+
+  .fases { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+
+  .fase {
+    background: var(--surface);
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 13px 20px;
+  }
+  .fase .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .fase .que { display: flex; flex-direction: column; gap: 1px; }
+  .fase .que b { font-weight: 600; font-size: 14.5px; }
+  .fase .que span { font-size: 12.5px; color: var(--ink-soft); }
+
+  .chip {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .chip.ok     { background: var(--ok-bg);     color: var(--ok); }
+  .chip.espera { background: var(--espera-bg); color: var(--espera); }
+  .chip.stop   { background: var(--stop-bg);   color: var(--stop); }
+  .chip.gris   { background: var(--surface-2); color: var(--ink-faint); }
+
+  /* ---------- listas ---------- */
+
+  .lista { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+
+  .fila {
+    background: var(--surface);
+    padding: 13px 20px;
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+  }
+  .fila .cuerpo { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .fila .cuerpo b { font-weight: 600; font-size: 14.5px; }
+  .fila .cuerpo p { margin: 0; font-size: 13px; color: var(--ink-soft); max-width: 74ch; }
+  .fila.hecha .cuerpo b { text-decoration: line-through; color: var(--ink-faint); }
+  .fila.hecha .cuerpo p { color: var(--ink-faint); }
+
+  /* ---------- hallazgos ---------- */
+
+  .hallazgos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+
+  .hallazgo {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .hallazgo .fuente {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    word-break: break-word;
+  }
+  .hallazgo b { font-size: 14px; font-weight: 600; }
+  .hallazgo p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .hallazgo .veredicto {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--verde);
+    border-top: 1px solid var(--line);
+    padding-top: 7px;
+    margin-top: 2px;
+  }
+  .hallazgo.malo .veredicto { color: var(--stop); }
+
+  /* ---------- pie ---------- */
+
+  footer {
+    border-top: 1px solid var(--line-strong);
+    padding-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  footer code { font-family: var(--mono); font-size: 11.5px; }
+
+  #estado-guardado {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 620px) {
+    .envoltorio { padding: 28px 16px 60px; gap: 36px; }
+    .fase { grid-template-columns: 28px 1fr; row-gap: 6px; }
+    .fase .chip { grid-column: 2; justify-self: start; }
+  }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <div class="marca">
+      <h1>Lámpara Engine</h1>
+      <span class="subtitulo">l&aacute;mpara-topper LED &middot; generar variantes sin volver a grabar</span>
+    </div>
+    <div class="aviso">
+      <p><strong>La cuenta de fal está bloqueada a $0.</strong> El bloqueo alcanza incluso a la subida de archivos, que es gratis, así que ahora mismo no corre ni el ensayo. Todo lo demás está escrito y esperando.</p>
+    </div>
+  </header>
+
+  <div class="metricas">
+    <div class="metrica">
+      <span class="rotulo">Atrezzo con foto</span>
+      <span class="cifra" id="m-fotos">0<em>/12</em></span>
+      <span class="pie">No bloquea: se llena sobre la marcha</span>
+    </div>
+    <div class="metrica">
+      <span class="rotulo">Reels de referencia</span>
+      <span class="cifra">4</span>
+      <span class="pie">De 5 descargados &middot; 3 en escenograf&iacute;a B</span>
+    </div>
+    <div class="metrica">
+      <span class="rotulo">Ley de potencias</span>
+      <span class="cifra">205<em>&times;</em></span>
+      <span class="pie">El n&ordm;1 sobre el n&ordm;2</span>
+    </div>
+    <div class="metrica">
+      <span class="rotulo">Coste por clip</span>
+      <span class="cifra">$1,81</span>
+      <span class="pie">10 s &middot; 720p &middot; con v&iacute;deo de referencia</span>
+    </div>
+  </div>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>Qué bloquea</h2>
+      <span class="nota-seccion">Una sola cosa, y no es código.</span>
+    </div>
+    <div class="bloqueadores">
+      <div class="bloqueador">
+        <h3>Saldo en fal</h3>
+        <p>La clave es válida — el endpoint de cuenta responde 200. El balance es <code>0.0</code> y la cuenta queda bloqueada: <code>User is locked. Reason: Exhausted balance.</code> El bloqueo alcanza incluso a la subida de archivos, que es gratis.</p>
+        <p class="accion">$10 basta para la validación y unas cuantas iteraciones.</p>
+      </div>
+      <div class="bloqueador" style="border-top-color: var(--verde)">
+        <h3>Y lo que no bloquea</h3>
+        <p>Las fotos de atrezzo que faltan. Son la biblioteca de botellas sobre las que se enseña el producto, no el producto: se llenan cuando convenga y no impiden generar.</p>
+        <p class="accion" style="color: var(--ink-soft)">Todo lo demás está escrito y comprobado.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>La cuenta de referencia</h2>
+      <span class="nota-seccion">@zalura_official, 27.700 seguidores, mismo producto. Los cinco reels top, por lo que rindieron.</span>
+    </div>
+    <div class="matriz-caja">
+      <table class="matriz">
+        <thead>
+          <tr>
+            <th class="col-marca">Reel</th>
+            <th>Escenograf&iacute;a</th>
+            <th class="num">Interacciones</th>
+            <th class="num">Vistas</th>
+            <th class="num">Tasa</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-reels"></tbody>
+      </table>
+      <div class="pie-matriz">
+        <div>El n&ordm;1 concentra m&aacute;s del <b>99%</b> del engagement de la muestra.</div>
+        <div>El motor compite en <b>escenograf&iacute;a B</b>, no en A. <span id="estado-guardado"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>Atrezzo</h2>
+      <span class="nota-seccion">Las botellas sobre las que se ense&ntilde;a el producto. No vendemos estas marcas: su variedad dentro del clip <em>es</em> la demo de que encaja en cualquiera.</span>
+    </div>
+    <div class="lista" id="bloques"></div>
+  </section>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>Las fases</h2>
+      <span class="nota-seccion">Cada fase mata el riesgo mayor que queda y entrega algo usable por sí solo.</span>
+    </div>
+    <div class="fases" id="fases"></div>
+  </section>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>Decisiones abiertas</h2>
+      <span class="nota-seccion">Ninguna bloquea la Fase 0. Todas bloquean la Fase 1.</span>
+    </div>
+    <div class="lista" id="decisiones"></div>
+  </section>
+
+  <section>
+    <div class="titulo-seccion">
+      <h2>Correcciones a los documentos</h2>
+      <span class="nota-seccion">Contradicciones encontradas entre lo que dicen los mds y lo que hay.</span>
+    </div>
+    <div class="hallazgos" id="hallazgos"></div>
+  </section>
+
+  <footer>
+    <span>El gate de publicación sigue siendo humano, a propósito.</span>
+    <span><code>~/lampara-engine</code></span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MARCAS = [
+    { id: "clase_azul",      nombre: "Clase Azul Reposado",   cat: "tequila", mdo: "es", brilla: 4 },
+    { id: "jack_daniels",    nombre: "Jack Daniel's Old No. 7", cat: "whiskey", mdo: "en", brilla: 2 },
+    { id: "fernet_branca",   nombre: "Fernet-Branca",          cat: "amaro",   mdo: "es", brilla: 1 },
+    { id: "patron",          nombre: "Patrón Silver",          cat: "tequila", mdo: "en", brilla: 3 },
+    { id: "grey_goose",      nombre: "Grey Goose",             cat: "vodka",   mdo: "en", brilla: 4 },
+    { id: "bombay_sapphire", nombre: "Bombay Sapphire",        cat: "gin",     mdo: "en", brilla: 4 },
+    { id: "hendricks",       nombre: "Hendrick's Gin",         cat: "gin",     mdo: "en", brilla: 1 },
+    { id: "don_julio_1942",  nombre: "Don Julio 1942",         cat: "tequila", mdo: "es", brilla: 2 },
+    { id: "absolut",         nombre: "Absolut Vodka",          cat: "vodka",   mdo: "en", brilla: 3 },
+    { id: "corralejo",       nombre: "Corralejo Reposado",     cat: "tequila", mdo: "es", brilla: 4 },
+    { id: "ron_zacapa",      nombre: "Ron Zacapa 23",          cat: "ron",     mdo: "es", brilla: 2 },
+    { id: "tanqueray",       nombre: "Tanqueray London Dry",   cat: "gin",     mdo: "en", brilla: 3 }
+  ];
+
+  var REELS = [
+    { id: "DEkNFILoGPc", esc: "A", eng: "744.587", vis: "25,2 M", tasa: "2,95%",
+      nota: "el viral \u00b7 8 ene 2025", viral: true },
+    { id: "Da2KVpliOUw", esc: "B", eng: "3.620", vis: "356 mil", tasa: "1,02%", nota: "16 jul 2026" },
+    { id: "DbPwDVYo-gu", esc: "B", eng: "271", vis: "47,6 mil", tasa: "0,57%", nota: "25 jul 2026" },
+    { id: "DbWNalLIzqV", esc: "B", eng: "200", vis: "39,1 mil", tasa: "0,51%", nota: "28 jul 2026" }
+  ];
+
+  var VERSION_ESTADO = 2;
+  var COSTE = 1.8144;
+
+  var FASES = [
+    { n: "0", t: "Validación de la API", d: "Un clip por fal con el setup exacto del 05/09", e: "stop",   c: "escrita · sin saldo" },
+    { n: "1", t: "El bucle mínimo",      d: "Un comando produce un clip, sin tocar el navegador", e: "espera", c: "siguiente" },
+    { n: "2", t: "Catálogo y plantillas", d: "Añadir una marca es una entrada y una foto", e: "espera", c: "medio hecha" },
+    { n: "3", t: "QA automático",        d: "La puerta de calidad se queda humana, a propósito", e: "gris", c: "fuera de alcance" },
+    { n: "4", t: "Voz y post-producción", d: "Gradium responde desde el Mac, el mux ya está resuelto", e: "gris", c: "desbloqueada" },
+    { n: "5", t: "Orquestación por lotes", d: "N variantes con tope de presupuesto", e: "gris", c: "pendiente" },
+    { n: "6", t: "Empaquetado como agente", d: "Recibe marca y fotos, devuelve vídeo y coste", e: "gris", c: "pendiente" }
+  ];
+
+  var DECISIONES = [
+    { id: "cuentas",    t: "¿Una cuenta o la rueda entera?",  d: "El playbook describe varias cuentas con aislamiento por proxy; lo real es @zularalamp sola. Decide si jobs necesita columna de cuenta desde el principio." },
+    { id: "facebook",   t: "¿Entra Facebook?",                d: "El cross-post está documentado como alcance gratis — 1,1 M de vistas en el caso de referencia — pero no está implementado." },
+    { id: "cloudinary", t: "¿Cloudinary por API o a mano?",   d: "El generador ya no lo necesita: fal sube desde disco. Instagram sí sigue necesitando una URL pública para el vídeo final con voz." },
+    { id: "gasto",      t: "¿Tope por lote o aprobación por disparo?", d: "Hoy apruebas cada disparo. A partir de la Fase 5 hay que elegir uno de los dos y escribirlo en el código." },
+    { id: "voces",      t: "¿Una voz por mercado?",           d: "Hay una voz clonada. Si hace falta otra en inglés, el catálogo gana un campo de voz por marca." }
+  ];
+
+  var HALLAZGOS = [
+    {
+      fuente: "CLAUDE.md",
+      t: "El generador no era automático",
+      d: "Decía que producía un clip sin intervención. El de Flashboards pedía pestaña viva, arrastrar el mp4 a mano y descargar desde el board.",
+      v: "Resuelto: fal sube con upload_file y devuelve URL directa.",
+      malo: false
+    },
+    {
+      fuente: "flashboards_audio_labios_y_producto.md §3",
+      t: "El cono está descrito al revés",
+      d: "El bloque corregido dice «wider at the base than at the top». Los fotogramas muestran lo contrario: es una pantalla de lámpara, ancha arriba.",
+      v: "Corregido en los dos bloques de topper.",
+      malo: false
+    },
+    {
+      fuente: "infraestructura_rutas_y_limites.md",
+      t: "Gradium no está bloqueado aquí",
+      d: "Daba el bloqueo por verificado «desde los dos shells». Desde este Mac responde 200.",
+      v: "La Fase 4 está desbloqueada en local.",
+      malo: false
+    },
+    {
+      fuente: "arquitectura",
+      t: "El producto tambi\u00e9n era contexto",
+      d: "El topper estaba escrito a mano en el prompt de la Fase 0, en los bloques de identidad de videos.json y en el nombre de la carpeta de marcas. Cambiar de producto habr\u00eda obligado a tocar c\u00f3digo.",
+      v: "Separado: todo vive en contexto.json.",
+      malo: false
+    },
+    {
+      fuente: "playbook vs. nodo de inteligencia",
+      t: "Los dos documentos dicen lo contrario del CTA",
+      d: "El playbook: el CTA de comentario multiplica 13\u00d7 las vistas y 180\u00d7 los comentarios. El nodo, midiendo tu competencia directa: los reels con CTA sacan de 0 a 12 comentarios, y el viral sin CTA sac\u00f3 1.587.",
+      v: "Sin decidir cu\u00e1l manda.",
+      malo: true
+    },
+    {
+      fuente: "nodo_inteligencia_formato_e_ingesta.md",
+      t: "Las botellas van dentro del clip",
+      d: "El reel ganador ense\u00f1a tres botellas distintas en cuatro segundos. Eso tumba el supuesto de que cada marca necesita su propio v\u00eddeo.",
+      v: "Corregido: esto ya no es una matriz de marca \u00d7 escena.",
+      malo: false
+    },
+    {
+      fuente: "instagram_publisher/LEEME.md",
+      t: "Manda usar el script equivocado",
+      d: "Dice de usar publicar_trial_reels.sh siempre, pero la cuenta está por debajo de 1.000 seguidores y ahí trial reels no existe: publica al grid igual.",
+      v: "publicar_grid.sh sigue sin existir.",
+      malo: true
+    },
+    {
+      fuente: "INFORME_PUBLICACION_VIDEOS.md",
+      t: "App Secret en texto plano",
+      d: "El informe lleva escrito el secreto de la app y un token, y es justo el archivo que circula entre chats.",
+      v: "Rotar en Meta Developers.",
+      malo: true
+    },
+    {
+      fuente: "credenciales_ig.env",
+      t: "El token de Instagram caduca",
+      d: "Válido hasta el 6 de octubre. La renovación exige login OAuth en navegador, que no se puede automatizar del todo.",
+      v: "Quedan tres semanas.",
+      malo: true
+    }
+  ];
+
+  var estado = { fotos: {}, decisiones: {} };
+  var db = null;
+  var elGuardado = document.getElementById("estado-guardado");
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function barras(n) {
+    var h = "";
+    for (var i = 1; i <= 4; i++) h += '<i class="' + (i <= n ? "on" : "") + '"></i>';
+    return '<span class="brilla" title="cómo queda encendida">' + h + "</span>";
+  }
+
+  function pintarReels() {
+    document.getElementById("cuerpo-reels").innerHTML = REELS.map(function (r) {
+      return '<tr class="' + (r.viral ? "viral" : "") + '">' +
+        '<td class="txt"><span class="nombre-marca">' + esc(r.id) + "</span>" +
+          '<br><span class="meta-marca">' + esc(r.nota) + "</span></td>" +
+        '<td class="txt"><span class="etq-esc ' + r.esc.toLowerCase() + '">' + r.esc + "</span></td>" +
+        '<td class="num">' + r.eng + "</td>" +
+        '<td class="num">' + r.vis + "</td>" +
+        '<td class="num">' + r.tasa + "</td></tr>";
+    }).join("");
+  }
+
+  function pintarBloques() {
+    var cont = document.getElementById("bloques");
+    cont.innerHTML = MARCAS.map(function (m) {
+      var tiene = !!estado.fotos[m.id];
+      var aviso = m.id === "jack_daniels"
+        ? '<p style="color:var(--ink-faint)">La foto que hay es de la web. Sirve: como atrezzo la etiqueta es secundaria \u2014 lo que no puede derivar es el producto.</p>'
+        : "";
+      return '<div class="fila' + (tiene ? " hecha" : "") + '">' +
+        '<input type="checkbox" class="tick" data-foto="' + m.id + '"' + (tiene ? " checked" : "") +
+          ' aria-label="Tengo foto propia de ' + esc(m.nombre) + '">' +
+        '<span class="cuerpo"><b>' + esc(m.nombre) + "</b>" +
+        '<p>' + m.cat + " &middot; mercado " + m.mdo + " &middot; encendida " + barras(m.brilla) + "</p>" +
+        aviso + "</span></div>";
+    }).join("");
+
+    cont.querySelectorAll("input[data-foto]").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        estado.fotos[cb.getAttribute("data-foto")] = cb.checked;
+        pintarBloques();
+        actualizarCifras();
+        guardar();
+      });
+    });
+  }
+
+  function actualizarCifras() {
+    var con = MARCAS.filter(function (m) { return estado.fotos[m.id]; }).length;
+    document.getElementById("m-fotos").innerHTML = con + "<em>/12</em>";
+  }
+
+  function pintarFases() {
+    document.getElementById("fases").innerHTML = FASES.map(function (f) {
+      return '<div class="fase"><span class="num">' + f.n + "</span>" +
+        '<span class="que"><b>' + esc(f.t) + "</b><span>" + esc(f.d) + "</span></span>" +
+        '<span class="chip ' + f.e + '">' + esc(f.c) + "</span></div>";
+    }).join("");
+  }
+
+  function pintarDecisiones() {
+    var cont = document.getElementById("decisiones");
+    cont.innerHTML = DECISIONES.map(function (d) {
+      var hecha = !!estado.decisiones[d.id];
+      return '<div class="fila' + (hecha ? " hecha" : "") + '">' +
+        '<input type="checkbox" class="tick" data-decision="' + d.id + '"' + (hecha ? " checked" : "") +
+          ' aria-label="Decidido: ' + esc(d.t) + '">' +
+        '<span class="cuerpo"><b>' + esc(d.t) + "</b><p>" + esc(d.d) + "</p></span></div>";
+    }).join("");
+
+    cont.querySelectorAll("input[data-decision]").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        estado.decisiones[cb.getAttribute("data-decision")] = cb.checked;
+        pintarDecisiones();
+        guardar();
+      });
+    });
+  }
+
+  function pintarHallazgos() {
+    document.getElementById("hallazgos").innerHTML = HALLAZGOS.map(function (h) {
+      return '<div class="hallazgo' + (h.malo ? " malo" : "") + '">' +
+        '<span class="fuente">' + esc(h.fuente) + "</span>" +
+        "<b>" + esc(h.t) + "</b><p>" + esc(h.d) + "</p>" +
+        '<span class="veredicto">' + esc(h.v) + "</span></div>";
+    }).join("");
+  }
+
+  var guardando = null;
+  function guardar() {
+    if (!db) return;
+    clearTimeout(guardando);
+    guardando = setTimeout(function () {
+      db.doc("estado/tablero").set({
+        v: VERSION_ESTADO,
+        fotos: estado.fotos,
+        decisiones: estado.decisiones
+      }).then(function () {
+        elGuardado.textContent = "guardado";
+      }).catch(function () {
+        elGuardado.textContent = "no se pudo guardar";
+      });
+    }, 400);
+  }
+
+  pintarReels();
+  pintarBloques();
+  actualizarCifras();
+  pintarFases();
+  pintarDecisiones();
+  pintarHallazgos();
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("db").then(function (ns) {
+      if (!ns) return;
+      db = ns;
+      return db.doc("estado/tablero").get().then(function (snap) {
+        if (snap && snap.exists) {
+          var d = snap.data() || {};
+          // El criterio de 'foto' cambio: ahora solo cuenta si la hiciste tu.
+          // Un estado guardado con el criterio viejo ya no significa lo mismo.
+          if (d.v === VERSION_ESTADO) {
+            if (d.fotos) estado.fotos = Object.assign({}, d.fotos);
+            if (d.decisiones) estado.decisiones = Object.assign({}, d.decisiones);
+            pintarBloques();
+            actualizarCifras();
+            pintarDecisiones();
+          }
+        }
+        elGuardado.textContent = "se guarda solo";
+      });
+    }).catch(function () { /* sin persistencia, la página sigue funcionando */ });
+  }
+})();
+</script>

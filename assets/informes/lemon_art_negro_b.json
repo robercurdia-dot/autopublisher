@@ -1,0 +1,53 @@
+{
+  "id": "lemon_art_negro_b",
+  "archivo": "assets/videos/lemon_art_negro_b.mp4",
+  "duracion": 9.75,
+  "tamano_bytes": 1607479,
+  "video": {
+    "codec": "h264",
+    "ancho": 720,
+    "alto": 1280,
+    "fps": 30.0,
+    "proporcion": "720:1280"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": 44100,
+    "canales": 2,
+    "extraido": "assets/audio/lemon_art_negro_b.m4a",
+    "silencio_inicial_s": 0.0,
+    "energia_media": 0.379
+  },
+  "cortes": [
+    3.63,
+    4.67,
+    5.67,
+    6.67,
+    7.67,
+    8.17,
+    8.67,
+    9.17
+  ],
+  "golpes_audio": [
+    2.44,
+    3.61,
+    3.66,
+    4.44,
+    4.97,
+    5.27,
+    6.53,
+    6.58,
+    6.82,
+    7.61,
+    7.95,
+    8.09
+  ],
+  "concordancia": {
+    "cortes": 8,
+    "golpes": 12,
+    "encajan": 5,
+    "porcentaje": 62.5,
+    "tolerancia_s": 0.35
+  },
+  "planos": 9
+}

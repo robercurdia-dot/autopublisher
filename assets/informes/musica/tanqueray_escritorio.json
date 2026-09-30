@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/audio/tanqueray_escritorio.m4a",
+  "duracion": 9.03,
+  "bpm": 117.5,
+  "pulso": 0.545,
+  "brillo_hz": 3083.3,
+  "bandas": [
+    0.4154,
+    0.2338,
+    0.1146,
+    0.0829,
+    0.0646,
+    0.0529,
+    0.0218,
+    0.014
+  ],
+  "golpes_por_s": 4.76,
+  "dinamica": 0.47,
+  "croma": [
+    0.141,
+    0.0717,
+    0.1245,
+    0.0719,
+    0.0715,
+    0.0855,
+    0.0567,
+    0.0778,
+    0.0616,
+    0.0926,
+    0.0824,
+    0.0629
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "medio",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

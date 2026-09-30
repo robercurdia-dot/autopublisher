@@ -1,0 +1,40 @@
+{
+  "archivo": "assets/audio/bar_cabinet_negro_1080.m4a",
+  "duracion": 10.1,
+  "bpm": 156.6,
+  "pulso": 0.337,
+  "brillo_hz": 2096.9,
+  "bandas": [
+    0.329,
+    0.2756,
+    0.23,
+    0.099,
+    0.0259,
+    0.0225,
+    0.0121,
+    0.006
+  ],
+  "golpes_por_s": 4.26,
+  "dinamica": 0.466,
+  "croma": [
+    0.1665,
+    0.0727,
+    0.0872,
+    0.0601,
+    0.0555,
+    0.1236,
+    0.0505,
+    0.0567,
+    0.0683,
+    0.1231,
+    0.0863,
+    0.0495
+  ],
+  "tonica_aprox": "do",
+  "terminos": [
+    "rápido",
+    "equilibrado",
+    "percusivo",
+    "denso"
+  ]
+}

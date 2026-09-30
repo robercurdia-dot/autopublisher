@@ -1,0 +1,19 @@
+{
+  "id": "ref_tom_montada",
+  "archivo": "assets/videos/ref_tom_montada.mp4",
+  "duracion": 5.0,
+  "tamano_bytes": 1679261,
+  "video": {
+    "codec": "h264",
+    "ancho": 576,
+    "alto": 1024,
+    "fps": 30.0,
+    "proporcion": "576:1024"
+  },
+  "audio": null,
+  "aviso": "Sin pista de audio: no hay nada que reutilizar.",
+  "cortes": [
+    2.2,
+    2.83
+  ]
+}

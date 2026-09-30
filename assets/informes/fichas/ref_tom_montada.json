@@ -1,0 +1,82 @@
+{
+  "id": "ref_tom_montada",
+  "duracion": 5.0,
+  "proporcion": "576:1024",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 2.2,
+      "duracion": 2.2,
+      "muestra": 1.1,
+      "fotograma": "assets/informes/planos/ref_tom_montada/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 2.2,
+      "hasta": 2.83,
+      "duracion": 0.63,
+      "muestra": 2.52,
+      "fotograma": "assets/informes/planos/ref_tom_montada/plano_01.jpg"
+    },
+    {
+      "plano": 2,
+      "desde": 2.83,
+      "hasta": 5.0,
+      "duracion": 2.17,
+      "muestra": 3.92,
+      "fotograma": "assets/informes/planos/ref_tom_montada/plano_02.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/ref_tom_montada/contactos.jpg",
+  "lectura": {
+    "_fuente": "lectura de visión sobre la hoja de contactos, 26 sep 2026",
+    "producto_protagonista": "small object held up to camera and then examined in the hands",
+    "personas": "cara visible",
+    "escenario": "a plain home interior: light wall, then a bright kitchen with pale units",
+    "iluminacion": "flat indoor daylight",
+    "accion": {
+      "verbo": "show and explain",
+      "fases": {
+        "gancho": "the person looks straight into the camera, close up, holding the product near their chest and talking",
+        "mostrar": "the person turns to the counter and holds the product up, looking at it, showing it from the side"
+      },
+      "estado_inicial": "product in hand, unexplained",
+      "estado_final": "the product has been shown clearly from the front and from the side",
+      "se_completa_en_plano": 2
+    },
+    "objetos": [
+      {
+        "tipo": "botella",
+        "cantidad": 1,
+        "papel": "interactua"
+      },
+      {
+        "tipo": "lampara-topper",
+        "cantidad": 1,
+        "papel": "protagonista"
+      }
+    ],
+    "guion": [
+      {
+        "plano": 0,
+        "fase": "gancho",
+        "unidad": null,
+        "encuadre": "close up, face to camera"
+      },
+      {
+        "plano": 1,
+        "fase": "mostrar",
+        "unidad": 0,
+        "encuadre": "medium, side on, product in hands"
+      },
+      {
+        "plano": 2,
+        "fase": "mostrar",
+        "unidad": 0,
+        "encuadre": "medium, side on, product in hands"
+      }
+    ],
+    "patron": "gancho a cámara y demostración del producto; el habla sostiene el clip"
+  }
+}

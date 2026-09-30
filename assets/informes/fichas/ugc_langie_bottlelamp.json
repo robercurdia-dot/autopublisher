@@ -1,0 +1,113 @@
+{
+  "id": "ugc_langie_bottlelamp",
+  "duracion": 17.667,
+  "proporcion": "576:1024",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 1.63,
+      "duracion": 1.63,
+      "muestra": 0.81,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 1.63,
+      "hasta": 2.6,
+      "duracion": 0.97,
+      "muestra": 2.12,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_01.jpg"
+    },
+    {
+      "plano": 2,
+      "desde": 2.6,
+      "hasta": 3.2,
+      "duracion": 0.6,
+      "muestra": 2.9,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_02.jpg"
+    },
+    {
+      "plano": 3,
+      "desde": 3.2,
+      "hasta": 3.87,
+      "duracion": 0.67,
+      "muestra": 3.54,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_03.jpg"
+    },
+    {
+      "plano": 4,
+      "desde": 3.87,
+      "hasta": 4.4,
+      "duracion": 0.53,
+      "muestra": 4.13,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_04.jpg"
+    },
+    {
+      "plano": 5,
+      "desde": 4.4,
+      "hasta": 5.13,
+      "duracion": 0.73,
+      "muestra": 4.77,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_05.jpg"
+    },
+    {
+      "plano": 6,
+      "desde": 5.13,
+      "hasta": 5.4,
+      "duracion": 0.27,
+      "muestra": 5.27,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_06.jpg"
+    },
+    {
+      "plano": 7,
+      "desde": 5.4,
+      "hasta": 8.5,
+      "duracion": 3.1,
+      "muestra": 6.95,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_07.jpg"
+    },
+    {
+      "plano": 8,
+      "desde": 8.5,
+      "hasta": 11.27,
+      "duracion": 2.77,
+      "muestra": 9.88,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_08.jpg"
+    },
+    {
+      "plano": 9,
+      "desde": 11.27,
+      "hasta": 13.3,
+      "duracion": 2.03,
+      "muestra": 12.29,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_09.jpg"
+    },
+    {
+      "plano": 10,
+      "desde": 13.3,
+      "hasta": 15.07,
+      "duracion": 1.77,
+      "muestra": 14.19,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_10.jpg"
+    },
+    {
+      "plano": 11,
+      "desde": 15.07,
+      "hasta": 15.47,
+      "duracion": 0.4,
+      "muestra": 15.27,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_11.jpg"
+    },
+    {
+      "plano": 12,
+      "desde": 15.47,
+      "hasta": 17.67,
+      "duracion": 2.2,
+      "muestra": 16.57,
+      "fotograma": "assets/informes/planos/ugc_langie_bottlelamp/plano_12.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/ugc_langie_bottlelamp/contactos.jpg",
+  "lectura": null
+}

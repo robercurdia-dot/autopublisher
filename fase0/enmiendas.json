@@ -1,0 +1,163 @@
+{
+ "_que_es_esto": "Todo lo aprendido a base de publicar, en un sitio que el constructor de prompts lee SIEMPRE. No es documentación: cada entrada activa cambia el prompt o la selección de atrezzo, escena y música. Se añade con fase0/enmiendas.py, no a mano.",
+ "enmiendas": [
+  {
+   "id": "etiquetas_ilegibles",
+   "fecha": "2026-09-22",
+   "origen": "run02",
+   "evidencia": "Salió BOMBAY SAPPAIRE y HENDRICK'S GII. Los bloques de marcas pedían letra «sharp and legible» y el modelo, en vez de difuminar, inventa.",
+   "aplica_en": "prompt",
+   "regla": "LABELS: at this size printed labels read as texture. Get the colour, the layout and the emblem right and leave the small print unreadable. Do NOT spell out brand names letter by letter: a wrong word is worse than a blur.",
+   "estado": "retirada",
+   "retirada_porque": "Probada en el run 04 y no basta: pedirle que deje la letra ilegible no evita que invente. Salió «LAMBIAN SUBBAN» donde pedimos Bombay Sapphire, y los lomos de los libros como garabatos. El modelo prefiere escribir una palabra falsa antes que difuminar.",
+   "retirada_el": "2026-09-27"
+  },
+  {
+   "id": "escena_propia",
+   "fecha": "2026-09-22",
+   "origen": "run02",
+   "evidencia": "Heredar el escenario de la referencia subió el parecido visual de 0,588 a 0,667, con el umbral en 0,70.",
+   "aplica_en": "escena",
+   "regla": "El decorado sale de contexto.json/variacion_escena, nunca de la referencia, y no se nombra el de la referencia ni para prohibirlo.",
+   "estado": "activa"
+  },
+  {
+   "id": "entrada_corta",
+   "fecha": "2026-09-25",
+   "origen": "metricas run02 en las tres plataformas",
+   "evidencia": "TikTok: la mayoría abandona en el segundo 0:02 y solo el 12,2% lo ve entero. Facebook: 203 de 441 llegan a los 3 s. El plano de apertura duraba 3,63 s y la primera botella no salía hasta entonces. Medido en piezas SIN cara; en una pieza con avatar el gancho es la persona, así que no aplica. | 30 sep 2026: el run 06 abrio con 'a hand lifts the product and shows it' en los planos 1 y 2 pese a esta regla, porque iba solo como prosa y el bloque SHOTS la contradecia. El pico de abandono en TikTok cayo en el segundo 2, al final de esa entrada.",
+   "aplica_en": "prompt",
+   "regla": "OPENING: the first shot lasts 1.5 seconds at most and opens on the situation the viewer already recognises as their own — the scene as it is BEFORE what we sell exists in it. What is being sold is NOT in frame yet. Never open by presenting it.",
+   "estado": "activa",
+   "aplica_si": {
+    "personas": [
+     "ninguna",
+     "manos",
+     "cuerpo"
+    ]
+   },
+   "efecto": {
+    "abrir_con": "estado_inicial"
+   }
+  },
+  {
+   "id": "no_repetir_entre_piezas",
+   "fecha": "2026-09-25",
+   "origen": "Roberto",
+   "evidencia": "Dos piezas seguidas con las mismas botellas, la misma escena o la misma música se leen como la misma pieza, que es justo lo que penaliza la norma de contenido no original.",
+   "aplica_en": "seleccion",
+   "regla": "Atrezzo, escena y pista se eligen excluyendo lo usado en las piezas anteriores mientras el catálogo dé de sí.",
+   "estado": "activa",
+   "efecto": {
+    "no_repetir": true
+   }
+  },
+  {
+   "id": "mas_unidades",
+   "fecha": "2026-09-25",
+   "origen": "Roberto",
+   "evidencia": "La variedad dentro del clip ES el argumento de venta: cuantas más botellas distintas, más claro queda que encaja en cualquiera.",
+   "aplica_en": "seleccion",
+   "regla": "unidades = las de la referencia + 1, con tope en lo que permita la biblioteca de atrezzo. La variedad dentro del clip es la demo de que el producto sirve para cualquier soporte.",
+   "estado": "activa",
+   "efecto": {
+    "unidades_extra": 1
+   },
+   "_renombrada": "Se llamaba «mas_botellas» hasta el 27 sep 2026. El nombre ataba una regla general al producto de hoy."
+  },
+  {
+   "id": "caption_propio",
+   "fecha": "2026-09-25",
+   "origen": "metricas run02",
+   "evidencia": "0 comentarios en las tres plataformas. El caption del reel de referencia que sí funcionó pedía algo explícitamente; el nuestro no pedía nada. Copiarlo tal cual disparaba la puerta de originalidad a 0,973.",
+   "aplica_en": "caption",
+   "regla": "Caption propio, nunca el de la referencia: gancho en la primera línea, la objeción resuelta en la segunda, y una pregunta o petición concreta al final. Hashtags de nicho, no genéricos.",
+   "estado": "activa"
+  },
+  {
+   "id": "etiquetas_por_forma",
+   "fecha": "2026-09-27",
+   "origen": "run04",
+   "evidencia": "El run 02 dio BOMBAY SAPPAIRE y HENDRICK'S GII; el run 04, con la regla de «déjala ilegible» ya puesta, dio LAMBIAN SUBBAN. Dos tiradas seguidas demuestran que el modelo no sabe no-escribir: si hay una etiqueta en cuadro, la rellena con letras inventadas.",
+   "aplica_en": "prompt",
+   "regla": "Identify each support by SHAPE and COLOUR, not by its label: the silhouette of the bottle, the tint of the glass, the shape of the seal. Keep any printed label small in frame, turned away or out of focus. Never make a label the subject of a shot.",
+   "estado": "retirada",
+   "retirada_porque": "Redactada en términos de botellas -herramienta general, no de este producto-. La sustituye marcas_reales_sin_texto, que dice lo mismo para cualquier objeto.",
+   "retirada_el": "2026-09-27"
+  },
+  {
+   "id": "marcas_reales_sin_texto",
+   "fecha": "2026-09-27",
+   "origen": "run02 y run04",
+   "evidencia": "Dos tiradas con la misma conclusión: el modelo no sabe NO escribir. Run 02: BOMBAY SAPPAIRE, HENDRICK'S GII. Run 04, ya con la regla de «déjala ilegible»: LAMBIAN SUBBAN, y además los lomos de los libros del decorado salieron garabateados. No es un problema del atrezzo ni del producto: es cualquier texto impreso que entre en cuadro.",
+   "aplica_en": "prompt",
+   "regla": "Real-world branded objects are identified by their PHYSICAL identity and never by their printed text: silhouette, proportions, material, colour, and non-text marks like an emblem, a seal or a coloured band. Any printed text in frame — on the product, on the props, on the set — stays small, turned away or out of focus. Never make printed text the subject of a shot.",
+   "estado": "activa"
+  },
+  {
+   "id": "etiqueta_solo_nativa",
+   "fecha": "2026-09-27",
+   "origen": "Roberto",
+   "evidencia": "Decisión suya del 27 sep 2026: «no habrá etiqueta más que la que marca generado por IA en las propias redes». Las tres plataformas tienen su propia declaración y se ve en el post publicado: Instagram muestra «Contenido generado con IA» junto al nombre, Facebook tiene su etiqueta de IA y TikTok su interruptor AIGC.",
+   "aplica_en": "publicacion",
+   "regla": "No se quema ninguna etiqueta sobre el vídeo, ni siquiera en piezas con cara. La declaración va SIEMPRE por el mecanismo nativo de cada red, y sin ella no se publica.",
+   "estado": "activa"
+  },
+  {
+   "id": "foto_de_producto_obligatoria",
+   "fecha": "2026-09-29",
+   "origen": "run05",
+   "evidencia": "El run 05 fue el primero sin ninguna imagen de referencia, solo prosa. Comprobado plano a plano a resolucion completa: la silueta general aguanta (el cono es mas ancho arriba en los 9 planos y el boton tactil aparece), pero derivan dos cotas que la prosa no fija: el largo del vastago, que pasa de varilla corta a barra larga entre planos, y la proporcion del faldon de la base, mas acampanado en el plano final que en el primero. Los run 02 y 04 llevaban la foto del producto en image_urls y esas cotas no bailaron.",
+   "aplica_en": "seleccion",
+   "regla": "La foto del producto va SIEMPRE en image_urls, en toda generacion, sea cual sea el flujo. La prosa fija la forma general pero no las cotas (largos, proporciones, grosores): eso solo lo ancla una imagen.",
+   "estado": "activa"
+  },
+  {
+   "id": "referencia_entra_en_el_modelo",
+   "fecha": "2026-09-29",
+   "origen": "run05",
+   "evidencia": "El run 05 se genero headless sin adjuntar nada: la referencia se habia leido, comprimido a ficha y descrito en prosa, pero el modelo nunca la vio. Ademas la tirada era de una variante de la que no existia foto, asi que tampoco habia ancla de producto. Resultado: la forma general aguanto y las cotas derivaron.",
+   "aplica_en": "seleccion",
+   "regla": "La referencia es ENTRADA del modelo, no documentacion para escribir un prompt. Se adjunta siempre, y el prompt es la capa de ajuste encima: declara con anclajes posicionales que se toma de cada referencia y que tiene prohibido aportar, segun el papel declarado de esa referencia. Una referencia cuyo producto o acabado no sea el de la tirada NO ancla producto por bien montada que este.",
+   "estado": "activa"
+  },
+  {
+   "id": "cotas_del_invariante_verificadas",
+   "fecha": "2026-09-29",
+   "origen": "ficha de producto",
+   "evidencia": "El invariante de contexto.json decia que el producto es un cono truncado MAS ANCHO ARRIBA. La ficha de producto con cotas (14 cm de alto, 12 cm en la base) y el propio video de referencia dicen lo contrario: la cara luminosa es el extremo estrecho. Los cinco primeros runs pidieron el producto invertido, y lo que yo apunte como deriva en el run 05 era el modelo corrigiendo hacia la forma real.",
+   "aplica_en": "seleccion",
+   "regla": "La descripcion invariante del producto se verifica contra una fuente con cotas (ficha tecnica, plano o medicion) antes de usarse, no contra el recuerdo de quien la escribio. Si no hay fuente con cotas, se mide sobre la referencia. Una descripcion invertida no la detecta ningun QA posterior: todo el pipeline la obedece.",
+   "estado": "activa"
+  },
+  {
+   "id": "auditar_la_cuenta_antes_de_copiarla",
+   "fecha": "2026-09-30",
+   "origen": "nicho 30 sep",
+   "evidencia": "La unica cuenta que seguiamos como modelo, homeinspirehacks, tiene 3,3 M de seguidores y esta verificada, pero sus piezas de hace 12 h sacaron 92 y 338 likes: 0,0065 %. En el mismo nicho, aethos.led rinde 3,97 % con 416 K y hellolangie 5,76 % con 891 K. Copiar la forma de la primera habria fijado un liston que no corresponde a ningun resultado real.",
+   "aplica_en": "seleccion",
+   "regla": "Antes de tomar una cuenta como referencia o como listón, se audita con ingesta/auditar_cuenta.py: se contrasta su numero de seguidores contra lo que rinden sus piezas. Una cuenta cuyos seguidores no se explican por su contenido no sirve de modelo ni de objetivo, por grande que sea su cifra. En la investigacion de nicho se anota SIEMPRE el handle y los seguidores; sin eso no se puede auditar nada.",
+   "estado": "activa"
+  },
+  {
+   "id": "premio_antes_del_segundo_3",
+   "fecha": "2026-09-30",
+   "origen": "metricas run06",
+   "evidencia": "En el run 06 el estado final llegaba en el segundo 4,47 y el tiempo medio de visionado en TikTok fue 5,39 s: el espectador mediano veia el motivo de la pieza menos de un segundo, y la mitad se iba antes de llegar. Solo el 15,3 % la vio entera.",
+   "aplica_en": "prompt",
+   "regla": "El estado final -aquello que la pieza existe para demostrar- tiene que estar en pantalla antes del segundo 3. Si el guion lo coloca despues, se reordena: primero un ciclo completo hasta el resultado, y despues las variaciones. Ensenar el resultado tarde es pagar por alcance que se va antes de verlo.",
+   "estado": "activa"
+  },
+  {
+   "id": "gancho_quemado_propio",
+   "fecha": "2026-09-30",
+   "origen": "nicho 30 sep",
+   "evidencia": "Las piezas del nicho con audiencia viva abren todas con un rotulo quemado en el primer fotograma, y ninguno describe lo que se vende: nombran una perdida que el espectador esta a punto de cometer, una identidad suya o su propia reaccion. La de mas rendimiento medido -51.300 likes- es una prohibicion. Nuestras piezas salen sin ningun rotulo porque extendi 'marcas_reales_sin_texto' a prohibir todo texto, y eso confundio dos cosas distintas.",
+   "aplica_en": "publicacion",
+   "regla": "El gancho se quema en montaje, nunca lo genera el modelo: el modelo sigue sin poder inventar texto en la escena. El rotulo aparece en el primer fotograma y habla del ESPECTADOR -una perdida que va a cometer, una identidad, una reaccion-, nunca describe lo que se vende ni enumera sus caracteristicas. Sin rotulo no se publica.",
+   "estado": "activa"
+  }
+ ],
+ "_efecto": "Las enmiendas de ámbito «seleccion» llevan un efecto legible por máquina. El constructor lo aplica sin conocer el id: una regla nueva entra sola.",
+ "_aplica_si": "Una enmienda puede acotarse a las piezas que cumplan ciertos campos de la lectura. Sin eso, una corrección medida en un formato se impone a otro donde no significa nada."
+}

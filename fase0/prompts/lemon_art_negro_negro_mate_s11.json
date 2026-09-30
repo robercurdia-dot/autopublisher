@@ -1,0 +1,13 @@
+{
+  "referencia": "lemon_art_negro",
+  "variante": "negro_mate",
+  "semilla": 11,
+  "unidades": 3,
+  "atrezzo": [
+    "don_julio_1942",
+    "absolut",
+    "tanqueray"
+  ],
+  "planos": 9,
+  "duracion": 9.736
+}

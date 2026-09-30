@@ -1,0 +1,31 @@
+10 second vertical 9:16 product video, 9 shots, no on-screen text.
+
+PRODUCT — identical in every single shot, this is what is being sold:
+a small matte black lampshade-shaped cap, a truncated cone that is WIDER AT THE TOP than at the bottom, with a flat luminous top face carrying a small round touch button at its centre, and a short chrome prong underneath that plugs into a bottle neck - same shape, same matte black finish, same proportions, same warm light colour when it turns on.
+
+SUPPORTS — 3 different ones, one per cycle. Each must be clearly distinct from the others:
+  [1] A real Bombay Sapphire gin bottle — a flat-sided rectangular bottle of translucent sapphire blue glass with rounded corners, clear gin inside, a cream label bearing a portrait of Queen Victoria and gold and black lettering reading BOMBAY SAPPHIRE, sharp and legible.
+  [2] A real Fernet-Branca bottle — tall dark olive-green glass bottle with sloping shoulders and a long neck, cream-coloured rectangular label with an ornate black eagle perched on a globe, red and black serif lettering reading Fernet-Branca, sharp and legible.
+  [3] A real Hendrick's Gin bottle — a squat dark brown apothecary bottle with broad shoulders, a short thick neck and an opaque glass body, carrying a cream Victorian-style label with fine black engraved lettering and curling botanical flourishes reading HENDRICK'S GIN, sharp and legible.
+
+ACTION — the point of the video, and it MUST be completed on screen:
+  fit and switch on. It starts with support standing bare, product not attached and is only finished when product seated on the support and LIT, glowing warm and lighting the objects around it.
+
+SHOTS:
+  1. (0.00–3.63s, close up) a hand picks the product up and shows it briefly, close up
+  2. (3.63–4.63s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [1]
+  3. (4.63–5.63s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [2]
+  4. (5.63–6.63s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [3]
+  5. (6.63–7.63s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [1]
+  6. (7.63–8.13s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [2]
+  7. (8.13–8.63s, medium, warmer) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [2]
+  8. (8.63–9.13s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [3]
+  9. (9.13–9.74s, medium, lamp lit) hold on the finished state: product seated on the support and LIT, glowing warm and lighting the objects around it — support [3]
+
+SETTING: domestic table corner: framed print, small vase of flowers, potted plant, light wood surface.
+LIGHT: neutral daylight that turns warm and golden once the lamp is on.
+PEOPLE: hands only, no face in frame.
+
+END STATE, non negotiable: product seated on the support and LIT, glowing warm and lighting the objects around it.
+
+NEGATIVE: no text overlay, no captions, no subtitles on screen; no glossy finish on the product; no size change between product and support; no aspect ratio change.

@@ -1,0 +1,36 @@
+10 second vertical 9:16 product video, 9 shots, no on-screen text.
+
+PRODUCT — identical in every single shot, this is what is being sold:
+a small brushed copper lampshade-shaped cap, a truncated cone that is WIDER AT THE TOP than at the bottom, with a flat luminous top face carrying a small round touch button at its centre, and a short prong underneath that plugs into a bottle neck - same shape, same warm brushed copper metal finish, same proportions, same warm light colour when it turns on.
+
+SUPPORTS — 4 different bottles, one per cycle. Each must be clearly distinct from the others:
+  [1] A real Hendrick's Gin bottle — a squat dark brown apothecary bottle with broad shoulders, a short thick neck and an opaque glass body, carrying a cream Victorian-style label with fine black engraved lettering and curling botanical flourishes reading HENDRICK'S GIN.
+  [2] A real Bombay Sapphire gin bottle — a flat-sided rectangular bottle of translucent sapphire blue glass with rounded corners, clear gin inside, a cream label bearing a portrait of Queen Victoria and gold and black lettering reading BOMBAY SAPPHIRE.
+  [3] A real Patron Silver tequila bottle — short, stout, slope-shouldered bottle of slightly cloudy recycled glass with a broad round body and a thick neck, clear tequila inside, an orange and cream oval label with a black bee emblem and green banner lettering.
+  [4] A real Fernet-Branca bottle — tall dark olive-green glass bottle with sloping shoulders and a long neck, cream-coloured rectangular label with an ornate black eagle perched on a globe, red and black serif lettering reading Fernet-Branca.
+
+ACTION — the point of the video, and it MUST be completed on screen:
+  fit and switch on. It starts with support standing bare, product not attached and is only finished when product seated on the support and LIT, glowing warm and lighting the objects around it.
+
+SHOTS:
+  1. (0.00–0.75s, close up) a hand lifts the product from a shelf of bottles and shows it, close up
+  2. (0.75–1.50s, close up) a hand lifts the product from a shelf of bottles and shows it, close up
+  3. (1.50–2.50s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [1]
+  4. (2.50–3.46s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [2]
+  5. (3.46–4.47s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [3]
+  6. (4.47–4.99s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [1]
+  7. (4.99–5.50s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [2]
+  8. (5.50–6.50s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [3]
+  9. (6.50–10.00s, medium, lamp lit) hold on the finished state: product seated on the support and LIT, glowing warm and lighting the objects around it — support [4]
+
+SETTING: a marble bathroom shelf with a rolled towel and a soap dish. Do not reuse the decor of the reference video.
+LIGHT: daylight per room that turns warm and golden once the lamp is on.
+PEOPLE: hands only, no face in frame.
+
+CORRECTIONS — learned from what we have already published:
+  OPENING: the first shot lasts 1.5 seconds at most, and the first support must be on screen before second 2. Never open with the product alone in a hand.
+  Real-world branded objects are identified by their PHYSICAL identity and never by their printed text: silhouette, proportions, material, colour, and non-text marks like an emblem, a seal or a coloured band. Any printed text in frame — on the product, on the props, on the set — stays small, turned away or out of focus. Never make printed text the subject of a shot.
+
+END STATE, non negotiable: product seated on the support and LIT, glowing warm and lighting the objects around it.
+
+NEGATIVE: no text overlay, no captions, no subtitles on screen; no glossy finish on the product; no size change between product and support; no aspect ratio change.

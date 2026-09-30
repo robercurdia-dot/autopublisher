@@ -1,0 +1,54 @@
+{
+  "id": "bar_cabinet_negro_1080",
+  "archivo": "assets/videos/bar_cabinet_negro_1080.mp4",
+  "duracion": 10.133,
+  "tamano_bytes": 7481648,
+  "video": {
+    "codec": "h264",
+    "ancho": 1080,
+    "alto": 1920,
+    "fps": 60.0,
+    "proporcion": "1080:1920"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": 44100,
+    "canales": 2,
+    "extraido": "assets/audio/bar_cabinet_negro_1080.m4a",
+    "silencio_inicial_s": 0.0,
+    "energia_media": 0.381
+  },
+  "cortes": [
+    1.57,
+    3.05,
+    3.88,
+    4.67,
+    5.5,
+    5.93,
+    6.35,
+    7.18,
+    10.07
+  ],
+  "golpes_audio": [
+    2.23,
+    2.89,
+    5.32,
+    6.38,
+    6.94,
+    7.7,
+    8.46,
+    8.51,
+    9.53,
+    9.58,
+    9.68,
+    10.08
+  ],
+  "concordancia": {
+    "cortes": 9,
+    "golpes": 12,
+    "encajan": 5,
+    "porcentaje": 55.6,
+    "tolerancia_s": 0.35
+  },
+  "planos": 10
+}

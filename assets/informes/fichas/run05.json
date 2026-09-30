@@ -1,0 +1,81 @@
+{
+  "id": "run05",
+  "duracion": 10.1,
+  "proporcion": "720:1280",
+  "planos": [
+    {
+      "plano": 0,
+      "desde": 0.0,
+      "hasta": 0.88,
+      "duracion": 0.88,
+      "muestra": 0.44,
+      "fotograma": "assets/informes/planos/run05/plano_00.jpg"
+    },
+    {
+      "plano": 1,
+      "desde": 0.88,
+      "hasta": 2.38,
+      "duracion": 1.5,
+      "muestra": 1.63,
+      "fotograma": "assets/informes/planos/run05/plano_01.jpg"
+    },
+    {
+      "plano": 2,
+      "desde": 2.38,
+      "hasta": 3.71,
+      "duracion": 1.33,
+      "muestra": 3.04,
+      "fotograma": "assets/informes/planos/run05/plano_02.jpg"
+    },
+    {
+      "plano": 3,
+      "desde": 3.71,
+      "hasta": 4.42,
+      "duracion": 0.71,
+      "muestra": 4.06,
+      "fotograma": "assets/informes/planos/run05/plano_03.jpg"
+    },
+    {
+      "plano": 4,
+      "desde": 4.42,
+      "hasta": 5.58,
+      "duracion": 1.16,
+      "muestra": 5.0,
+      "fotograma": "assets/informes/planos/run05/plano_04.jpg"
+    },
+    {
+      "plano": 5,
+      "desde": 5.58,
+      "hasta": 6.79,
+      "duracion": 1.21,
+      "muestra": 6.19,
+      "fotograma": "assets/informes/planos/run05/plano_05.jpg"
+    },
+    {
+      "plano": 6,
+      "desde": 6.79,
+      "hasta": 7.71,
+      "duracion": 0.92,
+      "muestra": 7.25,
+      "fotograma": "assets/informes/planos/run05/plano_06.jpg"
+    },
+    {
+      "plano": 7,
+      "desde": 7.71,
+      "hasta": 8.88,
+      "duracion": 1.17,
+      "muestra": 8.29,
+      "fotograma": "assets/informes/planos/run05/plano_07.jpg"
+    },
+    {
+      "plano": 8,
+      "desde": 8.88,
+      "hasta": 10.1,
+      "duracion": 1.22,
+      "muestra": 9.49,
+      "fotograma": "assets/informes/planos/run05/plano_08.jpg"
+    }
+  ],
+  "contactos": "assets/informes/planos/run05/contactos.jpg",
+  "lectura": null
+}

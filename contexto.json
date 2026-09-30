@@ -1,0 +1,75 @@
+{
+  "_que_es_esto": "La unica pieza que se toca cuando cambia el producto. El motor no sabe que vende: recibe un video de referencia, unas imagenes y un prompt con la estructura identidad -> cambio -> accion -> negativos. Todo lo que sigue es relleno de esa estructura.",
+  "producto": {
+    "nombre": "lampara-topper LED",
+    "propuesta": "se encaja en el cuello de cualquier botella y la convierte en lampara de mesa",
+    "_invariante": "Lo que NUNCA puede derivar, porque es lo que se vende. Va al bloque de identidad del prompt. Si una etiqueta del atrezzo sale floja es un objeto borroso en una mesa; si esto deriva, el clip no vende nada. El QA lo mira primero.",
+    "variantes": {
+      "negro_mate": "a small matte black lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same matte black finish, same proportions, same warm light colour when it turns on.",
+      "cobre": "a small brushed copper lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same warm brushed copper metal finish, same proportions, same warm light colour when it turns on."
+    },
+    "objeciones_que_el_clip_debe_resolver": [
+      "como se sujeta  -> ensenar la varilla entrando en el cuello",
+      "como se enciende -> ensenar el dedo sobre el boton tactil"
+    ],
+    "fotos": {
+      "negro_mate": "producto/negro_mate.jpg"
+    },
+    "variante_por_defecto": "negro_mate",
+    "_cotas": {
+      "alto_cm": 14,
+      "diametro_base_cm": 12,
+      "_fuente": "ficha de producto con cotas, en el board de Flashboards, 29 sep 2026",
+      "_nota": "Confirmado ademas en el video de referencia bar_cabinet_negro_1080: la cara luminosa es el extremo ESTRECHO. El invariante decia WIDER AT THE TOP y estaba invertido desde el principio: los cinco primeros runs pidieron el producto del reves."
+    }
+  },
+  "atrezzo": {
+    "tipo": "botella",
+    "_por_que": "El soporte sobre el que se ensena el producto. Su VARIEDAD DENTRO DEL CLIP es la demo de la propuesta: tres botellas distintas en cuatro segundos dicen 'encaja en cualquiera que tengas'. No es decoracion, es el argumento de venta puesto en imagen.",
+    "biblioteca": "marcas/brands.json",
+    "por_clip": "1-3",
+    "tipo_en": "bottle",
+    "_tipo_en": "El mismo sustantivo en inglés, que es el idioma del prompt. Si el producto cambia y pasa a interactuar con tazas, aquí van «taza» y «mug», y el motor no se entera de nada más."
+  },
+  "negativos": [
+    "no text overlay, no captions, no subtitles on screen",
+    "no glossy finish on the product",
+    "no size change between product and support",
+    "no aspect ratio change"
+  ],
+  "_por_que_negativos": "El material de origen lleva rotulo quemado y el modelo lo reproduce si no se prohibe.",
+  "referencia": {
+    "cuenta": "@zalura_official",
+    "_que_es": "de donde bajamos videos de referencia. Mismo producto, 27.700 seguidores.",
+    "biblioteca": "assets/videos.json"
+  },
+  "publicacion": {
+    "plataforma": "instagram",
+    "cuenta": "@zularalamp",
+    "fase": "0 — por debajo de 1.000 seguidores, solo grid",
+    "hashtags": [
+      "#homedecor",
+      "#barcart",
+      "#bottlelamp",
+      "#upcycling"
+    ],
+    "_hashtags": "De nicho, del producto. Los genéricos no traen a nadie."
+  },
+  "_para_cambiar_de_producto": [
+    "1. Cambia 'producto' entero: nombre, propuesta, variantes, objeciones.",
+    "2. Cambia 'atrezzo.tipo' y apunta 'biblioteca' a la nueva libreria de props.",
+    "3. Revisa 'negativos' — los del rotulo quemado valen para cualquier material ajeno.",
+    "4. Cambia 'referencia.cuenta' por la que corresponda al nuevo nicho.",
+    "El motor, el esquema de jobs y el board NO se tocan."
+  ],
+  "variacion_escena": [
+    "a bare kitchen worktop with a folded tea towel and a glass of water",
+    "a dark wood sideboard with a stack of books and a small brass tray",
+    "a bedside table with a paperback and a pair of glasses",
+    "a marble bathroom shelf with a rolled towel and a soap dish",
+    "a windowsill at dusk with a half-drawn curtain and a coffee cup",
+    "a home bar shelf with two empty tumblers and a bottle opener"
+  ],
+  "_por_que_variacion_escena": "Run 02: copiar la escena de la referencia subio el parecido visual de 0,588 a 0,667, a un pelo del umbral 0,70. Se ancla el tipo de sitio (mesa domestica) y se cambian los objetos, que es lo que identifica al clip ajeno. Ampliar esta lista cuesta nada y baja el parecido gratis.",
+  "zona_producto": "superior"
+}
