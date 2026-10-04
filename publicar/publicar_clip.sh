@@ -5,7 +5,8 @@
 # La puerta de originalidad va antes de alojar: si el clip se parece demasiado a su
 # referencia (vídeo, audio o caption), no llega ni a subirse.
 #
-#   bash publicar_clip.sh clip.mp4 musica/pista.mp3 lemon_art_negro "caption propio"
+#   GANCHO="No tires esa botella" \
+#     bash publicar_clip.sh clip.mp4 musica/pista.mp3 lemon_art_negro "caption propio"
 #   ETIQUETA="AI-generated content" POSICION=arriba-izq bash publicar_clip.sh ...
 #   VERTIENTE=sin_caras bash publicar_clip.sh ...   <- sin etiqueta quemada
 
@@ -21,12 +22,26 @@ POSICION="${POSICION:-arriba-der}"
 # Enmienda «etiqueta_solo_nativa»: no se quema nada por defecto. Con
 # ETIQUETA_QUEMADA=si vuelve a pintarse, por si algún día hace falta.
 ETIQUETA_QUEMADA="${ETIQUETA_QUEMADA:-no}"
+# El gancho SÍ se quema siempre, y es cosa distinta de la etiqueta de IA: la
+# etiqueta declara, el gancho retiene. La enmienda «gancho_quemado_propio» lo
+# hace obligatorio porque las piezas del nicho que funcionan lo llevan todas
+# desde el primer fotograma, y las nuestras salían sin él.
+GANCHO="${GANCHO:-}"
+# Hasta qué segundo se ve. Vacío = todo el clip.
+GANCHO_HASTA="${GANCHO_HASTA:-}"
 
-[ $# -eq 4 ] || { echo 'Uso: bash publicar_clip.sh <clip.mp4> <archivo_audio> <id_referencia> "<caption>"'; exit 1; }
+[ $# -eq 4 ] || { echo 'Uso: GANCHO="..." bash publicar_clip.sh <clip.mp4> <archivo_audio> <id_referencia> "<caption>"'; exit 1; }
+if [ -z "$GANCHO" ]; then
+  echo 'ABORTADO: falta GANCHO.'
+  echo '  La enmienda «gancho_quemado_propio» lo exige: sin rótulo no se publica.'
+  echo '  Habla del ESPECTADOR —una pérdida, una identidad, una reacción—, no del producto.'
+  echo '  Ej.: GANCHO="No tires esa botella" bash publicar_clip.sh ...'
+  exit 1
+fi
 CLIP="$1"; AUDIO="$2"; REFERENCIA="$3"; CAPTION="$4"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 
-echo "== 0/5 · Caption frente al de la referencia =="
+echo "== 0/6 · Caption frente al de la referencia =="
 if ! python3 "$REPO/fase0/caption.py" revisar "$REFERENCIA" "$CAPTION"; then
   echo
   echo "ABORTADO: el caption no cumple lo aprendido (fase0/enmiendas.json)."
@@ -35,21 +50,26 @@ if ! python3 "$REPO/fase0/caption.py" revisar "$REFERENCIA" "$CAPTION"; then
 fi
 
 echo
-echo "== 1/5 · Montando audio =="
+echo "== 1/6 · Montando audio =="
 bash "$AQUI/montar_audio.sh" "$CLIP" "$AUDIO" "$TMP/con_audio.mp4"
 
 echo
+echo "== 2/6 · Gancho quemado =="
+HASTA=""; [ -n "$GANCHO_HASTA" ] && HASTA="--hasta $GANCHO_HASTA"
+python3 "$AQUI/quemar_gancho.py" "$TMP/con_audio.mp4" "$TMP/con_gancho.mp4" --texto "$GANCHO" $HASTA
+
+echo
 if [ "$ETIQUETA_QUEMADA" != "si" ]; then
-  echo "== 2/5 · Sin etiqueta quemada =="
-  echo "   La declaración va por la red: is_ai_generated=true en el paso 5."
-  cp "$TMP/con_audio.mp4" "$TMP/final.mp4"
+  echo "== 3/6 · Sin etiqueta quemada =="
+  echo "   La declaración va por la red: is_ai_generated=true en el último paso."
+  cp "$TMP/con_gancho.mp4" "$TMP/final.mp4"
 else
-  echo "== 2/5 · Etiqueta visible de IA =="
-  python3 "$AQUI/etiquetar_ia.py" "$TMP/con_audio.mp4" "$TMP/final.mp4" --texto "$ETIQUETA" --posicion "$POSICION"
+  echo "== 3/6 · Etiqueta visible de IA =="
+  python3 "$AQUI/etiquetar_ia.py" "$TMP/con_gancho.mp4" "$TMP/final.mp4" --texto "$ETIQUETA" --posicion "$POSICION"
 fi
 
 echo
-echo "== 3/5 · Originalidad frente a '$REFERENCIA' =="
+echo "== 4/6 · Originalidad frente a '$REFERENCIA' =="
 if ! python3 "$REPO/ingesta/originalidad.py" "$TMP/final.mp4" --referencia "$REFERENCIA" --caption "$CAPTION"; then
   echo
   echo "ABORTADO: se parece demasiado a la referencia. No se sube ni se publica."
@@ -59,7 +79,7 @@ if ! python3 "$REPO/ingesta/originalidad.py" "$TMP/final.mp4" --referencia "$REF
 fi
 
 echo
-echo "== 4/5 · Alojando =="
+echo "== 5/6 · Alojando =="
 URL=$(curl -s --max-time 300 -X POST "https://api.cloudinary.com/v1_1/$CLOUD/video/upload" \
       -F "file=@$TMP/final.mp4" -F "upload_preset=$PRESET" \
       | python3 -c "import sys,json; print(json.load(sys.stdin).get('secure_url',''))")
@@ -67,5 +87,5 @@ URL=$(curl -s --max-time 300 -X POST "https://api.cloudinary.com/v1_1/$CLOUD/vid
 echo "   $URL"
 
 echo
-echo "== 5/5 · Publicando (is_ai_generated=true) =="
+echo "== 6/6 · Publicando (is_ai_generated=true) =="
 CLIP_LOCAL="$TMP/final.mp4" bash "$AQUI/publicar_grid.sh" "$CAPTION|$URL"

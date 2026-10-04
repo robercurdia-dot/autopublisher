@@ -18,7 +18,10 @@
    "notas": "El que más rinde de todos. Abre con rótulo quemado «Don't throw your empty bottles out!» sobre una botella tipo Clase Azul y una mano. Su sonido está no disponible.",
    "seguidores": 891200,
    "veredicto_cuenta": "viva",
-   "tasa_sobre_seguidores": 0.057563
+   "tasa_sobre_seguidores": 0.057563,
+   "videos_publicados": 4050,
+   "likes_totales": 52900000,
+   "_fuente_seguidores": "datos incrustados de TikTok, curl directo, 30 sep 2026"
   },
   {
    "creador": "TFINE",
@@ -39,7 +42,13 @@
    "colaboracion_pago": false,
    "cara": false,
    "gancho": "Guys... run don't walk to IKEA",
-   "notas": "POV caminando por IKEA con rótulo «POV: You're jumping on that viral IKEA lamp trend». Trend-jack, sin cara."
+   "notas": "POV caminando por IKEA con rótulo «POV: You're jumping on that viral IKEA lamp trend». Trend-jack, sin cara.",
+   "seguidores": 8097,
+   "videos_publicados": 549,
+   "likes_totales": 593300,
+   "_fuente_seguidores": "datos incrustados de TikTok, curl directo, 30 sep 2026",
+   "veredicto_cuenta": "viva",
+   "tasa_sobre_seguidores": 0.064839
   },
   {
    "creador": "Aethos",
@@ -49,11 +58,14 @@
    "colaboracion_pago": false,
    "cara": null,
    "gancho": "The perfect Christmas gift",
-   "seguidores": 415700,
+   "seguidores": 8097,
    "handle": "aethos.led",
    "tienda": "aethosled.shop",
    "veredicto_cuenta": "viva",
-   "tasa_sobre_seguidores": 0.039692
+   "tasa_sobre_seguidores": 2.037792,
+   "videos_publicados": 549,
+   "likes_totales": 593300,
+   "_fuente_seguidores": "datos incrustados de TikTok, curl directo, 30 sep 2026"
   },
   {
    "creador": "Super Smith",
@@ -183,5 +195,6 @@
   "Rob | Male UGC Creator (rob.ugc, 55,2K likes acumulados)"
  ],
  "_veredicto_cuenta": "Lo calcula ingesta/auditar_cuenta.py: contrasta los seguidores contra lo que rinden las piezas. 'inflada' no acusa de comprar nada, dice que esos seguidores no se explican por ese contenido. Antes de copiar la forma de una cuenta, mirar esto: copiar a una cuenta inflada fija un liston que no corresponde a nada real.",
- "_falta": "De las 14 piezas solo 3 tienen 'seguidores'. Sin ese campo auditar_cuenta no puede opinar. Al minar el nicho hay que anotarlo siempre, junto al handle."
+ "_falta": "De las 14 piezas solo 3 tienen 'seguidores'. Sin ese campo auditar_cuenta no puede opinar. Al minar el nicho hay que anotarlo siempre, junto al handle.",
+ "_correccion_30sep": "El 30 sep 2026 se habia anotado 415.700 seguidores para aethos.led a partir de un resumen de busqueda. Era falso: sus propios datos incrustados dicen 8.097. La leccion operativa es que las cifras de una cuenta se leen de la fuente, no de un resumen. El de hellolangie (891.200) si era correcto."
 }
