@@ -59,11 +59,13 @@
    "evidencia": "La variedad dentro del clip ES el argumento de venta: cuantas más botellas distintas, más claro queda que encaja en cualquiera.",
    "aplica_en": "seleccion",
    "regla": "unidades = las de la referencia + 1, con tope en lo que permita la biblioteca de atrezzo. La variedad dentro del clip es la demo de que el producto sirve para cualquier soporte.",
-   "estado": "activa",
+   "estado": "retirada",
    "efecto": {
     "unidades_extra": 1
    },
-   "_renombrada": "Se llamaba «mas_botellas» hasta el 27 sep 2026. El nombre ataba una regla general al producto de hoy."
+   "_renombrada": "Se llamaba «mas_botellas» hasta el 27 sep 2026. El nombre ataba una regla general al producto de hoy.",
+   "retirada_porque": "Escrita por intuicion, no por medida. La pieza de mas rendimiento del nicho (51.300 likes, 5.736 guardados) usa UN SOLO soporte durante 17,7 s. La variedad dentro del clip reparte la atencion en vez de demostrar nada.",
+   "retirada_el": "2026-10-04"
   },
   {
    "id": "caption_propio",
@@ -145,8 +147,11 @@
    "origen": "metricas run06",
    "evidencia": "En el run 06 el estado final llegaba en el segundo 4,47 y el tiempo medio de visionado en TikTok fue 5,39 s: el espectador mediano veia el motivo de la pieza menos de un segundo, y la mitad se iba antes de llegar. Solo el 15,3 % la vio entera.",
    "aplica_en": "prompt",
-   "regla": "El estado final -aquello que la pieza existe para demostrar- tiene que estar en pantalla antes del segundo 3. Si el guion lo coloca despues, se reordena: primero un ciclo completo hasta el resultado, y despues las variaciones. Ensenar el resultado tarde es pagar por alcance que se va antes de verlo.",
-   "estado": "activa"
+   "regla": "PAYOFF: the end state — the thing this piece exists to demonstrate — must be on screen before second 3. If the shot list puts it later, compress what comes before it: one complete cycle through to the result first, variations after. Showing the result late is paying for reach that leaves before seeing it.",
+   "estado": "activa",
+   "efecto": {
+    "premio_max_s": 3.0
+   }
   },
   {
    "id": "gancho_quemado_propio",
@@ -155,6 +160,66 @@
    "evidencia": "Las piezas del nicho con audiencia viva abren todas con un rotulo quemado en el primer fotograma, y ninguno describe lo que se vende: nombran una perdida que el espectador esta a punto de cometer, una identidad suya o su propia reaccion. La de mas rendimiento medido -51.300 likes- es una prohibicion. Nuestras piezas salen sin ningun rotulo porque extendi 'marcas_reales_sin_texto' a prohibir todo texto, y eso confundio dos cosas distintas.",
    "aplica_en": "publicacion",
    "regla": "El gancho se quema en montaje, nunca lo genera el modelo: el modelo sigue sin poder inventar texto en la escena. El rotulo aparece en el primer fotograma y habla del ESPECTADOR -una perdida que va a cometer, una identidad, una reaccion-, nunca describe lo que se vende ni enumera sus caracteristicas. Sin rotulo no se publica.",
+   "estado": "activa"
+  },
+  {
+   "id": "un_solo_sujeto_por_pieza",
+   "fecha": "2026-10-04",
+   "origen": "estudio de angulos, pieza top del nicho",
+   "evidencia": "La pieza con mas traccion medida del nicho -51.300 likes y 5.736 guardados- dedica sus 13 planos y 17,7 segundos a UN solo elemento. Nuestro run 06 uso cinco distintos en 10 segundos: cada uno recibe dos segundos y ninguno llega a leerse.",
+   "aplica_en": "seleccion",
+   "regla": "Una pieza ensena UN solo ejemplar de aquello sobre lo que actua el producto, de principio a fin. La variedad va ENTRE piezas, no dentro de una: repartir la atencion entre varios ejemplares en un clip corto no demuestra versatilidad, impide que se entienda ninguno.",
+   "estado": "activa",
+   "efecto": {
+    "unidades": 1
+   }
+  },
+  {
+   "id": "silueta_completa_no_recorte",
+   "fecha": "2026-10-04",
+   "origen": "estudio de angulos",
+   "evidencia": "En la pieza top el conjunto completo esta en cuadro en los 13 planos, ocupando el tercio central en vertical. Nuestro run 06 abre con dos planos recortados al producto solo en una mano: eso ensena un objeto, no una transformacion.",
+   "aplica_en": "prompt",
+   "regla": "FRAMING: always show the COMPLETE combined object — what is being sold together with whatever it acts upon — as one single object. Never crop to the product on its own. What is being sold is the change, and the change is only visible when both parts are in frame.",
+   "estado": "activa",
+   "efecto": {
+    "encuadre_minimo": "medium"
+   }
+  },
+  {
+   "id": "aire_para_el_rotulo",
+   "fecha": "2026-10-04",
+   "origen": "estudio de angulos",
+   "evidencia": "La pieza top encuadra dejando el tercio superior vacio, que es exactamente donde caen sus cuatro rotulos quemados. Nuestro encuadre es apretado, asi que un rotulo quemado se superpondria al producto.",
+   "aplica_en": "prompt",
+   "regla": "FRAMING: keep the upper third of the frame clear. A caption is burned there in post, and if the subject occupies that band the caption covers it or becomes unreadable.",
+   "estado": "activa"
+  },
+  {
+   "id": "contraste_de_estado",
+   "fecha": "2026-10-04",
+   "origen": "estudio de angulos",
+   "evidencia": "La pieza top empieza en una cocina con luz de dia y termina en una sala a oscuras: cuando el producto se enciende, el cambio es evidente. El run 06 transcurre entero con la misma luz de atardecer y el encendido apenas se nota.",
+   "aplica_en": "prompt",
+   "regla": "ARC: start in the state where the product adds nothing and end in the state where its value is obvious. If what is being sold only shows in particular conditions, the clip must travel to them — shooting entirely in the favourable state cancels the demo.",
+   "estado": "activa"
+  },
+  {
+   "id": "duracion_de_los_que_ganan",
+   "fecha": "2026-10-04",
+   "origen": "barrido IG 4 oct",
+   "evidencia": "Barrido de 40 piezas del hashtag del nicho en Instagram: la mediana de duracion es 10,1 s, pero las cinco de mas alcance estan entre 13,5 y 14,9 s (51,8 M, 23,2 M, 19,1 M, 6,0 M reproducciones). Nuestras dos piezas duran 10 s y hacen 170 y 166.",
+   "aplica_en": "prompt",
+   "regla": "La duracion no se hereda de la referencia ni se deja en el valor por defecto: se fija en la que usan las piezas de mas alcance del nicho, medida en el ultimo barrido. Quedarse en la mediana del monton es quedarse con los resultados del monton.",
+   "estado": "activa"
+  },
+  {
+   "id": "caption_corto",
+   "fecha": "2026-10-04",
+   "origen": "barrido IG 4 oct",
+   "evidencia": "Las cinco piezas de mas alcance del nicho usan captions de 12 a 80 caracteres sin contar hashtags: 'Get yours from the link in bio', 'How unique', 'What a vibe'. El nuestro tenia 251 caracteres con pregunta incluida, y saco 0 y 1 likes.",
+   "aplica_en": "caption",
+   "regla": "El caption no lleva el argumento de venta: ese va quemado en el video. Maximo 80 caracteres sin contar hashtags. El texto largo compite con el video por la atencion y en el nicho lo usan los que no rinden.",
    "estado": "activa"
   }
  ],

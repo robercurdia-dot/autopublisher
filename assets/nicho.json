@@ -196,5 +196,55 @@
  ],
  "_veredicto_cuenta": "Lo calcula ingesta/auditar_cuenta.py: contrasta los seguidores contra lo que rinden las piezas. 'inflada' no acusa de comprar nada, dice que esos seguidores no se explican por ese contenido. Antes de copiar la forma de una cuenta, mirar esto: copiar a una cuenta inflada fija un liston que no corresponde a nada real.",
  "_falta": "De las 14 piezas solo 3 tienen 'seguidores'. Sin ese campo auditar_cuenta no puede opinar. Al minar el nicho hay que anotarlo siempre, junto al handle.",
- "_correccion_30sep": "El 30 sep 2026 se habia anotado 415.700 seguidores para aethos.led a partir de un resumen de busqueda. Era falso: sus propios datos incrustados dicen 8.097. La leccion operativa es que las cifras de una cuenta se leen de la fuente, no de un resumen. El de hellolangie (891.200) si era correcto."
+ "_correccion_30sep": "El 30 sep 2026 se habia anotado 415.700 seguidores para aethos.led a partir de un resumen de busqueda. Era falso: sus propios datos incrustados dicen 8.097. La leccion operativa es que las cifras de una cuenta se leen de la fuente, no de un resumen. El de hellolangie (891.200) si era correcto.",
+ "_barrido_ig_4oct": {
+  "metodo": "40 piezas de #bottlelamp en Instagram, metricas leidas de /api/v1/media/{id}/info/ con x-ig-app-id desde la sesion del navegador. 40 de 40 sin fallo.",
+  "hallazgos": [
+   "Duracion: la mediana de las 40 es 10,1 s, pero los cinco primeros estan entre 13,5 y 14,9 s. El monton hace 10 s, los que ganan hacen 15.",
+   "Caption: los cinco primeros usan entre 12 y 80 caracteres sin hashtags ('Get yours from the link in bio', 'How unique'). El nuestro tenia 251.",
+   "@aethos_led copa 4 de los 12 primeros puestos, con un reel de 51.792.568 reproducciones y 1.755.598 likes.",
+   "Hay dos juegos distintos: maximizar likes (aethos) o maximizar comentarios con embudo a DM (@tales_of_diyhome: 10.848 comentarios sobre 4.425 likes, 'Comment link').",
+   "Nuestras dos piezas en el mismo hashtag: 170 y 166 reproducciones."
+  ],
+  "top": [
+   {
+    "cuenta": "aethos_led",
+    "reproducciones": 51792568,
+    "likes": 1755598,
+    "comentarios": 4091,
+    "duracion": 14.9,
+    "caption": "Get yours from the link in bio"
+   },
+   {
+    "cuenta": "deco_pilar",
+    "reproducciones": 23237279,
+    "likes": 434650,
+    "comentarios": 994,
+    "duracion": 13.5
+   },
+   {
+    "cuenta": "aethos_led",
+    "reproducciones": 19129008,
+    "likes": 397484,
+    "comentarios": 1967,
+    "duracion": 14.4,
+    "caption": "How unique"
+   },
+   {
+    "cuenta": "aethos_led",
+    "reproducciones": 6030516,
+    "likes": 115766,
+    "comentarios": 249,
+    "duracion": 14.9,
+    "caption": "What a vibe"
+   },
+   {
+    "cuenta": "craft_gallery_ai",
+    "reproducciones": 4439788,
+    "likes": 86128,
+    "comentarios": 488,
+    "duracion": 10.0
+   }
+  ]
+ }
 }

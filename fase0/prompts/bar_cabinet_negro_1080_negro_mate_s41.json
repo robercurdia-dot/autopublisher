@@ -2,27 +2,33 @@
   "referencia": "bar_cabinet_negro_1080",
   "variante": "negro_mate",
   "semilla": 41,
-  "unidades": 4,
+  "unidades": 1,
   "atrezzo": [
-    "corralejo",
-    "grey_goose",
-    "jack_daniels",
     "don_julio_1942"
   ],
   "escena": "a windowsill at dusk with a half-drawn curtain and a coffee cup",
-  "planos": 9,
-  "duracion": 10.0,
+  "planos": 4,
+  "duracion": 14.0,
   "duracion_referencia": 10.133,
   "enmiendas": [
     "escena_propia",
     "entrada_corta",
     "no_repetir_entre_piezas",
-    "mas_unidades",
     "caption_propio",
     "marcas_reales_sin_texto",
     "etiqueta_solo_nativa",
     "foto_de_producto_obligatoria",
-    "referencia_entra_en_el_modelo"
+    "referencia_entra_en_el_modelo",
+    "cotas_del_invariante_verificadas",
+    "auditar_la_cuenta_antes_de_copiarla",
+    "premio_antes_del_segundo_3",
+    "gancho_quemado_propio",
+    "un_solo_sujeto_por_pieza",
+    "silueta_completa_no_recorte",
+    "aire_para_el_rotulo",
+    "contraste_de_estado",
+    "duracion_de_los_que_ganan",
+    "caption_corto"
   ],
   "entradas": [
     {
@@ -34,15 +40,12 @@
     {
       "clase": "imagen",
       "papel": "producto",
-      "archivo": "producto/negro_mate.jpg"
+      "archivo": "producto/negro_mate_estudio.jpg"
     }
   ],
   "papel_referencia": "directa",
   "evitado": {
     "atrezzo": [
-      "ron_zacapa",
-      "absolut",
-      "clase_azul",
       "tanqueray",
       "hendricks",
       "bombay_sapphire",

@@ -200,6 +200,11 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
         usadas = {g["unidad"] for g in L["guion"] if g.get("unidad") is not None}
         if usadas:
             unidades = min(unidades, max(len(usadas), max(usadas) + 1))
+    # Una enmienda puede fijar cuántos ejemplares salen, y manda sobre lo que
+    # traiga la referencia: el guion describe lo que hacía ELLA, no lo que
+    # queremos nosotros.
+    if not servicio and efectos.get("unidades"):
+        unidades = int(efectos["unidades"])
     if efectos.get("no_repetir"):
         excluir = tuple(set(excluir) | set(previo["atrezzo"]))
 
@@ -281,8 +286,57 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
                 d = (tiempos[n][1] - tiempos[n][0]) * escala
                 tiempos[n] = (round(t, 2), round(t + d, 2)); t += d
 
+    # El guion describe lo que hacía la REFERENCIA. Si una enmienda cambia el
+    # número de ejemplares, hay que reescribirlo o el prompt se contradice a sí
+    # mismo: ya nos pasó con la entrada, y el modelo obedece a SHOTS.
+    guion = [dict(g) for g in L["guion"]]
+    if not servicio and efectos.get("unidades"):
+        for g in guion:
+            if g.get("unidad") is not None:
+                g["unidad"] = 0
+    # Con menos ejemplares, planos que antes eran distintos pasan a ser el mismo.
+    # Repetirlos gasta segundos en enseñar dos veces lo mismo.
+    fundido, previo_clave = [], None
+    for g in guion:
+        clave = (g["fase"], g.get("unidad"))
+        if clave == previo_clave:
+            fundido[-1]["_funde"] = fundido[-1].get("_funde", []) + [g["plano"]]
+            continue
+        fundido.append(g); previo_clave = clave
+    guion = fundido
+
+    # Al fundir planos sobra tiempo: se reparte proporcionalmente para que el
+    # clip siga durando lo pedido y el premio no se vaya al final.
+    if len(guion) < len(L["guion"]):
+        total = sum(tiempos[g["plano"]][1] - tiempos[g["plano"]][0]
+                    + sum(tiempos[p][1] - tiempos[p][0] for p in g.get("_funde", []))
+                    for g in guion) or dur
+        t = 0.0
+        for g in guion:
+            largo = (tiempos[g["plano"]][1] - tiempos[g["plano"]][0]
+                     + sum(tiempos[p][1] - tiempos[p][0] for p in g.get("_funde", [])))
+            largo = largo / total * dur
+            tiempos[g["plano"]] = (round(t, 2), round(t + largo, 2))
+            t += largo
+
+    tope = efectos.get("premio_max_s")
+    if tope and len(guion) >= 3:
+        premio = guion[-2]["plano"]
+        if tiempos[premio][0] > tope:
+            antes = [g["plano"] for g in guion[:-2]]
+            largo_antes = sum(tiempos[p][1] - tiempos[p][0] for p in antes) or 1
+            t = 0.0
+            for p in antes:
+                l = (tiempos[p][1] - tiempos[p][0]) / largo_antes * tope
+                tiempos[p] = (round(t, 2), round(t + l, 2)); t += l
+            resto = [g["plano"] for g in guion[-2:]]
+            largo_resto = sum(tiempos[p][1] - tiempos[p][0] for p in resto) or 1
+            for p in resto:
+                l = (tiempos[p][1] - tiempos[p][0]) / largo_resto * (dur - tope)
+                tiempos[p] = (round(t, 2), round(t + l, 2)); t += l
+
     lineas.append("SHOTS:")
-    for g in L["guion"]:
+    for g in guion:
         p = next((x for x in ficha["planos"] if x["plano"] == g["plano"]), None)
         if not p:
             continue
@@ -297,9 +351,12 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
         if efectos.get("abrir_con") == "estado_inicial" and g.get("unidad") is None:
             texto = (f"open on the situation the viewer already recognises as their own: "
                      f"{L['accion']['estado_inicial']}. What is being sold is NOT in frame yet")
+        encuadre = g.get("encuadre", "medium")
+        if efectos.get("encuadre_minimo") == "medium" and encuadre == "close up":
+            encuadre = "medium, the whole combined object in frame"
         soporte = f" — support [{g['unidad'] + 1}]" if g.get("unidad") is not None else ""
         lineas.append(f"  {g['plano'] + 1}. ({p['desde']:.2f}–{p['hasta']:.2f}s, "
-                      f"{g.get('encuadre', 'medium')}) {texto}{soporte}")
+                      f"{encuadre}) {texto}{soporte}")
     lineas.append("")
     escena = L["escenario"]
     cambio = None
@@ -335,7 +392,7 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
         "referencia": ident, "variante": variante, "semilla": semilla,
         "unidades": unidades, "atrezzo": [m["id"] for m in atrezzo],
         "escena": cambio if variantes_escena else None,
-        "planos": len(ficha["planos"]),
+        "planos": len(guion),
         "duracion": round(dur, 2),
         "duracion_referencia": ficha["duracion"],
         "enmiendas": [x["id"] for x in reglas],

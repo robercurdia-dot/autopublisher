@@ -13,7 +13,7 @@
       "como se enciende -> ensenar el dedo sobre el boton tactil"
     ],
     "fotos": {
-      "negro_mate": "producto/negro_mate.jpg"
+      "negro_mate": "producto/negro_mate_estudio.jpg"
     },
     "variante_por_defecto": "negro_mate",
     "_cotas": {
@@ -21,7 +21,8 @@
       "diametro_base_cm": 12,
       "_fuente": "ficha de producto con cotas, en el board de Flashboards, 29 sep 2026",
       "_nota": "Confirmado ademas en el video de referencia bar_cabinet_negro_1080: la cara luminosa es el extremo ESTRECHO. El invariante decia WIDER AT THE TOP y estaba invertido desde el principio: los cinco primeros runs pidieron el producto del reves."
-    }
+    },
+    "_fotos_nota": "Foto de estudio sobre blanco: ancla mejor que un fotograma, porque aisla la silueta sin contexto que distraiga."
   },
   "atrezzo": {
     "tipo": "botella",

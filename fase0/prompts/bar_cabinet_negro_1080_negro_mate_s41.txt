@@ -1,4 +1,4 @@
-10 second vertical 9:16 product video, 9 shots, no on-screen text.
+14 second vertical 9:16 product video, 9 shots, no on-screen text.
 
 ANCHORS — what each attached reference is for:
   @Video1 — take from it ONLY: the shot structure, the cutting rhythm, the camera framing, the hand choreography and the product itself.
@@ -8,33 +8,30 @@ ANCHORS — what each attached reference is for:
 PRODUCT — identical in every single shot, this is what is being sold:
 a small matte black lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same matte black finish, same proportions, same warm light colour when it turns on.
 
-SUPPORTS — 4 different bottles, one per cycle. Each must be clearly distinct from the others:
-  [1] A real Corralejo Reposado tequila bottle — a very tall, slim, elongated bottle of deep cobalt blue hand-blown glass with a rounded base and a long tapering neck, carrying a small cream and gold label with ornate lettering reading CORRALEJO.
-  [2] A real Grey Goose vodka bottle — a tall frosted glass bottle, translucent rather than transparent, with a flight of dark grey flying geese silkscreened down the front, blue and grey lettering reading GREY GOOSE above them and a French tricolour accent.
-  [3] A real Jack Daniel's Old No. 7 Tennessee Whiskey bottle — square-shouldered clear glass bottle, dark amber whiskey inside, black rectangular label with white and gold lettering and the Jack Daniel's arch logo.
-  [4] A real Don Julio 1942 anejo tequila bottle — a tall slender elongated clear glass bottle shaped like an agave leaf, narrowing gently towards a long neck, golden amber tequila inside, with an embossed body, a cream and gold label reading DON JULIO 1942 in elegant serif lettering.
+SUPPORT — one bottle:
+  [1] A real Don Julio 1942 anejo tequila bottle — a tall slender elongated clear glass bottle shaped like an agave leaf, narrowing gently towards a long neck, golden amber tequila inside, with an embossed body, a cream and gold label reading DON JULIO 1942 in elegant serif lettering.
 
 ACTION — the point of the video, and it MUST be completed on screen:
   fit and switch on. It starts with support standing bare, product not attached and is only finished when product seated on the support and LIT, glowing warm and lighting the objects around it.
 
 SHOTS:
-  1. (0.00–0.75s, close up) a hand lifts the product from a shelf of bottles and shows it, close up
-  2. (0.75–1.50s, close up) a hand lifts the product from a shelf of bottles and shows it, close up
-  3. (1.50–2.50s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [1]
-  4. (2.50–3.46s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [2]
-  5. (3.46–4.47s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [3]
-  6. (4.47–4.99s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [1]
-  7. (4.99–5.50s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [2]
-  8. (5.50–6.50s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [3]
-  9. (6.50–10.00s, medium, lamp lit) hold on the finished state: product seated on the support and LIT, glowing warm and lighting the objects around it — support [4]
+  1. (0.00–0.77s, medium, the whole combined object in frame) open on the situation the viewer already recognises as their own: support standing bare, product not attached. What is being sold is NOT in frame yet
+  3. (0.77–3.00s, medium) a hand lowers the product onto the neck of the support until the prong seats — support [1]
+  6. (3.00–7.04s, medium) a fingertip taps the top face, the lamp turns on and warm light floods the scene — support [1]
+  9. (7.04–14.00s, medium, lamp lit) hold on the finished state: product seated on the support and LIT, glowing warm and lighting the objects around it — support [1]
 
 SETTING: a windowsill at dusk with a half-drawn curtain and a coffee cup. Do not reuse the decor of the reference video.
 LIGHT: daylight per room that turns warm and golden once the lamp is on.
 PEOPLE: hands only, no face in frame.
 
 CORRECTIONS — learned from what we have already published:
-  OPENING: the first shot lasts 1.5 seconds at most, and the first support must be on screen before second 2. Never open with the product alone in a hand.
+  OPENING: the first shot lasts 1.5 seconds at most and opens on the situation the viewer already recognises as their own — the scene as it is BEFORE what we sell exists in it. What is being sold is NOT in frame yet. Never open by presenting it.
   Real-world branded objects are identified by their PHYSICAL identity and never by their printed text: silhouette, proportions, material, colour, and non-text marks like an emblem, a seal or a coloured band. Any printed text in frame — on the product, on the props, on the set — stays small, turned away or out of focus. Never make printed text the subject of a shot.
+  PAYOFF: the end state — the thing this piece exists to demonstrate — must be on screen before second 3. If the shot list puts it later, compress what comes before it: one complete cycle through to the result first, variations after. Showing the result late is paying for reach that leaves before seeing it.
+  FRAMING: always show the COMPLETE combined object — what is being sold together with whatever it acts upon — as one single object. Never crop to the product on its own. What is being sold is the change, and the change is only visible when both parts are in frame.
+  FRAMING: keep the upper third of the frame clear. A caption is burned there in post, and if the subject occupies that band the caption covers it or becomes unreadable.
+  ARC: start in the state where the product adds nothing and end in the state where its value is obvious. If what is being sold only shows in particular conditions, the clip must travel to them — shooting entirely in the favourable state cancels the demo.
+  La duracion no se hereda de la referencia ni se deja en el valor por defecto: se fija en la que usan las piezas de mas alcance del nicho, medida en el ultimo barrido. Quedarse en la mediana del monton es quedarse con los resultados del monton.
 
 END STATE, non negotiable: product seated on the support and LIT, glowing warm and lighting the objects around it.
 
