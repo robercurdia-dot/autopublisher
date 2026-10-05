@@ -1,0 +1,61 @@
+{
+ "_que_es_esto": "Errores del autoclipper detectados al usarlo de verdad. Cada uno lleva la evidencia que lo destapó, la causa, el arreglo y el test que impide que vuelva (tests/test_clipper.py). Es el equivalente a fase0/enmiendas.json para el clipper: si un error no tiene test, no está arreglado, solo está anotado.",
+ "errores": [
+  {
+   "id": "criterios_calibrados_en_otro_nicho",
+   "fecha": "2026-10-05",
+   "evidencia": "Prueba con un vídeo de Rubius de 25,6 min (Su7PwMU-rUc). El ritmo objetivo era 0,73 cortes/s y la duración de 14 s, ambos medidos en piezas de producto de 10-17 s. El vídeo de Rubius tiene 0,22 cortes/s de media: el criterio premiaba lo que más se parecía a una pieza de producto, no lo mejor del vídeo.",
+   "causa": "Constantes absolutas sacadas de un nicho concreto, aplicadas a cualquier fuente.",
+   "arreglo": "Cada señal se convierte en percentil DENTRO del propio vídeo. Ningún criterio compara contra un número de otro nicho.",
+   "test": "test_criterios_relativos_al_video"
+  },
+  {
+   "id": "elige_la_intro",
+   "fecha": "2026-10-05",
+   "evidencia": "El clip 1 de la prueba de Rubius fue el tramo 3-33 s: la intro editada, con memes y cortes rápidos. Es lo más montado del vídeo y por eso puntuaba alto en ritmo, pero es envoltorio, no contenido.",
+   "causa": "Nada distinguía el envoltorio (intro, cierre) del contenido.",
+   "arreglo": "En fuentes de más de 3 min se descartan las ventanas que empiezan en el primer margen o acaban en el último (máx. de 30 s o el 3 % de la duración).",
+   "test": "test_no_elige_la_intro"
+  },
+  {
+   "id": "clips_solapados",
+   "fecha": "2026-10-05",
+   "evidencia": "Los clips 2 (213-243 s) y 3 (236-266 s) de la prueba de Rubius compartían 6,5 s y el mismo plano de la caja. Dos de tres clips en el mismo minuto de un vídeo de 25.",
+   "causa": "Se toleraba un 35 % de solape y no había separación mínima.",
+   "arreglo": "Cero solape y una separación mínima de media ventana entre clips.",
+   "test": "test_clips_sin_solape_y_separados"
+  },
+  {
+   "id": "ignora_el_audio",
+   "fecha": "2026-10-05",
+   "evidencia": "En una apertura de sobres, el mejor momento es cuando sale una carta rara y el creador reacciona: eso está en la voz, no en la imagen. El clipper solo miraba imagen.",
+   "causa": "No había ninguna señal de audio.",
+   "arreglo": "Señal de energía de audio: lo que el tramo sube por encima del volumen típico del vídeo. Es la de más peso. Si la fuente no tiene audio, su peso se reparte entre las demás.",
+   "test": "test_encuentra_el_pico_de_audio"
+  },
+  {
+   "id": "arco_saturado",
+   "fecha": "2026-10-05",
+   "evidencia": "Los tres clips de la prueba de Rubius sacaron arco = 1,00. El salto de brillo se dividía entre 40 y se recortaba a 1: en un vídeo largo con cambios de escena casi cualquier ventana llegaba al tope.",
+   "causa": "Umbral absoluto que satura.",
+   "arreglo": "El salto de brillo se convierte en percentil dentro del vídeo, como el resto de señales.",
+   "test": "test_arco_no_satura"
+  },
+  {
+   "id": "recorte_vertical_corta_rotulos",
+   "fecha": "2026-10-05",
+   "evidencia": "El clip 1 de la prueba de Rubius salió con un rótulo quemado cortado a la mitad («…MOS:»). El recorte centrado a 9:16 tira los laterales de una fuente 16:9, y los rótulos suelen ocupar todo el ancho.",
+   "causa": "Recorte centrado a ciegas.",
+   "arreglo": "Antes de recortar se mide el detalle de las bandas laterales que se tirarían. Si contienen tanto detalle como el centro (señal de texto o de información), se usa encuadre completo: el plano entero sobre un fondo desenfocado de sí mismo. El detalle se mide por franjas horizontales y se toma la peor: la primera versión del arreglo promediaba toda la altura y diluía un rótulo fino hasta hacerlo invisible (17 % frente a un umbral de 55 %). Lo cazó el test antes de usarse.",
+   "test": "test_recorte_detecta_detalle_en_los_laterales"
+  },
+  {
+   "id": "criterio_constante",
+   "fecha": "2026-10-05",
+   "evidencia": "Releyendo el código tras la prueba: el criterio «duracion» pesaba un 15 % pero todas las ventanas candidatas miden lo mismo, así que sumaba la misma cantidad a todas. Ocupaba peso sin ordenar nada.",
+   "causa": "Un parámetro tratado como criterio.",
+   "arreglo": "La duración es un parámetro de la búsqueda, no una señal. Por defecto 14 s en fuentes cortas (medido en el nicho de producto) y 30 s en fuentes largas (convención de Shorts de charla, no medida por nosotros).",
+   "test": "test_ningun_criterio_es_constante"
+  }
+ ]
+}
