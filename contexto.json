@@ -5,8 +5,8 @@
     "propuesta": "se encaja en el cuello de cualquier botella y la convierte en lampara de mesa",
     "_invariante": "Lo que NUNCA puede derivar, porque es lo que se vende. Va al bloque de identidad del prompt. Si una etiqueta del atrezzo sale floja es un objeto borroso en una mesa; si esto deriva, el clip no vende nada. El QA lo mira primero.",
     "variantes": {
-      "negro_mate": "a small matte black lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same matte black finish, same proportions, same warm light colour when it turns on.",
-      "cobre": "a small brushed copper lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same warm brushed copper metal finish, same proportions, same warm light colour when it turns on."
+      "negro_mate": "a small matte black lampshade-shaped cap: a truncated cone that is WIDER AT THE BOTTOM than at the top, standing on a short cylindrical prong that plugs into a bottle neck. PROPORTIONS, measured from the product photo and not to be changed: the whole object is about 1.2 times as tall as it is wide; the cone is the upper three quarters of the height and the prong the lower quarter; the widest point is the cone's bottom rim; the flat top is a little over half as wide as that rim; the prong is about a third as wide as that rim. The flat top face is a single pale luminous disc covering the whole narrow end — not a dark lid with a small button — with a small round power symbol at its centre. Matte black with a faint fine texture, no gloss anywhere. Same shape, same proportions, same warm light colour when it turns on.",
+      "cobre": "a small brushed copper lampshade-shaped cap: a truncated cone that is WIDER AT THE BOTTOM than at the top, standing on a short cylindrical prong that plugs into a bottle neck. PROPORTIONS, measured from the product photo and not to be changed: the whole object is about 1.2 times as tall as it is wide; the cone is the upper three quarters of the height and the prong the lower quarter; the widest point is the cone's bottom rim; the flat top is a little over half as wide as that rim; the prong is about a third as wide as that rim. The flat top face is a single pale luminous disc covering the whole narrow end — not a dark lid with a small button — with a small round power symbol at its centre. Warm brushed copper metal, satin not mirror. Same shape, same proportions, same warm light colour when it turns on."
     },
     "objeciones_que_el_clip_debe_resolver": [
       "como se sujeta  -> ensenar la varilla entrando en el cuello",
@@ -20,7 +20,15 @@
       "alto_cm": 14,
       "diametro_base_cm": 12,
       "_fuente": "ficha de producto con cotas, en el board de Flashboards, 29 sep 2026",
-      "_nota": "Confirmado ademas en el video de referencia bar_cabinet_negro_1080: la cara luminosa es el extremo ESTRECHO. El invariante decia WIDER AT THE TOP y estaba invertido desde el principio: los cinco primeros runs pidieron el producto del reves."
+      "_nota": "Confirmado ademas en el video de referencia bar_cabinet_negro_1080: la cara luminosa es el extremo ESTRECHO. El invariante decia WIDER AT THE TOP y estaba invertido desde el principio: los cinco primeros runs pidieron el producto del reves.",
+      "medido_en_foto": {
+        "alto_entre_ancho": 1.22,
+        "cono_pct_altura": 75,
+        "varilla_pct_altura": 25,
+        "cara_superior_pct_ancho": 54,
+        "varilla_pct_ancho": 30,
+        "_fuente": "medicion en pixeles de producto/negro_mate_estudio.jpg, 4 oct 2026"
+      }
     },
     "_fotos_nota": "Foto de estudio sobre blanco: ancla mejor que un fotograma, porque aisla la silueta sin contexto que distraiga."
   },

@@ -221,6 +221,15 @@
    "aplica_en": "caption",
    "regla": "El caption no lleva el argumento de venta: ese va quemado en el video. Maximo 80 caracteres sin contar hashtags. El texto largo compite con el video por la atencion y en el nicho lo usan los que no rinden.",
    "estado": "activa"
+  },
+  {
+   "id": "dos_anclas_trabajos_distintos",
+   "fecha": "2026-10-05",
+   "origen": "run07",
+   "evidencia": "Run 05: sin ninguna referencia, la forma del producto derivo entre planos. Run 07: con foto de producto pero SIN video de referencia, el producto aguanto identico los 12 segundos y en cambio el montaje desaparecio — el modelo entrego un unico plano continuo donde el guion pedia cuatro, el estado final llego en el segundo 4,6 en vez de antes del 3, y el 69 % del clip (8,4 s de 12,1) no cambia. El bloque de planos en texto, por si solo, no produce cortes.",
+   "aplica_en": "seleccion",
+   "regla": "Las referencias de imagen y de video hacen trabajos distintos y ninguna sustituye a la otra: la imagen fija QUE es la cosa -silueta, proporciones, acabado- y el video fija COMO se cuenta -cortes, ritmo, duracion de cada plano, movimiento de camara-. Una pieza con varios planos necesita las dos. Si solo se puede adjuntar una, hay que decidir y decirlo: con solo imagen se obtiene un plano unico sostenido, y la estructura descrita en texto se ignora.",
+   "estado": "activa"
   }
  ],
  "_efecto": "Las enmiendas de ámbito «seleccion» llevan un efecto legible por máquina. El constructor lo aplica sin conocer el id: una regla nueva entra sola.",

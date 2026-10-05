@@ -223,8 +223,9 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
 
     lineas = []
     dur = duracion or ficha["duracion"]
-    lineas.append(f"{dur:.0f} second vertical {proporcion(ficha.get('proporcion', '9:16'))} "
-                  f"product video, {len(ficha['planos'])} shots, no on-screen text.")
+    # Se rellena al final, cuando el guion ya está reescrito: contar los planos
+    # de la ficha aquí daba una cabecera que contradecía la lista de abajo.
+    lineas.append(None)
     lineas.append("")
 
     # Las referencias ENTRAN en la generación; el prompt solo dice qué se toma de
@@ -335,6 +336,8 @@ def construir(ident, variante=None, semilla=0, excluir=(), duracion=None):
                 l = (tiempos[p][1] - tiempos[p][0]) / largo_resto * (dur - tope)
                 tiempos[p] = (round(t, 2), round(t + l, 2)); t += l
 
+    lineas[0] = (f"{dur:.0f} second vertical {proporcion(ficha.get('proporcion', '9:16'))} "
+                 f"product video, {len(guion)} shots, no on-screen text.")
     lineas.append("SHOTS:")
     for g in guion:
         p = next((x for x in ficha["planos"] if x["plano"] == g["plano"]), None)

@@ -1,12 +1,12 @@
-14 second vertical 9:16 product video, 9 shots, no on-screen text.
+14 second vertical 9:16 product video, 4 shots, no on-screen text.
 
 ANCHORS — what each attached reference is for:
-  @Video1 — take from it ONLY: the shot structure, the cutting rhythm, the camera framing, the hand choreography and the product itself.
-  @Video1 — do NOT take from it: the set decor, the printed text, the on-screen captions.
+  @Video1 — take from it ONLY: the shot structure, the cutting rhythm, the camera framing and the hand choreography.
+  @Video1 — do NOT take from it: the product, its finish, its proportions, the set decor, the printed text, the on-screen captions.
   @Image1 — is the PRODUCT itself. Its silhouette, its proportions, the length of every part and the relation between them are defined HERE and nowhere else. Every single shot must match it. Where the reference video and this image disagree about the product, this image wins.
 
 PRODUCT — identical in every single shot, this is what is being sold:
-a small matte black lampshade-shaped cap, a truncated cone that is WIDER AT THE BOTTOM than at the top - 14 cm tall and 12 cm across at its widest, which is its lower rim - with a flat luminous top face at the narrow end carrying a small round touch button at its centre, and a short cylindrical prong underneath that plugs into a bottle neck - same shape, same matte black finish, same proportions, same warm light colour when it turns on.
+a small matte black lampshade-shaped cap: a truncated cone that is WIDER AT THE BOTTOM than at the top, standing on a short cylindrical prong that plugs into a bottle neck. PROPORTIONS, measured from the product photo and not to be changed: the whole object is about 1.2 times as tall as it is wide; the cone is the upper three quarters of the height and the prong the lower quarter; the widest point is the cone's bottom rim; the flat top is a little over half as wide as that rim; the prong is about a third as wide as that rim. The flat top face is a single pale luminous disc covering the whole narrow end — not a dark lid with a small button — with a small round power symbol at its centre. Matte black with a faint fine texture, no gloss anywhere. Same shape, same proportions, same warm light colour when it turns on.
 
 SUPPORT — one bottle:
   [1] A real Don Julio 1942 anejo tequila bottle — a tall slender elongated clear glass bottle shaped like an agave leaf, narrowing gently towards a long neck, golden amber tequila inside, with an embossed body, a cream and gold label reading DON JULIO 1942 in elegant serif lettering.

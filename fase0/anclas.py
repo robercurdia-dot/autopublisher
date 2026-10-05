@@ -82,6 +82,17 @@ def papel_de(ident, variante=None, cat=None):
 
 
 def bloque(entradas):
+    # Dos anclas no pueden mandar sobre lo mismo. Si hay foto de producto, el
+    # vídeo aporta estructura y deja de aportar producto: su producto es otro
+    # ejemplar, y en cuanto discrepan el modelo se inventa un término medio.
+    if any(e.get("papel") == "producto" for e in entradas):
+        for e in entradas:
+            if e["clase"] == "video" and e.get("papel") == "directa":
+                e = e
+                entradas = [dict(x, papel="estructura")
+                            if x is e else x for x in entradas]
+                break
+
     """El bloque ANCHORS del prompt.
 
     `entradas` es la lista en el MISMO orden en que se adjuntan al proveedor,
