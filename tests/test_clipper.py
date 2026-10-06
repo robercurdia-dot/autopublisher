@@ -144,6 +144,20 @@ class TestClipper(unittest.TestCase):
         self.assertEqual(ac.x_recorte(0.0, 1920, 1080), 0)
         self.assertEqual(ac.x_recorte(1.0, 1920, 1080), int(1920 - 1080 * 9 / 16))
 
+    def test_el_origen_sobrevive_al_reprocesar(self):
+        d = Path(self.tmp.name) / "con_origen"
+        d.mkdir(exist_ok=True)
+        video = d / "original.mp4"
+        video.write_bytes(b"")
+        self.assertEqual(ac.leer_origen(video), {})
+        ac.guardar_origen(video, {"webpage_url": "https://youtu.be/x", "uploader": "alguien"})
+        self.assertEqual(ac.leer_origen(video)["uploader"], "alguien")
+
+    def test_metadatos_avisan_si_fallan(self):
+        from descargar import metadatos
+        with self.assertWarns(UserWarning):
+            self.assertEqual(metadatos("https://no-existe.invalid/video"), {})
+
     def test_pantalla_partida_mitades(self):
         d = Path(self.tmp.name)
         rojo = d / "fondo_rojo.mp4"

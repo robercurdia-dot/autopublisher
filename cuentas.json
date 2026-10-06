@@ -57,6 +57,16 @@
    "declaracion_ia": "casilla de contenido sintetico en Studio",
    "audio": "neutro",
    "pendiente": "el canal con sesion es personal (155 subs): hace falta canal de marca"
+  },
+  "youtube_clips": {
+   "canal": "ClipperZero",
+   "usuario": "@ClipperZero-d9b",
+   "id": "UCZjfgv3NmW68ikiMS1wlkrQ",
+   "url": "https://www.youtube.com/@ClipperZero-d9b",
+   "estado": "activa",
+   "via": "navegador (YouTube Studio)",
+   "contenido": "clips del autoclipper, no la marca",
+   "_nota": "Creado por Roberto el 6 oct 2026. Por navegador y no por API: los vídeos subidos con videos.insert desde un proyecto sin verificar quedan privados hasta pasar la auditoría de Google."
   }
  }
 }

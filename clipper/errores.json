@@ -110,6 +110,22 @@
    "causa": "Reutilizar un nombre de una letra dentro del bucle.",
    "arreglo": "La holgura tiene nombre propio (`margen`).",
    "test": "test_alto_del_video_no_se_pisa"
+  },
+  {
+   "id": "pierde_el_origen_al_reprocesar",
+   "fecha": "2026-10-06",
+   "evidencia": "Al preparar la primera subida a ClipperZero, el informe del Xokas tenía origen nulo: la última pasada se hizo sobre el original.mp4 local y no sobre el enlace. Sin origen no hay enlace al vídeo original para el crédito de la descripción.",
+   "causa": "Los metadatos de la plataforma solo vivían en memoria durante una pasada con enlace.",
+   "arreglo": "Al bajar, se guardan en origen.json junto al vídeo; al procesar un fichero local, se leen de ahí.",
+   "test": "test_el_origen_sobrevive_al_reprocesar"
+  },
+  {
+   "id": "metadatos_fallan_en_silencio",
+   "fecha": "2026-10-06",
+   "evidencia": "Al recuperar el origen del Xokas, metadatos() devolvió {} sin aviso. La causa real: YouTube pedía «Sign in to confirm you're not a bot», provocado por 135 peticiones en paralelo del estudio de fondos lanzadas desde esta misma IP.",
+   "causa": "Cualquier fallo de yt-dlp se convertía en un diccionario vacío.",
+   "arreglo": "Avisa con la última línea del error de yt-dlp. Y operativo: nada de ráfagas en paralelo contra YouTube; si hace falta leer muchos vídeos, en serie, con pausas, o con la sesión del navegador (--cookies-de chrome).",
+   "test": "test_metadatos_avisan_si_fallan"
   }
  ]
 }

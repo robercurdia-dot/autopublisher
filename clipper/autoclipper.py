@@ -79,6 +79,24 @@ UMBRAL_CARA = 0.35
 DETECTOR_CARAS = RAIZ / "modelos" / "yunet.onnx"
 
 
+# ------------------------------------------------------------------ origen
+
+def guardar_origen(video, meta):
+    """Los metadatos de la descarga, junto al vídeo: origen.json."""
+    Path(video).with_name("origen.json").write_text(
+        json.dumps(meta, indent=2, ensure_ascii=False, default=str))
+
+
+def leer_origen(video):
+    """El origen de un vídeo ya descargado, o {} si no se sabe.
+
+    Re-procesar el fichero local perdía de dónde salió: el informe quedaba
+    con origen nulo y el clip no podía llevar el crédito al vídeo original.
+    """
+    f = Path(video).with_name("origen.json")
+    return json.loads(f.read_text()) if f.exists() else {}
+
+
 # ---------------------------------------------------------------- medición
 
 def muestrear_imagen(ruta):
@@ -415,6 +433,8 @@ def main():
             print(f"bajando de {plataforma(a.entrada)}"
                   + (f" · @{meta['uploader']}" if meta.get("uploader") else "") + " …")
         ent = descargar(a.entrada, destino, a.cookies_de)
+        meta.setdefault("webpage_url", a.entrada)
+        guardar_origen(ent, meta)
         if not a.json and meta.get("view_count"):
             print(f"  {meta['view_count']:,} reproducciones · "
                   f"{(meta.get('like_count') or 0):,} likes\n")
@@ -422,6 +442,7 @@ def main():
         ent = Path(a.entrada)
         if not ent.exists():
             raise SystemExit(f"no existe: {ent}")
+        meta = leer_origen(ent)
 
     r = analizar(ent, a.cuantos, a.duracion)
     if not a.json:

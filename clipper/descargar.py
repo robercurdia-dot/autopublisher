@@ -14,6 +14,7 @@ Instagram y algunas plataformas piden sesión. Si falla por eso, se puede pasar
 
 import argparse
 import json
+import warnings
 import re
 import subprocess
 import sys
@@ -63,11 +64,14 @@ def metadatos(url, cookies_de=None):
     if cookies_de:
         cmd[1:1] = ["--cookies-from-browser", cookies_de]
     r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        return {}
     try:
-        d = json.loads(r.stdout)
+        d = json.loads(r.stdout) if r.returncode == 0 else None
     except json.JSONDecodeError:
+        d = None
+    if d is None:
+        # Antes devolvía {} sin decir nada, y el informe salía sin origen.
+        motivo = (r.stderr.strip().splitlines() or ["sin salida"])[-1][:300]
+        warnings.warn(f"sin metadatos de {url}: {motivo}", stacklevel=2)
         return {}
     return {k: d.get(k) for k in
             ("title", "uploader", "duration", "view_count", "like_count",
