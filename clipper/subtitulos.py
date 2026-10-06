@@ -40,6 +40,9 @@ PAUSA_FRASE = 0.35
 # Hasta dónde se puede mover el inicio o el fin de un clip para caer en una
 # pausa del habla.
 HOLGURA_CORTE = 3.0
+# El final puede adelantarse más: es mejor un clip unos segundos más corto que
+# uno que acaba a media frase o con el arranque de otra persona hablando.
+ATRAS_FIN = 8.0
 
 
 # ------------------------------------------------------------ transcripción
@@ -95,7 +98,7 @@ def pausas(palabras):
     return p
 
 
-def ajustar_cortes(ini, fin, palabras, holgura=HOLGURA_CORTE):
+def ajustar_cortes(ini, fin, palabras, holgura=HOLGURA_CORTE, atras_fin=ATRAS_FIN):
     """Lleva ini y fin a un límite de frase cercano, dentro de la holgura.
 
     Manda la PUNTUACIÓN: whisper da los tiempos de palabra pegados unos a otros
@@ -104,23 +107,33 @@ def ajustar_cortes(ini, fin, palabras, holgura=HOLGURA_CORTE):
     había, cortaba en la palabra más cercana: un clip arrancó con «7.», el
     final de la frase anterior. Ver clipper/errores.json.
 
-    Orden de preferencia: tras un punto (. ! ? …), tras una coma o similar, y
-    si no hay ninguna, entre dos palabras. Si nadie habla cerca, no lo toca.
+    El inicio busca a ±holgura: tras un punto (. ! ? …), si no tras una coma.
+    El final SOLO acepta un cierre de frase, y lo busca hasta atras_fin antes
+    del corte. Si no hay ninguno, entre dos palabras. Si nadie habla cerca, no
+    lo toca.
     """
     if not palabras:
         return ini, fin
 
-    def mejor(objetivo):
+    def mejor(objetivo, antes_max, despues_max, niveles):
         opciones = []
         for i, t in enumerate(pausas(palabras)):
-            if abs(t - objetivo) > holgura:
+            if not objetivo - antes_max <= t <= objetivo + despues_max:
                 continue
-            antes = palabras[i - 1]["t"] if i > 0 else "."
-            nivel = 0 if re.search(r"[.!?…]$", antes) else 1 if re.search(r"[,;:]$", antes) else 2
-            opciones.append((nivel, abs(t - objetivo), t))
-        return min(opciones)[2] if opciones else objetivo
+            previa = palabras[i - 1]["t"] if i > 0 else "."
+            nivel = 0 if re.search(r"[.!?…]$", previa) else 1 if re.search(r"[,;:]$", previa) else 2
+            if nivel in niveles:
+                opciones.append((nivel, abs(t - objetivo), t))
+        if opciones:
+            return min(opciones)[2]
+        # Sin cierre a mano: al menos entre dos palabras, cerca del corte.
+        cerca = [t for t in pausas(palabras) if abs(t - objetivo) <= holgura]
+        return min(cerca, key=lambda t: abs(t - objetivo)) if cerca else objetivo
 
-    nuevo_ini, nuevo_fin = mejor(ini), mejor(fin)
+    # Empezar tras una coma vale (arranca una cláusula); ACABAR en una coma
+    # deja la idea colgando: en el Xokas, dos de tres clips terminaron así.
+    nuevo_ini = mejor(ini, holgura, holgura, (0, 1))
+    nuevo_fin = mejor(fin, atras_fin, holgura, (0,))
     if nuevo_fin - nuevo_ini < (fin - ini) * 0.7:
         return ini, fin
     return round(nuevo_ini, 2), round(nuevo_fin, 2)

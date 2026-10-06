@@ -80,6 +80,19 @@ class TestLogica(unittest.TestCase):
         self.assertIn(round(ini, 2), (752.56, 753.78))
         self.assertEqual(round(ini, 2), 753.78, "el punto más cercano")
 
+    def test_final_en_cierre_de_frase_aunque_este_lejos(self):
+        # Caso del Xokas: el remate acaba 7 s antes del corte, luego habla otro
+        # y la frase más cercana al corte termina en coma.
+        x = pal(("ya", 758.5, 758.8), ("no", 758.8, 759.0), ("se", 759.0, 759.2), ("la", 759.2, 759.4),
+                ("coláis.", 759.4, 760.0), ("Tenemos", 761.0, 761.5), ("dos", 761.5, 761.8),
+                ("consideraciones", 761.8, 762.6), ("previas,", 762.6, 763.5), ("agradecer", 763.5, 764.2),
+                ("la", 764.2, 764.4), ("cooperación", 764.4, 765.5), ("aquí", 765.5, 768.2),
+                ("presente,", 768.2, 769.0), ("institucional", 769.0, 770.0))
+        _, fin = st.ajustar_cortes(738.0, 768.4, x)
+        self.assertAlmostEqual(fin, 760.5, places=1)
+        anterior = [p for p in x if p["fin"] <= fin + 0.01][-1]["t"]
+        self.assertFalse(anterior.endswith(","), "acaba en coma")
+
     def test_ninguna_frase_pasa_de_una_linea(self):
         largas = pal(("película", 0, 0.5), ("de", 0.5, 0.6), ("Interestral", 0.6, 1.2),
                      ("extraordinariamente", 1.2, 2.0), ("bien", 2.0, 2.3))

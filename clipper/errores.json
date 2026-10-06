@@ -65,7 +65,7 @@
    "causa": "El ajuste del corte puntuaba los silencios entre palabras, y whisper no los da: el criterio estaba muerto y decidía solo la distancia, así que se cortaba en la palabra más cercana.",
    "arreglo": "Manda la puntuación: primero tras un punto, luego tras una coma, y solo si no hay ninguna, entre dos palabras. Límite honesto: si el que habla no cierra una frase en ±3 s del corte, el clip sigue empezando a mitad de idea.",
    "test": "test_corte_tras_el_punto_con_tiempos_pegados",
-   "pendiente": "Segunda tirada: mejor, no resuelto. Whisper puntúa distinto según la ventana que transcribe («7.» en una, «7» en otra), así que el clip 3 empezó en «La del Mewtwo», la respuesta a un «¿Cuál?» que quedó fuera. Y el clip 2 terminó en «en plan,» y perdió el remate: una coma sirve para empezar pero no para acabar. Siguiente paso si molesta: que el final solo acepte cierre de frase y prefiera alargar a recortar."
+   "pendiente": "Segunda tirada: mejor, no resuelto. Whisper puntúa distinto según la ventana que transcribe («7.» en una, «7» en otra), así que el clip 3 empezó en «La del Mewtwo», la respuesta a un «¿Cuál?» que quedó fuera. Y el clip 2 terminó en «en plan,» y perdió el remate: una coma sirve para empezar pero no para acabar. Siguiente paso si molesta: que el final solo acepte cierre de frase y prefiera alargar a recortar. Repetido en el Xokas: clip 3 arranca en «a más de medio millón de inmigrantes irregulares,»."
   },
   {
    "id": "rotulo_en_dos_lineas",
@@ -84,6 +84,16 @@
    "causa": "ffmpeg-full es keg-only y no reemplaza al otro, pero comparte dependencias: al subir una, la versión antigua de ffmpeg quedó enlazada a una librería que ya no existía.",
    "arreglo": "brew upgrade ffmpeg (9.0.2). Y un test que arranca los dos ffmpeg y comprueba que cada uno tiene lo que la cadena le pide: libx264 en ambos y libass en el completo.",
    "test": "test_los_dos_ffmpeg_arrancan"
+  },
+  {
+   "id": "acaba_en_coma_o_en_otra_voz",
+   "modulo": "subtitulos",
+   "fecha": "2026-10-06",
+   "evidencia": "Pasada sobre el Xokas (eDLjgDzmx0Y, Ceuta). Clip 1 acabó en «…el espigón de Tarajal,». Clip 2 acabó metiendo 8 s de OTRA persona (un político: «Tenemos dos consideraciones previas… aquí presente,») tras el remate del Xokas («…ya no se la coláis.»). Ya había pasado en Rubius («en plan,»). Los dos cierres buenos estaban 6-8 s antes del corte, fuera de los ±3 s que se miraban.",
+   "causa": "El final se trataba igual que el inicio: aceptaba una coma y solo buscaba a ±3 s.",
+   "arreglo": "El final solo acepta un cierre de frase (. ! ? …) y lo busca hasta 8 s antes del corte (y 3 después). Es preferible un clip algo más corto. Inicio sin cambios.",
+   "test": "test_final_en_cierre_de_frase_aunque_este_lejos",
+   "pendiente": "Tras el arreglo: clip 1 acaba en «…otras oportunidades.» y clip 3 en «…a Pedrito.». El clip 2 aún arrastra 3 s del político («Tenemos dos consideraciones previas.») porque whisper le puso punto y la transcripción no sabe quién habla. Separarlo exige distinguir voces (diarización), que no tenemos."
   }
  ]
 }
