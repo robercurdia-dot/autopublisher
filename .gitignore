@@ -41,3 +41,7 @@ assets/musica/*.wav
 
 # modelos de whisper (1,6 GB, se bajan de Hugging Face)
 clipper/modelos/
+
+# trabajos del motor (registros locales)
+motor/trabajos/
+motor/suite/autopublisher_suite.html
