@@ -94,6 +94,22 @@
    "arreglo": "El final solo acepta un cierre de frase (. ! ? …) y lo busca hasta 8 s antes del corte (y 3 después). Es preferible un clip algo más corto. Inicio sin cambios.",
    "test": "test_final_en_cierre_de_frase_aunque_este_lejos",
    "pendiente": "Tras el arreglo: clip 1 acaba en «…otras oportunidades.» y clip 3 en «…a Pedrito.». El clip 2 aún arrastra 3 s del político («Tenemos dos consideraciones previas.») porque whisper le puso punto y la transcripción no sabe quién habla. Separarlo exige distinguir voces (diarización), que no tenemos."
+  },
+  {
+   "id": "cabeza_parlante_en_completo",
+   "fecha": "2026-10-06",
+   "evidencia": "Pasada sobre el Xokas: en los clips a cámara su cara salía pequeña en una franja central, con dos tercios de la pantalla de fondo desenfocado. El detector de laterales confundió las estanterías de su cuarto con información (227 % del detalle del centro).",
+   "causa": "El encuadre solo miraba el detalle de los laterales; no sabía si había alguien hablando a cámara.",
+   "arreglo": "Antes que nada se buscan caras (YuNet de OpenCV, en local). Si una cara ocupa al menos el 35 % del alto en 3 de 5 fotogramas, se recorta a 9:16 centrado en ella. La webcam de esquina sobre un tuit (20 %) no cuenta: ahí sigue mandando el detector de laterales.",
+   "test": "test_a_camara_se_recorta_sobre_la_cara"
+  },
+  {
+   "id": "alto_pisado_por_holgura",
+   "fecha": "2026-10-06",
+   "evidencia": "Leyendo el bucle al añadir la pantalla partida: la holgura de los subtítulos se guardaba en `h`, la misma variable que el alto del vídeo. Desde el segundo clip, `w > h` comparaba el ancho con 4: un vídeo vertical se habría reencuadrado como si fuera horizontal. No llegó a pasar porque todas las pruebas eran horizontales.",
+   "causa": "Reutilizar un nombre de una letra dentro del bucle.",
+   "arreglo": "La holgura tiene nombre propio (`margen`).",
+   "test": "test_alto_del_video_no_se_pisa"
   }
  ]
 }

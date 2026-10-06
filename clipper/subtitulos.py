@@ -214,7 +214,8 @@ def ass(palabras, desplazamiento=0.0, ancho=1080, alto=1920, estilo=ESTILO):
         "Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, "
         "MarginV, Encoding\n"
         f"Style: Base,{e['fuente']},{e['tam']},{e['blanco']},{e['blanco']},&H00000000,"
-        f"&H64000000,-1,0,0,0,100,100,0,0,1,{e['borde']},3,2,60,60,{e['margen_v']},1\n\n"
+        f"&H64000000,-1,0,0,0,100,100,0,0,1,{e['borde']},3,{e.get('alineacion', 2)},60,60,"
+        f"{e['margen_v']},1\n\n"
         "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, "
         "Effect, Text\n")
     lineas = []

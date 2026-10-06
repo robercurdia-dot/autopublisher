@@ -72,6 +72,11 @@ MUESTREO = 4
 # fracción del detalle del centro, ahí hay algo (un rótulo, información) y se
 # encuadra completo en vez de recortar.
 UMBRAL_LATERALES = 0.55
+# Una cara que ocupa al menos esta fracción del alto es alguien hablando a
+# cámara: se recorta sobre ella. Medido en el Xokas: a cámara 0,54-0,60; su
+# webcam en una esquina sobre un tuit, 0,20.
+UMBRAL_CARA = 0.35
+DETECTOR_CARAS = RAIZ / "modelos" / "yunet.onnx"
 
 
 # ---------------------------------------------------------------- medición
@@ -249,19 +254,94 @@ def detalle_laterales(fotograma):
     return float(max(lados) / referencia)
 
 
+def fotograma(ruta, t, ancho=640, alto=360, formato="bgr24"):
+    r = subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-ss", f"{t:.2f}", "-i", str(ruta),
+                        "-frames:v", "1", "-vf", f"scale={ancho}:{alto}", "-f", "rawvideo",
+                        "-pix_fmt", formato, "-"], capture_output=True)
+    canales = 3 if formato == "bgr24" else 1
+    if len(r.stdout) != ancho * alto * canales:
+        return None
+    return np.frombuffer(r.stdout, dtype=np.uint8).reshape(alto, ancho, canales).squeeze()
+
+
+def caras(ruta, ini, fin, n=5):
+    """La cara más grande de n fotogramas del tramo: [(centro_x, alto)], relativos.
+
+    Fotograma sin cara: no aparece en la lista.
+    """
+    if not DETECTOR_CARAS.exists():
+        return None
+    import cv2
+    det = cv2.FaceDetectorYN.create(str(DETECTOR_CARAS), "", (640, 360), 0.7)
+    r = []
+    for t in np.linspace(ini + 0.5, fin - 0.5, n):
+        img = fotograma(ruta, t)
+        if img is None:
+            continue
+        _, f = det.detect(img)
+        if f is not None and len(f):
+            x, _, w, h = max(f, key=lambda c: c[3])[:4]
+            r.append(((x + w / 2) / 640, h / 360))
+    return r
+
+
+def es_a_camara(lista, n=5):
+    """Alguien hablando a cámara: cara grande en la mayoría de los fotogramas."""
+    grandes = [c for c in (lista or []) if c[1] >= UMBRAL_CARA]
+    return len(grandes) >= max(2, int(n * 0.6))
+
+
 def decidir_encuadre(ruta, ini, fin):
-    """recorte o completo, mirando tres fotogramas del tramo."""
+    """(encuadre, detalle_laterales, centro_x de la cara o None).
+
+    Primero la cara: si alguien habla a cámara, se recorta sobre él aunque el
+    fondo tenga detalle. La versión anterior solo medía detalle en los
+    laterales y confundía las estanterías del cuarto del Xokas con
+    información: su cara salía pequeña en una franja central.
+    """
+    lista = caras(ruta, ini, fin)
+    if es_a_camara(lista):
+        cx = float(np.median([c[0] for c in lista if c[1] >= UMBRAL_CARA]))
+        return "cara", None, round(cx, 3)
     ratios = []
     for t in np.linspace(ini + 0.5, fin - 0.5, 3):
-        r = subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-ss", f"{t:.2f}",
-                            "-i", str(ruta), "-frames:v", "1", "-vf",
-                            "scale=320:180,format=gray", "-f", "rawvideo", "-"],
-                           capture_output=True)
-        if len(r.stdout) == 320 * 180:
-            ratios.append(detalle_laterales(
-                np.frombuffer(r.stdout, dtype=np.uint8).reshape(180, 320)))
+        g = fotograma(ruta, t, 320, 180, "gray")
+        if g is not None:
+            ratios.append(detalle_laterales(g))
     ratio = max(ratios) if ratios else 0.0
-    return ("completo" if ratio >= UMBRAL_LATERALES else "recorte"), round(ratio, 2)
+    return ("completo" if ratio >= UMBRAL_LATERALES else "recorte"), round(ratio, 2), None
+
+
+def x_recorte(cx, w, h, ancho_rel=9 / 16):
+    """Píxel izquierdo de un recorte de ancho h*ancho_rel centrado en cx (0..1), sin salirse."""
+    ancho = h * ancho_rel
+    return int(min(max(cx * w - ancho / 2, 0), w - ancho))
+
+
+def filtro(encuadre, w, h, cx=None, con_fondo=False):
+    """filter_complex que deja el vídeo en [v].
+
+    con_fondo: pantalla partida. Arriba el clip (sobre la cara si hay, o
+    entero sobre su propio desenfoque si es una pantalla con información),
+    abajo el vídeo de fondo [1:v] sin su sonido.
+    """
+    if not con_fondo:
+        if encuadre == "cara":
+            return (f"[0:v]crop=ih*9/16:ih:{x_recorte(cx, w, h)}:0,"
+                    "scale=1080:1920:flags=lanczos[v]")
+        if encuadre:
+            return f"[0:v]{FILTROS[encuadre]}[v]"
+        return "[0:v]null[v]"
+    if encuadre == "cara":
+        arriba = (f"[0:v]crop=ih*9/8:ih:{x_recorte(cx, w, h, 9 / 8)}:0,"
+                  "scale=1080:960:flags=lanczos[arriba]")
+    else:
+        arriba = ("[0:v]split[a][b];[a]scale=1080:960:force_original_aspect_ratio=increase,"
+                  "crop=1080:960,boxblur=20:2[fa];[b]scale=1080:960:force_original_aspect_ratio=decrease"
+                  "[pa];[fa][pa]overlay=(W-w)/2:(H-h)/2[arriba]")
+    abajo = ("[1:v]scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960,"
+             "setsar=1[abajo]")
+    return f"{arriba};{abajo};[arriba][abajo]vstack,setsar=1[v]"
 
 
 FILTROS = {
@@ -274,12 +354,20 @@ FILTROS = {
 }
 
 
-def cortar(entrada, ini, fin, destino, encuadre=None):
-    """Corte preciso. encuadre: None (original), 'recorte' o 'completo'."""
-    vf = ["-vf", FILTROS[encuadre]] if encuadre else []
+def cortar(entrada, ini, fin, destino, encuadre=None, cx=None, fondo=None, fondo_ini=0.0):
+    """Corte preciso. encuadre: None (original), 'recorte', 'completo' o 'cara'.
+
+    fondo: vídeo para la mitad de abajo (pantalla partida), desde fondo_ini.
+    Se repite si es más corto que el clip. Su audio se descarta.
+    """
+    w, h = medidas(entrada)
+    entradas = ["-ss", f"{max(0, ini - 2):.2f}", "-i", str(entrada)]
+    if fondo:
+        entradas += ["-stream_loop", "-1", "-ss", f"{fondo_ini:.2f}", "-i", str(fondo)]
     subprocess.run(
-        ["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", f"{max(0, ini - 2):.2f}",
-         "-i", str(entrada), "-ss", f"{min(ini, 2):.2f}", "-t", f"{fin - ini:.2f}", *vf,
+        ["ffmpeg", "-nostdin", "-v", "error", "-y", *entradas,
+         "-ss", f"{min(ini, 2):.2f}", "-t", f"{fin - ini:.2f}",
+         "-filter_complex", filtro(encuadre, w, h, cx, bool(fondo)), "-map", "[v]", "-map", "0:a?",
          "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-movflags", "+faststart", str(destino)], check=True)
 
@@ -298,8 +386,11 @@ def main():
     ap.add_argument("--solo-analizar", action="store_true", help="puntúa y no corta")
     ap.add_argument("--encuadre", choices=("auto", "recorte", "completo", "original"),
                     default="auto",
-                    help="auto: vertical si la fuente es horizontal, recortando salvo que "
-                         "los laterales tengan información")
+                    help="auto: vertical si la fuente es horizontal; sobre la cara si alguien "
+                         "habla a cámara, entero si los laterales tienen información")
+    ap.add_argument("--fondo", default=None,
+                    help="vídeo para la mitad de abajo: además de cada clip, saca su versión "
+                         "en pantalla partida (clipN_fondo.mp4), para comparar las dos")
     ap.add_argument("--sin-subtitulos", action="store_true",
                     help="no transcribir ni quemar subtítulos")
     ap.add_argument("--vocabulario", default=None,
@@ -352,42 +443,68 @@ def main():
             # No se salta en silencio: se dice qué falta.
             print("  aviso: sin subtítulos — falta el modelo de whisper o ffmpeg-full")
             subtitular = False
+        fondo = Path(a.fondo) if a.fondo else None
+        if fondo and not fondo.exists():
+            raise SystemExit(f"no existe el fondo: {fondo}")
+        dur_fondo = datos_video(fondo)["duracion"] if fondo else 0.0
         for i, c in enumerate(r["clips"], 1):
-            enc = None
+            enc, cx = None, None
             if a.encuadre in ("recorte", "completo"):
                 enc = a.encuadre
             elif a.encuadre == "auto" and w > h:
-                enc, ratio = decidir_encuadre(ent, c["ini"], c["fin"])
-                c["detalle_laterales"] = ratio
+                enc, ratio, cx = decidir_encuadre(ent, c["ini"], c["fin"])
+                if ratio is not None:
+                    c["detalle_laterales"] = ratio
+                if cx is not None:
+                    c["cara_x"] = cx
             c["encuadre"] = enc or "original"
             palabras = []
             if subtitular:
                 # Se transcribe con margen para poder mover los cortes a una
                 # pausa del habla: un clip que empieza a media palabra suena roto.
-                h = subtitulos.HOLGURA_CORTE + 1
-                palabras = subtitulos.transcribir(ent, max(0.0, c["ini"] - h),
-                                                  min(r["duracion_fuente"], c["fin"] + h),
+                margen = subtitulos.ATRAS_FIN + 1
+                palabras = subtitulos.transcribir(ent, max(0.0, c["ini"] - margen),
+                                                  min(r["duracion_fuente"], c["fin"] + margen),
                                                   vocabulario=a.vocabulario)
                 c["ini_medido"], c["fin_medido"] = c["ini"], c["fin"]
                 c["ini"], c["fin"] = subtitulos.ajustar_cortes(c["ini"], c["fin"], palabras)
                 palabras = [p for p in palabras if p["fin"] > c["ini"] and p["ini"] < c["fin"]]
                 c["texto"] = " ".join(p["t"] for p in palabras)
-            sal = destino / f"clip{i}_{c['ini']:.0f}-{c['fin']:.0f}s.mp4"
-            if palabras:
-                crudo = destino / f".clip{i}_sin_sub.mp4"
-                cortar(ent, c["ini"], c["fin"], crudo, enc)
-                w_sal, h_sal = medidas(crudo)
-                subtitulos.quemar(crudo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal), sal)
-                crudo.unlink()
-            else:
-                cortar(ent, c["ini"], c["fin"], sal, enc)
+
+            versiones = [("", None)]
+            if fondo:
+                # Mismo clip, mismo corte, mismos subtítulos: la única diferencia
+                # entre las dos versiones es el fondo. Cada clip toma un tramo
+                # distinto del fondo para que no se repita entre clips.
+                largo = c["fin"] - c["ini"]
+                ini_fondo = (i - 1) * largo % max(1.0, dur_fondo - largo) if dur_fondo > largo else 0.0
+                versiones.append(("_fondo", ini_fondo))
+            c["archivos"] = []
+            for sufijo, ini_fondo in versiones:
+                sal = destino / f"clip{i}_{c['ini']:.0f}-{c['fin']:.0f}s{sufijo}.mp4"
+                args = dict(encuadre=enc, cx=cx, fondo=fondo if sufijo else None,
+                            fondo_ini=ini_fondo or 0.0)
+                if palabras:
+                    crudo = destino / f".clip{i}{sufijo}_sin_sub.mp4"
+                    cortar(ent, c["ini"], c["fin"], crudo, **args)
+                    w_sal, h_sal = medidas(crudo)
+                    # En pantalla partida, el rótulo va en la costura entre las
+                    # dos mitades: no tapa la cara ni el juego.
+                    estilo = dict(subtitulos.ESTILO, alineacion=5, margen_v=0) if sufijo \
+                        else subtitulos.ESTILO
+                    subtitulos.quemar(crudo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal,
+                                                            estilo), sal)
+                    crudo.unlink()
+                else:
+                    cortar(ent, c["ini"], c["fin"], sal, **args)
+                c["archivos"].append(str(sal))
             c["subtitulos"] = bool(palabras)
-            c["archivo"] = str(sal)
             if not a.json:
                 print(f"  clip{i}: {c['encuadre']}"
                       + (f" (laterales al {c['detalle_laterales']:.0%} del centro)"
                          if "detalle_laterales" in c else "")
-                      + (f" · {len(palabras)} palabras subtituladas" if palabras else ""))
+                      + (f" · {len(palabras)} palabras subtituladas" if palabras else "")
+                      + (" · con y sin fondo" if fondo else ""))
         (destino / "informe.json").write_text(json.dumps(
             {"origen": meta or None, "fuente": str(ent), **r},
             indent=2, ensure_ascii=False, default=float))

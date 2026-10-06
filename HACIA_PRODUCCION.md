@@ -86,7 +86,7 @@ Lo que habría que resolver para que el sistema corriera en un servidor.
 | **Credenciales** | En ficheros locales | Gestor de secretos del servidor |
 | **Entorno de Python** | Frágil: `brew install yt-dlp` metió un Python que tapó al del sistema y rompió los scripts el 5 oct | Un entorno virtual propio del proyecto, fijado |
 | **ffmpeg** | Hay dos: el normal (sin `drawtext` ni libass; los rótulos se pintan con PIL) y `ffmpeg-full` solo para subtítulos. Comparten dependencias de Homebrew: instalar uno rompió el otro el 6 oct (`test_los_dos_ffmpeg_arrancan` lo vigila) | Fijar versiones en el servidor |
-| **Modelo de whisper** | 1,6 GB en `clipper/modelos/`, fuera del repo | Bajarlo en la instalación |
+| **Modelos** | whisper (1,6 GB) y el detector de caras YuNet (230 KB) en `clipper/modelos/`, fuera del repo; OpenCV instalado con pip en el Python de Homebrew | Bajarlos en la instalación |
 
 ---
 

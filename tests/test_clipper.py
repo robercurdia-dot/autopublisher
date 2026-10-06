@@ -133,6 +133,49 @@ class TestClipper(unittest.TestCase):
         self.assertEqual(self.r["duracion_clip"], ac.DURACION_LARGA)
         self.assertEqual(ac.analizar(self.corto, cuantos=1)["duracion_clip"], ac.DURACION_CORTA)
 
+    def test_a_camara_se_recorta_sobre_la_cara(self):
+        # Medidas reales del Xokas: a cámara la cara ocupa 0,54-0,60 del alto;
+        # su webcam en la esquina de un tuit, 0,20.
+        self.assertTrue(ac.es_a_camara([(0.59, 0.60), (0.56, 0.54), (0.52, 0.56), (0.53, 0.6), (0.5, 0.58)]))
+        self.assertFalse(ac.es_a_camara([(0.85, 0.22), (0.81, 0.20), (0.84, 0.21)]))
+        self.assertFalse(ac.es_a_camara([(0.5, 0.6)]), "una cara suelta no es alguien hablando")
+        # El recorte sigue a la cara y nunca se sale del plano.
+        self.assertEqual(ac.x_recorte(0.5, 1920, 1080), int(960 - 1080 * 9 / 32))
+        self.assertEqual(ac.x_recorte(0.0, 1920, 1080), 0)
+        self.assertEqual(ac.x_recorte(1.0, 1920, 1080), int(1920 - 1080 * 9 / 16))
+
+    def test_pantalla_partida_mitades(self):
+        d = Path(self.tmp.name)
+        rojo = d / "fondo_rojo.mp4"
+        subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i",
+                        "color=c=red:s=320x180:r=10:d=5", "-c:v", "libx264", "-pix_fmt",
+                        "yuv420p", str(rojo)], check=True)
+        sal = d / "partido.mp4"
+        ac.cortar(self.largo, 60, 66, sal, "completo", fondo=rojo)
+        self.assertEqual(ac.medidas(sal), (1080, 1920))
+        r = subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-ss", "2", "-i", str(sal),
+                            "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+                           capture_output=True, check=True)
+        img = np.frombuffer(r.stdout, dtype=np.uint8).reshape(1920, 1080, 3).astype(int)
+        abajo, arriba = img[1100:1900].mean(axis=(0, 1)), img[100:860].mean(axis=(0, 1))
+        self.assertGreater(abajo[0] - abajo[1], 150, "la mitad de abajo no es el fondo")
+        self.assertLess(abs(arriba[0] - arriba[1]), 40, "el fondo se ha colado arriba")
+
+    @unittest.skipUnless((REPO / "clipper" / "modelos" / "ggml-large-v3-turbo.bin").exists(),
+                         "falta el modelo de whisper")
+    def test_alto_del_video_no_se_pisa(self):
+        d = Path(self.tmp.name)
+        vertical = generar(d / "vertical.mp4", 60, "90+60*between(Y,mod(T*20,320)-8,mod(T*20,320)+8)",
+                           "0.2*sin(2*PI*440*t)*(1+between(t,40,44))", "180x320")
+        salida = d / "vertical_clips"
+        subprocess.run([sys.executable, str(REPO / "clipper" / "autoclipper.py"), str(vertical),
+                        "--cuantos", "3", "--duracion", "8", "--salida", str(salida)],
+                       check=True, capture_output=True)
+        clips = json.loads((salida / "informe.json").read_text())["clips"]
+        self.assertGreater(len(clips), 1)
+        self.assertEqual({c["encuadre"] for c in clips}, {"original"},
+                         "un vídeo vertical se ha reencuadrado")
+
 
 if __name__ == "__main__":
     unittest.main()
