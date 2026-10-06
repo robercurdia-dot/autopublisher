@@ -38,3 +38,6 @@ assets/musica/*.mp4
 assets/musica/*.mp3
 assets/musica/*.m4a
 assets/musica/*.wav
+
+# modelos de whisper (1,6 GB, se bajan de Hugging Face)
+clipper/modelos/

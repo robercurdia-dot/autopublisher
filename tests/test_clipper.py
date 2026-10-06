@@ -8,6 +8,7 @@ qué hay en los laterales, y el resultado no depende de la red.
 """
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -64,7 +65,9 @@ class TestClipper(unittest.TestCase):
 
     def test_cada_error_tiene_su_test(self):
         """Un error sin test no está arreglado, solo anotado."""
-        definidos = {n for n in dir(self) if n.startswith("test_")}
+        # En cualquier fichero de tests: los de subtítulos viven en test_subtitulos.py.
+        fuentes = " ".join(f.read_text() for f in (REPO / "tests").glob("test_*.py"))
+        definidos = set(re.findall(r"def (test_\w+)\(", fuentes))
         for e in ERRORES:
             self.assertIn(e["test"], definidos, f"el error «{e['id']}» no tiene test")
 

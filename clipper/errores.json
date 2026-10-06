@@ -56,6 +56,34 @@
    "causa": "Un parámetro tratado como criterio.",
    "arreglo": "La duración es un parámetro de la búsqueda, no una señal. Por defecto 14 s en fuentes cortas (medido en el nicho de producto) y 30 s en fuentes largas (convención de Shorts de charla, no medida por nosotros).",
    "test": "test_ningun_criterio_es_constante"
+  },
+  {
+   "id": "empieza_a_media_frase",
+   "modulo": "subtitulos",
+   "fecha": "2026-10-06",
+   "evidencia": "Primera tirada con subtítulos sobre el vídeo de Rubius. El clip 3 arrancó con «7.», el final de «Este es el número 7.», y el clip 1 con «promo de un montón…». Al mirar los tiempos: whisper con un segmento por palabra los da pegados, todos los huecos a 0,00 s.",
+   "causa": "El ajuste del corte puntuaba los silencios entre palabras, y whisper no los da: el criterio estaba muerto y decidía solo la distancia, así que se cortaba en la palabra más cercana.",
+   "arreglo": "Manda la puntuación: primero tras un punto, luego tras una coma, y solo si no hay ninguna, entre dos palabras. Límite honesto: si el que habla no cierra una frase en ±3 s del corte, el clip sigue empezando a mitad de idea.",
+   "test": "test_corte_tras_el_punto_con_tiempos_pegados",
+   "pendiente": "Segunda tirada: mejor, no resuelto. Whisper puntúa distinto según la ventana que transcribe («7.» en una, «7» en otra), así que el clip 3 empezó en «La del Mewtwo», la respuesta a un «¿Cuál?» que quedó fuera. Y el clip 2 terminó en «en plan,» y perdió el remate: una coma sirve para empezar pero no para acabar. Siguiente paso si molesta: que el final solo acepte cierre de frase y prefiera alargar a recortar."
+  },
+  {
+   "id": "rotulo_en_dos_lineas",
+   "modulo": "subtitulos",
+   "fecha": "2026-10-06",
+   "evidencia": "«PELÍCULA DE INTERESTRAL» (23 letras) salió en dos líneas en el clip 3 y la segunda invadió el plano.",
+   "causa": "Las frases se repartían por número de palabras; el límite de letras solo se miraba para el tramo entero, no para cada trozo.",
+   "arreglo": "Se sigue partiendo mientras algún trozo pase de 18 letras (lo que cabe en una línea a ese tamaño). Una palabra sola que no quepa es el único caso que puede partir.",
+   "test": "test_ninguna_frase_pasa_de_una_linea"
+  },
+  {
+   "id": "ffmpeg_roto_por_dependencia",
+   "modulo": "subtitulos",
+   "fecha": "2026-10-06",
+   "evidencia": "Al instalar ffmpeg-full, Homebrew actualizó x265 y el ffmpeg normal (8.1.2) dejó de arrancar: «Library not loaded: libx265.216.dylib». Toda la cadena (clipper, verificar_salida, publicar_clip) depende de él. Se había afirmado que ffmpeg-full se instalaba al lado sin riesgo.",
+   "causa": "ffmpeg-full es keg-only y no reemplaza al otro, pero comparte dependencias: al subir una, la versión antigua de ffmpeg quedó enlazada a una librería que ya no existía.",
+   "arreglo": "brew upgrade ffmpeg (9.0.2). Y un test que arranca los dos ffmpeg y comprueba que cada uno tiene lo que la cadena le pide: libx264 en ambos y libass en el completo.",
+   "test": "test_los_dos_ffmpeg_arrancan"
   }
  ]
 }

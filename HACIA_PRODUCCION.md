@@ -27,6 +27,7 @@ Para no volver a discutir lo que está resuelto:
 | El producto derivaba de forma entre planos | Invariante corregido (estaba invertido) y medido en píxeles sobre la foto de estudio |
 | Las piezas salían sin gancho | `quemar_gancho.py`, paso obligatorio de la cadena |
 | Se copiaba la forma de cuentas con la audiencia muerta | `auditar_cuenta.py` las separa antes de tomarlas como modelo |
+| El clipper no entendía lo que se decía ni subtitulaba | `whisper.cpp` en local (modelo large-v3-turbo, ~5 s por clip con la GPU) + subtítulos animados palabra a palabra con `ffmpeg-full` (libass). Los cortes se mueven a final de frase |
 
 ---
 
@@ -84,7 +85,8 @@ Lo que habría que resolver para que el sistema corriera en un servidor.
 | **Generar por el board de Flashboards** | Necesita una pestaña viva; sin ella solo hay vía sin pestaña, que **no acepta vídeo de referencia** | Pasar la generación a fal, que es HTTP puro |
 | **Credenciales** | En ficheros locales | Gestor de secretos del servidor |
 | **Entorno de Python** | Frágil: `brew install yt-dlp` metió un Python que tapó al del sistema y rompió los scripts el 5 oct | Un entorno virtual propio del proyecto, fijado |
-| **ffmpeg** | Esta build no trae `drawtext`; los rótulos se pintan con PIL y se superponen | Funciona igual en un servidor, pero hay que replicar la instalación |
+| **ffmpeg** | Hay dos: el normal (sin `drawtext` ni libass; los rótulos se pintan con PIL) y `ffmpeg-full` solo para subtítulos. Comparten dependencias de Homebrew: instalar uno rompió el otro el 6 oct (`test_los_dos_ffmpeg_arrancan` lo vigila) | Fijar versiones en el servidor |
+| **Modelo de whisper** | 1,6 GB en `clipper/modelos/`, fuera del repo | Bajarlo en la instalación |
 
 ---
 
@@ -103,9 +105,9 @@ Por orden de lo que desbloquean.
    - **renovación del token de Instagram** (`publicar/renovar_token_ig.py`). Ojo: el script
      renueva *cuando se ejecuta* y quedan menos de 15 días, pero **nada lo ejecuta solo**.
      Si nadie lo lanza antes del 29 de noviembre, la publicación en Instagram se cae.
-5. **Transcripción** con `whisper.cpp` en local. Daría al autoclipper una quinta señal para
-   vídeos con habla y permitiría subtítulos automáticos. Hoy el clipper puntúa solo por imagen
-   y ritmo, así que elegiría mal en un pódcast.
+5. **La transcripción como señal para elegir.** Ya se transcribe cada clip (subtítulos y
+   cortes en final de frase), pero la ELECCIÓN de clips sigue sin leer lo que se dice: puntúa
+   por audio, imagen y ritmo. En un pódcast elegiría por volumen, no por contenido.
 6. **OCR de los rótulos de la competencia** con el framework Vision de macOS
    (`pyobjc-framework-Vision`). Los ganchos del nicho van quemados en pantalla; hoy se leen a ojo.
 7. **Chequeo automático de la silueta del producto.** Sigue siendo juicio humano sobre la tira

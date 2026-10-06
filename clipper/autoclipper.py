@@ -22,6 +22,10 @@ clipper/errores.json.)
 
 En fuentes de más de 3 minutos se descartan la intro y el cierre.
 
+Si el vídeo tiene audio, cada clip se transcribe en local (whisper.cpp), sus
+cortes se mueven a una pausa del habla y se le queman subtítulos animados
+palabra a palabra (clipper/subtitulos.py). --sin-subtitulos lo desactiva.
+
     python3 autoclipper.py "https://www.youtube.com/watch?v=..."
     python3 autoclipper.py entrada.mp4 --cuantos 5 --duracion 20
     python3 autoclipper.py "https://..." --encuadre completo --json
@@ -47,6 +51,7 @@ sys.path.insert(0, str(REPO / "ingesta"))
 sys.path.insert(0, str(RAIZ))
 from analizar_referencia import cortes, datos_video  # noqa: E402
 from descargar import descargar, metadatos, plataforma  # noqa: E402
+import subtitulos  # noqa: E402
 
 # Cuánto pesa cada señal. Suman 1. La duración no está: todas las ventanas
 # candidatas miden lo mismo, así que como criterio sumaría una constante.
@@ -295,6 +300,10 @@ def main():
                     default="auto",
                     help="auto: vertical si la fuente es horizontal, recortando salvo que "
                          "los laterales tengan información")
+    ap.add_argument("--sin-subtitulos", action="store_true",
+                    help="no transcribir ni quemar subtítulos")
+    ap.add_argument("--vocabulario", default=None,
+                    help="nombres propios y jerga del canal, separados por comas")
     ap.add_argument("--cookies-de", default=None,
                     help="navegador del que tomar la sesión si la plataforma la pide")
     ap.add_argument("--json", action="store_true")
@@ -338,6 +347,11 @@ def main():
         destino = Path(a.salida) if a.salida else ent.parent / f"{ent.stem}_clips"
         destino.mkdir(parents=True, exist_ok=True)
         w, h = medidas(ent)
+        subtitular = not a.sin_subtitulos and r["con_audio"]
+        if subtitular and not (subtitulos.MODELO.exists() and Path(subtitulos.FFMPEG_SUB).exists()):
+            # No se salta en silencio: se dice qué falta.
+            print("  aviso: sin subtítulos — falta el modelo de whisper o ffmpeg-full")
+            subtitular = False
         for i, c in enumerate(r["clips"], 1):
             enc = None
             if a.encuadre in ("recorte", "completo"):
@@ -346,13 +360,34 @@ def main():
                 enc, ratio = decidir_encuadre(ent, c["ini"], c["fin"])
                 c["detalle_laterales"] = ratio
             c["encuadre"] = enc or "original"
+            palabras = []
+            if subtitular:
+                # Se transcribe con margen para poder mover los cortes a una
+                # pausa del habla: un clip que empieza a media palabra suena roto.
+                h = subtitulos.HOLGURA_CORTE + 1
+                palabras = subtitulos.transcribir(ent, max(0.0, c["ini"] - h),
+                                                  min(r["duracion_fuente"], c["fin"] + h),
+                                                  vocabulario=a.vocabulario)
+                c["ini_medido"], c["fin_medido"] = c["ini"], c["fin"]
+                c["ini"], c["fin"] = subtitulos.ajustar_cortes(c["ini"], c["fin"], palabras)
+                palabras = [p for p in palabras if p["fin"] > c["ini"] and p["ini"] < c["fin"]]
+                c["texto"] = " ".join(p["t"] for p in palabras)
             sal = destino / f"clip{i}_{c['ini']:.0f}-{c['fin']:.0f}s.mp4"
-            cortar(ent, c["ini"], c["fin"], sal, enc)
+            if palabras:
+                crudo = destino / f".clip{i}_sin_sub.mp4"
+                cortar(ent, c["ini"], c["fin"], crudo, enc)
+                w_sal, h_sal = medidas(crudo)
+                subtitulos.quemar(crudo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal), sal)
+                crudo.unlink()
+            else:
+                cortar(ent, c["ini"], c["fin"], sal, enc)
+            c["subtitulos"] = bool(palabras)
             c["archivo"] = str(sal)
             if not a.json:
                 print(f"  clip{i}: {c['encuadre']}"
                       + (f" (laterales al {c['detalle_laterales']:.0%} del centro)"
-                         if "detalle_laterales" in c else ""))
+                         if "detalle_laterales" in c else "")
+                      + (f" · {len(palabras)} palabras subtituladas" if palabras else ""))
         (destino / "informe.json").write_text(json.dumps(
             {"origen": meta or None, "fuente": str(ent), **r},
             indent=2, ensure_ascii=False, default=float))
