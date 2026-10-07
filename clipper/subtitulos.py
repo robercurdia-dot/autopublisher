@@ -107,9 +107,8 @@ def ajustar_cortes(ini, fin, palabras, holgura=HOLGURA_CORTE, atras_fin=ATRAS_FI
     había, cortaba en la palabra más cercana: un clip arrancó con «7.», el
     final de la frase anterior. Ver clipper/errores.json.
 
-    El inicio busca a ±holgura: tras un punto (. ! ? …), si no tras una coma.
-    El final SOLO acepta un cierre de frase, y lo busca hasta atras_fin antes
-    del corte. Si no hay ninguno, entre dos palabras. Si nadie habla cerca, no
+    Inicio y final SOLO aceptan un cierre de frase (. ! ? …), y lo buscan
+    hasta atras_fin antes del corte y holgura después. Si no hay ninguno, entre dos palabras. Si nadie habla cerca, no
     lo toca.
     """
     if not palabras:
@@ -130,9 +129,11 @@ def ajustar_cortes(ini, fin, palabras, holgura=HOLGURA_CORTE, atras_fin=ATRAS_FI
         cerca = [t for t in pausas(palabras) if abs(t - objetivo) <= holgura]
         return min(cerca, key=lambda t: abs(t - objetivo)) if cerca else objetivo
 
-    # Empezar tras una coma vale (arranca una cláusula); ACABAR en una coma
-    # deja la idea colgando: en el Xokas, dos de tres clips terminaron así.
-    nuevo_ini = mejor(ini, holgura, holgura, (0, 1))
+    # Las dos puntas solo aceptan un cierre de frase. Empezar tras una coma
+    # parecía bastar, pero los datos de YouTube dijeron otra cosa: el clip que
+    # arrancó a mitad de idea retuvo al 43 % y el que abrió con una frase
+    # entera, al 68 %. El inicio puede retroceder tanto como el final.
+    nuevo_ini = mejor(ini, atras_fin, holgura, (0,))
     nuevo_fin = mejor(fin, atras_fin, holgura, (0,))
     if nuevo_fin - nuevo_ini < (fin - ini) * 0.7:
         return ini, fin

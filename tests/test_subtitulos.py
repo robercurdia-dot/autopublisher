@@ -80,6 +80,16 @@ class TestLogica(unittest.TestCase):
         self.assertIn(round(ini, 2), (752.56, 753.78))
         self.assertEqual(round(ini, 2), 753.78, "el punto más cercano")
 
+    def test_inicio_en_frase_entera_no_tras_coma(self):
+        # Caso «Ceuta a nado»: el corte caía tras una coma, a mitad de idea.
+        x = pal(("La", 450.0, 450.2), ("cosa", 450.2, 450.5), ("es", 450.5, 450.6), ("así.", 450.6, 451.0),
+                ("Si", 451.0, 451.2), ("vas", 451.2, 451.5), ("en", 451.5, 451.6), ("patera,", 451.6, 452.3),
+                ("te", 452.3, 452.4), ("pillan,", 452.4, 452.9), ("te", 452.9, 453.0), ("cogen", 453.0, 453.4))
+        ini, _ = st.ajustar_cortes(452.6, 480.0, x)
+        self.assertAlmostEqual(ini, 451.0, places=1)
+        anterior = [p for p in x if p["fin"] <= ini + 0.01][-1]["t"]
+        self.assertTrue(anterior.endswith("."), "no empieza en una frase entera")
+
     def test_final_en_cierre_de_frase_aunque_este_lejos(self):
         # Caso del Xokas: el remate acaba 7 s antes del corte, luego habla otro
         # y la frase más cercana al corte termina en coma.
