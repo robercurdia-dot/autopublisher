@@ -158,6 +158,27 @@ class TestClipper(unittest.TestCase):
         with self.assertWarns(UserWarning):
             self.assertEqual(metadatos("https://no-existe.invalid/video"), {})
 
+    def test_reaccion_webcam_arriba_y_una_sola_vez(self):
+        # Medidas reales del clip 3 del Xokas: webcam abajo a la derecha (0,19 de
+        # alto) en 4 de 5 fotogramas y un plano a cámara (0,53) en medio.
+        xokas = [(0.84, 0.20, 0.75, 0.09), (0.54, 0.53, 0.50, 0.22), (0.78, 0.18, 0.74, 0.08),
+                 (0.87, 0.18, 0.75, 0.08), (0.82, 0.20, 0.76, 0.09)]
+        caja = ac.webcam(xokas)
+        self.assertIsNotNone(caja)
+        self.assertFalse(ac.es_a_camara(xokas))
+        # Una cara pequeña que salta de sitio no es una webcam fija.
+        self.assertIsNone(ac.webcam([(0.2, 0.2, 0.3, 0.1), (0.8, 0.2, 0.7, 0.1), (0.5, 0.2, 0.2, 0.1)]))
+        x, y, cw, ch = ac.recorte_webcam(caja, 1920, 1080)
+        self.assertTrue(0 <= x and x + cw <= 1920 and 0 <= y and y + ch <= 1080)
+        self.assertLessEqual(x, caja[0] * 1920 - caja[2] * 1920 / 2, "la cara no entra entera")
+        # La pantalla de abajo deja fuera la columna de la webcam.
+        px, pw = ac.pantalla_sin_webcam(caja, x, cw, 1920)
+        self.assertLessEqual(px + pw, x)
+        d = Path(self.tmp.name)
+        sal = d / "reaccion.mp4"
+        ac.cortar(self.largo, 60, 64, sal, "reaccion", caja=caja)
+        self.assertEqual(ac.medidas(sal), (1080, 1920))
+
     def test_pantalla_partida_mitades(self):
         d = Path(self.tmp.name)
         rojo = d / "fondo_rojo.mp4"

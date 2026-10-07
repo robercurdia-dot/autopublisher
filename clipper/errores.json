@@ -126,6 +126,14 @@
    "causa": "Cualquier fallo de yt-dlp se convertía en un diccionario vacío.",
    "arreglo": "Avisa con la última línea del error de yt-dlp. Y operativo: nada de ráfagas en paralelo contra YouTube; si hace falta leer muchos vídeos, en serie, con pausas, o con la sesión del navegador (--cookies-de chrome).",
    "test": "test_metadatos_avisan_si_fallan"
+  },
+  {
+   "id": "reaccion_sin_webcam_arriba",
+   "fecha": "2026-10-07",
+   "evidencia": "Clip 3 del Xokas (1168-1197 s): lee un tuit con su webcam en la esquina inferior derecha. Salió en encuadre «completo»: la pantalla entera en una franja central y su cara diminuta en la esquina. Roberto: lo estándar es la cámara arriba y lo que enseña abajo. Primera versión del arreglo: el Xokas salía dos veces, grande arriba y pequeño en su esquina abajo.",
+   "causa": "El encuadre conocía dos casos, persona a cámara (cara grande) y pantalla con información. La webcam superpuesta (cara del 20 % del alto, siempre en el mismo sitio) no la distinguía.",
+   "arreglo": "Tercer encuadre, «reaccion»: una cara de entre el 10 % y el 35 % del alto en 3 de 5 fotogramas y casi en el mismo sitio es la webcam. Arriba (1080x768) va la webcam ampliada con hombros; abajo, la pantalla sin la columna de la webcam, a todo el ancho. Los subtítulos, en la costura. Límite: si el clip alterna entre pantalla completa a cámara y reacción, manda la mayoría; no cambia de encuadre a mitad del clip.",
+   "test": "test_reaccion_webcam_arriba_y_una_sola_vez"
   }
  ]
 }

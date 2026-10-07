@@ -76,6 +76,13 @@ UMBRAL_LATERALES = 0.55
 # cámara: se recorta sobre ella. Medido en el Xokas: a cámara 0,54-0,60; su
 # webcam en una esquina sobre un tuit, 0,20.
 UMBRAL_CARA = 0.35
+# Por debajo de eso pero por encima de este mínimo, y siempre en el mismo
+# sitio, es la webcam del streamer superpuesta a lo que enseña: el Xokas
+# leyendo un tuit con su cámara en una esquina mide 0,20.
+UMBRAL_WEBCAM = 0.10
+# Pantalla de reacción: la webcam ocupa la franja de arriba y lo que enseña,
+# la de abajo. Alturas en un lienzo de 1080x1920.
+ALTO_WEBCAM = 768
 DETECTOR_CARAS = RAIZ / "modelos" / "yunet.onnx"
 
 
@@ -283,7 +290,7 @@ def fotograma(ruta, t, ancho=640, alto=360, formato="bgr24"):
 
 
 def caras(ruta, ini, fin, n=5):
-    """La cara más grande de n fotogramas del tramo: [(centro_x, alto)], relativos.
+    """La cara más grande de n fotogramas: [(centro_x, alto, centro_y, ancho)], relativos.
 
     Fotograma sin cara: no aparece en la lista.
     """
@@ -299,7 +306,8 @@ def caras(ruta, ini, fin, n=5):
         _, f = det.detect(img)
         if f is not None and len(f):
             x, _, w, h = max(f, key=lambda c: c[3])[:4]
-            r.append(((x + w / 2) / 640, h / 360))
+            _, y = max(f, key=lambda c: c[3])[:2]
+            r.append(((x + w / 2) / 640, h / 360, (y + h / 2) / 360, w / 640))
     return r
 
 
@@ -309,18 +317,41 @@ def es_a_camara(lista, n=5):
     return len(grandes) >= max(2, int(n * 0.6))
 
 
+def webcam(lista, n=5):
+    """La caja de la webcam superpuesta (cx, cy, ancho, alto), o None.
+
+    Una cara pequeña que aparece en la mayoría de los fotogramas y casi en el
+    mismo sitio: es la cámara del streamer encima de lo que está enseñando.
+    """
+    peque = [c for c in (lista or []) if UMBRAL_WEBCAM <= c[1] < UMBRAL_CARA and len(c) >= 4]
+    if len(peque) < max(2, int(n * 0.6)):
+        return None
+    xs, ys = [c[0] for c in peque], [c[2] for c in peque]
+    if np.ptp(xs) > 0.12 or np.ptp(ys) > 0.12:
+        return None
+    return tuple(round(float(np.median([c[i] for c in peque])), 4) for i in (0, 2, 3, 1))
+
+
 def decidir_encuadre(ruta, ini, fin):
-    """(encuadre, detalle_laterales, centro_x de la cara o None).
+    """(encuadre, detalle_laterales, extra).
 
     Primero la cara: si alguien habla a cámara, se recorta sobre él aunque el
-    fondo tenga detalle. La versión anterior solo medía detalle en los
-    laterales y confundía las estanterías del cuarto del Xokas con
-    información: su cara salía pequeña en una franja central.
+    fondo tenga detalle (extra = su centro x). La versión anterior solo medía
+    detalle en los laterales y confundía las estanterías del cuarto del Xokas
+    con información: su cara salía pequeña en una franja central.
+
+    Luego la webcam: si el streamer reacciona a algo en pantalla con su cámara
+    en una esquina, «reaccion» pone la cámara arriba y la pantalla abajo
+    (extra = la caja de la webcam). Antes salía la pantalla entera en una
+    franja y la cara del streamer, diminuta en su esquina.
     """
     lista = caras(ruta, ini, fin)
     if es_a_camara(lista):
         cx = float(np.median([c[0] for c in lista if c[1] >= UMBRAL_CARA]))
         return "cara", None, round(cx, 3)
+    caja = webcam(lista)
+    if caja:
+        return "reaccion", None, caja
     ratios = []
     for t in np.linspace(ini + 0.5, fin - 0.5, 3):
         g = fotograma(ruta, t, 320, 180, "gray")
@@ -336,13 +367,55 @@ def x_recorte(cx, w, h, ancho_rel=9 / 16):
     return int(min(max(cx * w - ancho / 2, 0), w - ancho))
 
 
-def filtro(encuadre, w, h, cx=None, con_fondo=False):
+def recorte_webcam(caja, w, h, ancho_rel=1080 / ALTO_WEBCAM):
+    """(x, y, ancho, alto) en píxeles del recorte de la webcam para la franja de arriba.
+
+    La caja de la cara se amplía para que entren hombros y algo de cuarto, se
+    baja un poco (la cara no va pegada al borde de arriba) y nunca se sale.
+    """
+    cx, cy, fw, fh = caja
+    cw = min(w, fw * w * 3.2)
+    ch = cw / ancho_rel
+    if ch > h:
+        ch, cw = h, h * ancho_rel
+    x = min(max(cx * w - cw / 2, 0), w - cw)
+    y = min(max(cy * h + 0.15 * fh * h - ch / 2, 0), h - ch)
+    par = lambda v: int(v) // 2 * 2
+    return par(x), par(y), par(cw), par(ch)
+
+
+def pantalla_sin_webcam(caja, x, cw, w):
+    """(x, ancho) de la pantalla dejando fuera la columna donde está la webcam.
+
+    Con la webcam en un lateral se quita esa franja. La primera versión solo
+    recortaba un 10 % por cada lado y el Xokas salía dos veces: grande arriba
+    y pequeño en su esquina abajo.
+    """
+    if caja[0] >= 0.6:
+        return 0, x // 2 * 2
+    if caja[0] <= 0.4:
+        return x + cw, (w - x - cw) // 2 * 2
+    return int(w * 0.1) // 2 * 2, int(w * 0.8) // 2 * 2
+
+
+def filtro(encuadre, w, h, cx=None, con_fondo=False, caja=None):
     """filter_complex que deja el vídeo en [v].
 
     con_fondo: pantalla partida. Arriba el clip (sobre la cara si hay, o
     entero sobre su propio desenfoque si es una pantalla con información),
     abajo el vídeo de fondo [1:v] sin su sonido.
     """
+    if encuadre == "reaccion" and not con_fondo:
+        x, y, cw, ch = recorte_webcam(caja, w, h)
+        abajo = 1920 - ALTO_WEBCAM
+        px, pw = pantalla_sin_webcam(caja, x, cw, w)
+        # Abajo, la pantalla sin la columna de la webcam (si no, el streamer
+        # sale dos veces) y a todo el ancho, sobre un desenfoque de sí misma.
+        return (f"[0:v]split=3[a][b][c];[a]crop={cw}:{ch}:{x}:{y},"
+                f"scale=1080:{ALTO_WEBCAM}:flags=lanczos,setsar=1[arriba];"
+                f"[b]scale=1080:{abajo}:force_original_aspect_ratio=increase,crop=1080:{abajo},"
+                f"boxblur=20:2[fondo];[c]crop={pw}:ih:{px}:0,scale=1080:-2:flags=lanczos[pant];"
+                f"[fondo][pant]overlay=(W-w)/2:(H-h)/2,setsar=1[abajo];[arriba][abajo]vstack[v]")
     if not con_fondo:
         if encuadre == "cara":
             return (f"[0:v]crop=ih*9/16:ih:{x_recorte(cx, w, h)}:0,"
@@ -372,7 +445,8 @@ FILTROS = {
 }
 
 
-def cortar(entrada, ini, fin, destino, encuadre=None, cx=None, fondo=None, fondo_ini=0.0):
+def cortar(entrada, ini, fin, destino, encuadre=None, cx=None, fondo=None, fondo_ini=0.0,
+           caja=None):
     """Corte preciso. encuadre: None (original), 'recorte', 'completo' o 'cara'.
 
     fondo: vídeo para la mitad de abajo (pantalla partida), desde fondo_ini.
@@ -385,9 +459,19 @@ def cortar(entrada, ini, fin, destino, encuadre=None, cx=None, fondo=None, fondo
     subprocess.run(
         ["ffmpeg", "-nostdin", "-v", "error", "-y", *entradas,
          "-ss", f"{min(ini, 2):.2f}", "-t", f"{fin - ini:.2f}",
-         "-filter_complex", filtro(encuadre, w, h, cx, bool(fondo)), "-map", "[v]", "-map", "0:a?",
+         "-filter_complex", filtro(encuadre, w, h, cx, bool(fondo), caja), "-map", "[v]", "-map", "0:a?",
          "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-movflags", "+faststart", str(destino)], check=True)
+
+
+def estilo_subtitulos(encuadre, con_fondo):
+    """Dónde va el rótulo: siempre en la costura entre las dos mitades, si las hay."""
+    if con_fondo:
+        return dict(subtitulos.ESTILO, alineacion=5, margen_v=0)
+    if encuadre == "reaccion":
+        # Justo debajo de la webcam, sobre el borde de arriba de la pantalla.
+        return dict(subtitulos.ESTILO, margen_v=1920 - ALTO_WEBCAM - 140)
+    return subtitulos.ESTILO
 
 
 # -------------------------------------------------------------------- main
@@ -469,15 +553,18 @@ def main():
             raise SystemExit(f"no existe el fondo: {fondo}")
         dur_fondo = datos_video(fondo)["duracion"] if fondo else 0.0
         for i, c in enumerate(r["clips"], 1):
-            enc, cx = None, None
+            enc, cx, caja = None, None, None
             if a.encuadre in ("recorte", "completo"):
                 enc = a.encuadre
             elif a.encuadre == "auto" and w > h:
-                enc, ratio, cx = decidir_encuadre(ent, c["ini"], c["fin"])
+                enc, ratio, extra = decidir_encuadre(ent, c["ini"], c["fin"])
                 if ratio is not None:
                     c["detalle_laterales"] = ratio
-                if cx is not None:
-                    c["cara_x"] = cx
+                if enc == "cara":
+                    cx = c["cara_x"] = extra
+                elif enc == "reaccion":
+                    caja = extra
+                    c["webcam"] = list(extra)
             c["encuadre"] = enc or "original"
             palabras = []
             if subtitular:
@@ -503,7 +590,7 @@ def main():
             c["archivos"] = []
             for sufijo, ini_fondo in versiones:
                 sal = destino / f"clip{i}_{c['ini']:.0f}-{c['fin']:.0f}s{sufijo}.mp4"
-                args = dict(encuadre=enc, cx=cx, fondo=fondo if sufijo else None,
+                args = dict(encuadre=enc, cx=cx, caja=caja, fondo=fondo if sufijo else None,
                             fondo_ini=ini_fondo or 0.0)
                 if palabras:
                     crudo = destino / f".clip{i}{sufijo}_sin_sub.mp4"
@@ -511,8 +598,7 @@ def main():
                     w_sal, h_sal = medidas(crudo)
                     # En pantalla partida, el rótulo va en la costura entre las
                     # dos mitades: no tapa la cara ni el juego.
-                    estilo = dict(subtitulos.ESTILO, alineacion=5, margen_v=0) if sufijo \
-                        else subtitulos.ESTILO
+                    estilo = estilo_subtitulos(enc, bool(sufijo))
                     subtitulos.quemar(crudo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal,
                                                             estilo), sal)
                     crudo.unlink()
