@@ -166,6 +166,16 @@ class TestClipper(unittest.TestCase):
         caja = ac.webcam(xokas)
         self.assertIsNotNone(caja)
         self.assertFalse(ac.es_a_camara(xokas))
+        # Webcam diminuta (0,078) arriba a la derecha mientras el vídeo enseña
+        # caras grandes: reacción a la casa de Grefg.
+        grefg = [[(0.908, 0.084, 0.196, 0.037)], [(0.91, 0.078, 0.195, 0.035)],
+                 [(0.473, 0.518, 0.541, 0.2), (0.909, 0.08, 0.194, 0.036)],
+                 [(0.907, 0.073, 0.191, 0.034)], [(0.561, 0.574, 0.553, 0.233)]]
+        self.assertIsNotNone(ac.webcam(grefg))
+        # Gente del tour por el centro de la imagen: no es una webcam.
+        tour = [[(0.479, 0.446, 0.591, 0.186)], [(0.414, 0.15, 0.276, 0.061)],
+                [(0.453, 0.081, 0.354, 0.037)], [(0.443, 0.156, 0.317, 0.072)], [(0.45, 0.13, 0.30, 0.07)]]
+        self.assertIsNone(ac.webcam(tour))
         # Una cara pequeña que salta de sitio no es una webcam fija.
         self.assertIsNone(ac.webcam([(0.2, 0.2, 0.3, 0.1), (0.8, 0.2, 0.7, 0.1), (0.5, 0.2, 0.2, 0.1)]))
         x, y, cw, ch = ac.recorte_webcam(caja, 1920, 1080)

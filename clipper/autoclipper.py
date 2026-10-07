@@ -78,8 +78,9 @@ UMBRAL_LATERALES = 0.55
 UMBRAL_CARA = 0.35
 # Por debajo de eso pero por encima de este mínimo, y siempre en el mismo
 # sitio, es la webcam del streamer superpuesta a lo que enseña: el Xokas
-# leyendo un tuit con su cámara en una esquina mide 0,20.
-UMBRAL_WEBCAM = 0.10
+# leyendo un tuit con su cámara en una esquina mide 0,20; en la reacción a
+# la casa de Grefg, 0,078.
+UMBRAL_WEBCAM = 0.05
 # Pantalla de reacción: la webcam ocupa la franja de arriba y lo que enseña,
 # la de abajo. Alturas en un lienzo de 1080x1920.
 ALTO_WEBCAM = 768
@@ -289,11 +290,8 @@ def fotograma(ruta, t, ancho=640, alto=360, formato="bgr24"):
     return np.frombuffer(r.stdout, dtype=np.uint8).reshape(alto, ancho, canales).squeeze()
 
 
-def caras(ruta, ini, fin, n=5):
-    """La cara más grande de n fotogramas: [(centro_x, alto, centro_y, ancho)], relativos.
-
-    Fotograma sin cara: no aparece en la lista.
-    """
+def detectar_caras(ruta, ini, fin, n=7):
+    """Todas las caras de n fotogramas: una lista por fotograma de (cx, alto, cy, ancho), relativos."""
     if not DETECTOR_CARAS.exists():
         return None
     import cv2
@@ -304,11 +302,17 @@ def caras(ruta, ini, fin, n=5):
         if img is None:
             continue
         _, f = det.detect(img)
-        if f is not None and len(f):
-            x, _, w, h = max(f, key=lambda c: c[3])[:4]
-            _, y = max(f, key=lambda c: c[3])[:2]
-            r.append(((x + w / 2) / 640, h / 360, (y + h / 2) / 360, w / 640))
+        r.append([((x + w / 2) / 640, h / 360, (y + h / 2) / 360, w / 640)
+                  for x, y, w, h in (c[:4] for c in (f if f is not None else []))])
     return r
+
+
+def caras(ruta, ini, fin, n=5):
+    """La cara más grande de cada fotograma (los que tienen alguna)."""
+    todas = detectar_caras(ruta, ini, fin, n)
+    if todas is None:
+        return None
+    return [max(f, key=lambda c: c[1]) for f in todas if f]
 
 
 def es_a_camara(lista, n=5):
@@ -317,19 +321,41 @@ def es_a_camara(lista, n=5):
     return len(grandes) >= max(2, int(n * 0.6))
 
 
-def webcam(lista, n=5):
+def webcam(fotogramas, n=None):
     """La caja de la webcam superpuesta (cx, cy, ancho, alto), o None.
 
     Una cara pequeña que aparece en la mayoría de los fotogramas y casi en el
     mismo sitio: es la cámara del streamer encima de lo que está enseñando.
+    Se miran TODAS las caras de cada fotograma: la primera versión solo veía
+    la mayor, y en cuanto el vídeo de la reacción enseñaba una cara grande la
+    webcam desaparecía (reacción a la casa de Grefg).
+
+    Acepta una lista por fotograma o, por compatibilidad, una cara por fotograma.
     """
-    peque = [c for c in (lista or []) if UMBRAL_WEBCAM <= c[1] < UMBRAL_CARA and len(c) >= 4]
-    if len(peque) < max(2, int(n * 0.6)):
+    frames = [f if isinstance(f, list) else [f] for f in (fotogramas or [])]
+    n = n or len(frames)
+    peque = [[c for c in f if len(c) >= 4 and UMBRAL_WEBCAM <= c[1] < UMBRAL_CARA] for f in frames]
+    mejor = []
+    for f in peque:
+        for c in f:
+            # En cada fotograma, la cara pequeña más cercana a esta.
+            cerca = []
+            for g in peque:
+                d = [(abs(o[0] - c[0]) + abs(o[2] - c[2]), o) for o in g]
+                d = [x for x in d if x[0] <= 0.06]
+                if d:
+                    cerca.append(min(d)[1])
+            if len(cerca) > len(mejor):
+                mejor = cerca
+    if len(mejor) < max(2, int(np.ceil(n * 0.5))):
         return None
-    xs, ys = [c[0] for c in peque], [c[2] for c in peque]
-    if np.ptp(xs) > 0.12 or np.ptp(ys) > 0.12:
+    caja = tuple(round(float(np.median([c[i] for c in mejor])), 4) for i in (0, 2, 3, 1))
+    # Una webcam superpuesta vive en un borde. Caras del contenido que andan
+    # por el centro (un tour por una casa) no lo son, aunque se repitan.
+    cx, cy = caja[0], caja[1]
+    if not (cx <= 0.3 or cx >= 0.7 or cy <= 0.25 or cy >= 0.75):
         return None
-    return tuple(round(float(np.median([c[i] for c in peque])), 4) for i in (0, 2, 3, 1))
+    return caja
 
 
 def decidir_encuadre(ruta, ini, fin):
@@ -345,13 +371,17 @@ def decidir_encuadre(ruta, ini, fin):
     (extra = la caja de la webcam). Antes salía la pantalla entera en una
     franja y la cara del streamer, diminuta en su esquina.
     """
-    lista = caras(ruta, ini, fin)
-    if es_a_camara(lista):
-        cx = float(np.median([c[0] for c in lista if c[1] >= UMBRAL_CARA]))
-        return "cara", None, round(cx, 3)
-    caja = webcam(lista)
+    todas = detectar_caras(ruta, ini, fin)
+    # Primero la webcam: en una reacción, el vídeo que se ve puede tener una
+    # cara grande, y entonces parecería «alguien a cámara» y se recortaría
+    # sobre la persona equivocada.
+    caja = webcam(todas)
     if caja:
         return "reaccion", None, caja
+    lista = [max(f, key=lambda c: c[1]) for f in (todas or []) if f]
+    if es_a_camara(lista, len(todas or [])):
+        cx = float(np.median([c[0] for c in lista if c[1] >= UMBRAL_CARA]))
+        return "cara", None, round(cx, 3)
     ratios = []
     for t in np.linspace(ini + 0.5, fin - 0.5, 3):
         g = fotograma(ruta, t, 320, 180, "gray")
