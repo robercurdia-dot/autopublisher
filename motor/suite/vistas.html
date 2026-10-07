@@ -1,94 +1,77 @@
 <div class="suite">
-<nav class="rail" aria-label="Herramientas">
-  <div class="marca">Suite</div>
-  <button type="button" data-vista="clipper" aria-current="page">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg>
-    Clipper
-  </button>
-  <button type="button" data-vista="autopublisher">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/><path d="M10 7h3a2 2 0 0 1 2 2v5"/></svg>
-    Autopublisher
-  </button>
-  <button type="button" data-vista="motor">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
-    Motor
-  </button>
-  <button type="button" disabled title="Generar vídeo con fal: sin saldo">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.3L20 9l-4.4 3.9L17 19l-5-3-5 3 1.4-6.1L4 9l5.8-.7z"/></svg>
-    Generar
-    <span class="pronto">sin saldo</span>
-  </button>
-</nav>
+<div class="burbujas" aria-hidden="true"></div>
+
+<header class="barra-suite cristal">
+  <div class="logo"><span class="orbe" aria-hidden="true"></span>Suite</div>
+  <nav class="rail" aria-label="Herramientas">
+    <button type="button" data-vista="clipper" aria-current="page">Clipper</button>
+    <button type="button" data-vista="autopublisher">Autopublisher</button>
+    <button type="button" data-vista="motor">Motor</button>
+  </nav>
+  <span class="conexion" id="conexion" title="Estado del motor de tu Mac"><i></i><span id="conexion-txt">buscando el motor…</span></span>
+</header>
 
 <div class="vistas">
 
 <section class="vista" id="v-clipper" aria-label="Clipper">
-  <div class="herr">
-    <div class="herr-cab">
-      <div>
-        <span class="eyebrow">herramienta · clipper</span>
-        <h1>De un enlace a Shorts listos</h1>
-        <p>Pega un vídeo largo. El motor lo baja, elige los mejores momentos por audio, imagen y ritmo, corta en final de frase, recorta sobre la cara y quema subtítulos. Todo en tu Mac.</p>
-      </div>
-      <span class="conexion" id="conexion"><i></i><span id="conexion-txt">buscando el motor…</span></span>
+  <div class="columna">
+
+    <div class="cristal hero">
+      <h1>Pega un enlace.<br>Salen los clips.</h1>
+      <form id="f-clip" novalidate>
+        <div class="buscador">
+          <label class="oculto" for="c-url">Enlace del vídeo</label>
+          <input id="c-url" type="url" required placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
+          <button type="submit" class="aqua" id="c-enviar" disabled>Sacar clips</button>
+        </div>
+        <details class="opciones">
+          <summary>Opciones</summary>
+          <div class="rejilla-opciones">
+            <div class="campo">
+              <label for="c-cuantos">Clips</label>
+              <select id="c-cuantos"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
+            </div>
+            <div class="campo">
+              <label for="c-dur">Duración</label>
+              <select id="c-dur">
+                <option value="" selected>Automática</option>
+                <option value="14">14 s</option><option value="20">20 s</option>
+                <option value="30">30 s</option><option value="45">45 s</option><option value="58">58 s</option>
+              </select>
+            </div>
+            <div class="campo ancho">
+              <label for="c-vocab">Nombres propios para los subtítulos</label>
+              <input id="c-vocab" type="text" placeholder="Xokas, Ceuta, Marruecos" autocomplete="off">
+            </div>
+            <div class="campo ancho">
+              <label for="c-fondo">Vídeo de fondo (pantalla partida)</label>
+              <input id="c-fondo" type="text" placeholder="~/Downloads/clips/fondos/gameplay.mp4" autocomplete="off">
+            </div>
+            <label class="check ancho"><input type="checkbox" id="c-chrome"> Usar mi sesión de Chrome (si YouTube pide confirmar que no eres un bot)</label>
+          </div>
+        </details>
+      </form>
+      <div class="nota-envio" id="c-nota">Tarda unos 5 minutos por cada media hora de vídeo.</div>
     </div>
 
-    <div class="aviso-motor" id="aviso-motor" hidden>
+    <div class="aviso-motor cristal" id="aviso-motor" hidden>
       <b id="aviso-titulo">El motor no responde</b>
       <span id="aviso-texto"></span>
       <ol id="aviso-pasos" hidden>
-        <li>Abre esta página dentro de la app de Claude en tu Mac: en el navegador no puede hablar con el motor.</li>
-        <li>El motor tiene que estar dado de alta en la app como <code>autopublisher</code> (Ajustes → Desarrollador).</li>
+        <li>Abre esta página en la app de Claude de tu Mac.</li>
+        <li>El motor tiene que estar dado de alta en la app como <code>autopublisher</code>.</li>
         <li>Si acabas de darlo de alta, reinicia la app.</li>
       </ol>
     </div>
 
-    <div class="rejilla-clipper">
-      <form class="encargo" id="f-clip" novalidate>
-        <div class="campo">
-          <label for="c-url">Enlace del vídeo</label>
-          <input id="c-url" type="url" required placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
-          <span class="ayuda">YouTube, TikTok, Instagram, X o Facebook.</span>
-        </div>
-        <div class="dos">
-          <div class="campo">
-            <label for="c-cuantos">Clips</label>
-            <select id="c-cuantos"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
-          </div>
-          <div class="campo">
-            <label for="c-dur">Duración</label>
-            <select id="c-dur">
-              <option value="" selected>Según la fuente</option>
-              <option value="14">14 s</option><option value="20">20 s</option>
-              <option value="30">30 s</option><option value="45">45 s</option><option value="58">58 s</option>
-            </select>
-          </div>
-        </div>
-        <div class="campo">
-          <label for="c-vocab">Nombres propios</label>
-          <input id="c-vocab" type="text" placeholder="Xokas, Ceuta, Marruecos" autocomplete="off">
-          <span class="ayuda">Para que los subtítulos escriban bien nombres y jerga del canal.</span>
-        </div>
-        <div class="campo">
-          <label for="c-fondo">Vídeo de fondo</label>
-          <input id="c-fondo" type="text" placeholder="~/Downloads/clips/fondos/gameplay.mp4" autocomplete="off">
-          <span class="ayuda">Opcional, dentro de Downloads/clips. Saca además cada clip en pantalla partida, para comparar.</span>
-        </div>
-        <label class="check"><input type="checkbox" id="c-chrome"> Usar mi sesión de Chrome para bajarlo. Hace falta cuando YouTube pide confirmar que no eres un bot.</label>
-        <button type="submit" class="principal" id="c-enviar" disabled>Sacar clips</button>
-        <div class="nota-envio" id="c-nota">Tarda unos 5 minutos por cada media hora de vídeo.</div>
-      </form>
-
-      <div class="trabajos">
-        <div class="trabajos-cab">
-          <h2>Trabajos</h2>
-          <button type="button" class="sec" id="c-actualizar" disabled>Actualizar</button>
-        </div>
-        <div id="lista-trabajos">
-          <div class="vacio-lista"><b>Aquí aparecen los clips de cada enlace.</b>Con su miniatura, la transcripción, la puntuación y un botón para abrirlos en tu Mac. Cuando el motor conecte, verás también los trabajos anteriores.</div>
-        </div>
-      </div>
+    <div class="cab-trabajos">
+      <h2>Tus clips</h2>
+      <button type="button" class="cristal-btn" id="c-actualizar" disabled>Actualizar</button>
     </div>
+    <div id="lista-trabajos">
+      <div class="vacio-lista cristal"><b>Aquí aparecen tus clips.</b>Cada uno con su miniatura, lo que se dice y un botón para verlo.</div>
+    </div>
+
   </div>
 </section>
 
@@ -97,17 +80,13 @@
 </section>
 
 <section class="vista" id="v-motor" aria-label="Motor" hidden>
-  <div class="herr">
-    <div class="herr-cab">
-      <div>
-        <span class="eyebrow">herramienta · motor</span>
-        <h1>Lo que hay debajo</h1>
-        <p>El motor corre en tu Mac y lo comparten todas las herramientas. Aquí se ve qué puede hacer ahora mismo, en qué cuentas publica y qué fallos del clipper siguen abiertos.</p>
-      </div>
-      <button type="button" class="sec" id="m-actualizar" disabled>Actualizar</button>
+  <div class="columna">
+    <div class="cab-trabajos">
+      <h2>Motor</h2>
+      <button type="button" class="cristal-btn" id="m-actualizar" disabled>Actualizar</button>
     </div>
     <div class="paneles" id="paneles-motor">
-      <div class="vacio-lista"><b>Esperando al motor.</b>Cuando conecte, aparecen sus capacidades, las cuentas y los errores registrados.</div>
+      <div class="vacio-lista cristal"><b>Esperando al motor.</b>Cuando conecte, aquí ves qué puede hacer y en qué cuentas publica.</div>
     </div>
   </div>
 </section>

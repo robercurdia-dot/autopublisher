@@ -181,7 +181,7 @@
         art.appendChild(rej);
         var carpeta = (t.clips[0].archivos || [])[0];
         if (carpeta) art.appendChild(el("div", { class: "acciones" }, [
-          el("button", { type: "button", class: "sec", text: "Abrir la carpeta", onclick: function () { abrir(carpeta, true); } })
+          el("button", { type: "button", class: "cristal-btn", text: "Abrir la carpeta", onclick: function () { abrir(carpeta, true); } })
         ]));
       }
       cont.appendChild(art);
@@ -195,10 +195,10 @@
     if (c.publicado) marco.appendChild(el("span", { class: "pin ok pub", text: "publicado" }));
     pedirMiniatura(ruta, img);
     var acciones = el("div", { class: "acciones" }, [
-      el("button", { type: "button", class: "sec", text: "Ver", onclick: function () { abrir(ruta, false); } })
+      el("button", { type: "button", class: "cristal-btn", text: "Ver", onclick: function () { abrir(ruta, false); } })
     ]);
     (c.archivos || []).slice(1).forEach(function (r) {
-      acciones.appendChild(el("button", { type: "button", class: "sec", text: /_fondo/.test(r) ? "Con fondo" : "Otra versión", onclick: function () { abrir(r, false); } }));
+      acciones.appendChild(el("button", { type: "button", class: "cristal-btn", text: /_fondo/.test(r) ? "Con fondo" : "Otra versión", onclick: function () { abrir(r, false); } }));
     });
     var texto = c.texto || "";
     return el("div", { class: "clip" }, [
