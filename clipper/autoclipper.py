@@ -49,7 +49,7 @@ RAIZ = Path(__file__).resolve().parent
 REPO = RAIZ.parent
 sys.path.insert(0, str(REPO / "ingesta"))
 sys.path.insert(0, str(RAIZ))
-from analizar_referencia import cortes, datos_video  # noqa: E402
+from analizar_referencia import UMBRAL_CORTE, cortes, datos_video  # noqa: E402
 from descargar import descargar, metadatos, plataforma  # noqa: E402
 import subtitulos  # noqa: E402
 
@@ -72,6 +72,8 @@ MUESTREO = 4
 # fracción del detalle del centro, ahí hay algo (un rótulo, información) y se
 # encuadra completo en vez de recortar.
 UMBRAL_LATERALES = 0.55
+# Un plano más corto que esto no tiene encuadre propio: se suma al anterior.
+PLANO_MINIMO = 2.5
 # Una cara que ocupa al menos esta fracción del alto es alguien hablando a
 # cámara: se recorta sobre ella. Medido en el Xokas: a cámara 0,54-0,60; su
 # webcam en una esquina sobre un tuit, 0,20.
@@ -225,6 +227,32 @@ def analizar(ruta, cuantos=3, duracion=None, todas=False):
     return r
 
 
+def tramos_fijos(ruta, texto):
+    """Clips elegidos a mano o leyendo la transcripción: «356-386,19:30-20:02».
+
+    Se saltan la puntuación automática; el resto de la cadena (ajuste a frases,
+    encuadre, subtítulos) es la misma.
+    """
+    def seg(v):
+        v = v.strip()
+        if ":" in v:
+            m, s_ = v.split(":")
+            return int(m) * 60 + float(s_)
+        return float(v)
+    dur = datos_video(ruta)["duracion"]
+    clips = []
+    for parte in texto.split(","):
+        a, b = (seg(x) for x in parte.split("-"))
+        if not 0 <= a < b <= dur + 0.5:
+            raise SystemExit(f"tramo fuera del vídeo: {parte}")
+        clips.append({"ini": round(a, 2), "fin": round(min(b, dur), 2), "puntos": None,
+                      "elegido": "a mano"})
+    audio = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries",
+                            "stream=index", "-of", "csv=p=0", str(ruta)],
+                           capture_output=True, text=True).stdout.strip()
+    return {"duracion_fuente": dur, "con_audio": bool(audio), "clips": clips, "tramos": texto}
+
+
 def separados(cands, cuantos, largo):
     """Las mejores ventanas sin solape y con media ventana de separación.
 
@@ -352,8 +380,14 @@ def webcam(fotogramas, n=None):
     caja = tuple(round(float(np.median([c[i] for c in mejor])), 4) for i in (0, 2, 3, 1))
     # Una webcam superpuesta vive en un borde. Caras del contenido que andan
     # por el centro (un tour por una casa) no lo son, aunque se repitan.
-    cx, cy = caja[0], caja[1]
-    if not (cx <= 0.3 or cx >= 0.7 or cy <= 0.25 or cy >= 0.75):
+    cx, cy, ancho, alto = caja
+    # En una esquina, no solo en un borde...
+    if not ((cx <= 0.3 or cx >= 0.7) and (cy <= 0.3 or cy >= 0.7)):
+        return None
+    # ...y con la cara entera: la de una webcam superpuesta está dentro de su
+    # recuadro. Una cabeza cortada por el borde de la imagen es alguien que
+    # entra en el plano (el Xokas yendo a su armario en la reacción a Grefg).
+    if cy - alto / 2 < 0.02 or cy + alto / 2 > 0.98 or cx - ancho / 2 < 0.01 or cx + ancho / 2 > 0.99:
         return None
     return caja
 
@@ -395,6 +429,99 @@ def x_recorte(cx, w, h, ancho_rel=9 / 16):
     """Píxel izquierdo de un recorte de ancho h*ancho_rel centrado en cx (0..1), sin salirse."""
     ancho = h * ancho_rel
     return int(min(max(cx * w - ancho / 2, 0), w - ancho))
+
+
+def cortes_en(ruta, ini, fin):
+    """Cambios de plano entre ini y fin, en segundos del vídeo."""
+    r = subprocess.run(["ffmpeg", "-nostdin", "-ss", f"{ini:.2f}", "-t", f"{fin - ini:.2f}", "-i", str(ruta),
+                        "-filter:v", f"scale=320:-2,select='gt(scene,{UMBRAL_CORTE})',showinfo",
+                        "-f", "null", "-"], capture_output=True, text=True)
+    ts = []
+    for linea in r.stderr.splitlines():
+        if "pts_time:" in linea:
+            try:
+                ts.append(round(ini + float(linea.split("pts_time:")[1].split()[0]), 2))
+            except (IndexError, ValueError):
+                pass
+    return sorted(set(ts))
+
+
+def planos(cambios, ini, fin, minimo=PLANO_MINIMO):
+    """Tramos [(a, b)] entre cambios de plano; los que no llegan al mínimo se suman al anterior."""
+    bordes = [ini]
+    for t in cambios:
+        if t - bordes[-1] >= minimo and fin - t >= minimo:
+            bordes.append(t)
+    bordes.append(fin)
+    return list(zip(bordes[:-1], bordes[1:]))
+
+
+def mismo_encuadre(x, y):
+    if x["encuadre"] != y["encuadre"]:
+        return False
+    if x["encuadre"] == "cara":
+        return abs(x["extra"] - y["extra"]) < 0.1
+    if x["encuadre"] == "reaccion":
+        return abs(x["extra"][0] - y["extra"][0]) < 0.06 and abs(x["extra"][1] - y["extra"][1]) < 0.06
+    return True
+
+
+def unir_planos(lista):
+    """Junta planos seguidos con el mismo encuadre; manda el primero de cada grupo."""
+    out = []
+    for p in lista:
+        if out and mismo_encuadre(out[-1], p):
+            out[-1] = dict(out[-1], fin=p["fin"])
+        else:
+            out.append(dict(p))
+    return out
+
+
+def encuadres_por_plano(ruta, ini, fin):
+    """El encuadre de cada plano del clip.
+
+    Un solo encuadre para todo el clip fallaba en cuanto el streamer cambiaba
+    de la pantalla con su webcam a hablar a cámara (Grefg, primeros 7 s): la
+    pantalla salía recortada por el centro, ilegible, justo en el gancho.
+    """
+    lista = []
+    for a, b in planos(cortes_en(ruta, ini, fin), ini, fin):
+        enc, ratio, extra = decidir_encuadre(ruta, a, b)
+        lista.append({"ini": a, "fin": b, "encuadre": enc, "extra": extra, "detalle_laterales": ratio})
+    return unir_planos(lista)
+
+
+def args_plano(p):
+    return {"encuadre": p["encuadre"], "cx": p["extra"] if p["encuadre"] == "cara" else None,
+            "caja": p["extra"] if p["encuadre"] == "reaccion" else None}
+
+
+def cortar_planos(entrada, ini, fin, destino, lista):
+    """Corta cada plano con su encuadre y los une. El audio sale de un único
+    corte continuo: unido por trozos, cada empalme mete un chasquido."""
+    if len(lista) == 1:
+        return cortar(entrada, ini, fin, destino, **args_plano(lista[0]))
+    tmp = destino.parent / f".{destino.stem}_planos"
+    tmp.mkdir(exist_ok=True)
+    try:
+        partes = []
+        for k, p in enumerate(lista):
+            a, b = max(ini, p["ini"]), min(fin, p["fin"])
+            parte = tmp / f"{k}.mp4"
+            cortar(entrada, a, b, parte, **args_plano(p))
+            partes.append(parte)
+        (tmp / "lista.txt").write_text("".join(f"file '{x.name}'\n" for x in partes))
+        subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "concat", "-safe", "0",
+                        "-i", str(tmp / "lista.txt"), "-an", "-c:v", "copy", str(tmp / "video.mp4")],
+                       check=True)
+        subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", str(tmp / "video.mp4"),
+                        "-ss", f"{ini:.2f}", "-t", f"{fin - ini:.2f}", "-i", str(entrada),
+                        "-map", "0:v", "-map", "1:a?", "-c:v", "copy",
+                        "-c:a", "aac", "-shortest", "-movflags", "+faststart", str(destino)], check=True)
+    finally:
+        for x in tmp.iterdir():
+            x.unlink()
+        tmp.rmdir()
 
 
 def recorte_webcam(caja, w, h, ancho_rel=1080 / ALTO_WEBCAM):
@@ -520,6 +647,8 @@ def main():
                     default="auto",
                     help="auto: vertical si la fuente es horizontal; sobre la cara si alguien "
                          "habla a cámara, entero si los laterales tienen información")
+    ap.add_argument("--tramos", default=None,
+                    help="cortar estos tramos en vez de buscarlos: «356-386,19:30-20:02»")
     ap.add_argument("--fondo", default=None,
                     help="vídeo para la mitad de abajo: además de cada clip, saca su versión "
                          "en pantalla partida (clipN_fondo.mp4), para comparar las dos")
@@ -527,6 +656,8 @@ def main():
                     help="no transcribir ni quemar subtítulos")
     ap.add_argument("--vocabulario", default=None,
                     help="nombres propios y jerga del canal, separados por comas")
+    ap.add_argument("--corregir", default=None,
+                    help="palabras mal oídas en los subtítulos: «pagos=pavos,Bolt=goat»")
     ap.add_argument("--cookies-de", default=None,
                     help="navegador del que tomar la sesión si la plataforma la pide")
     ap.add_argument("--json", action="store_true")
@@ -558,8 +689,8 @@ def main():
             raise SystemExit(f"no existe: {ent}")
         meta = leer_origen(ent)
 
-    r = analizar(ent, a.cuantos, a.duracion)
-    if not a.json:
+    r = tramos_fijos(ent, a.tramos) if a.tramos else analizar(ent, a.cuantos, a.duracion)
+    if not a.json and not a.tramos:
         print(f"{ent.name} · {r['duracion_fuente']:.0f}s · {r['planos']} planos"
               + (f" · intro y cierre fuera ({r['margen']:.0f}s)" if r["margen"] else "")
               + ("" if r["con_audio"] else " · SIN AUDIO"))
@@ -583,31 +714,37 @@ def main():
             raise SystemExit(f"no existe el fondo: {fondo}")
         dur_fondo = datos_video(fondo)["duracion"] if fondo else 0.0
         for i, c in enumerate(r["clips"], 1):
-            enc, cx, caja = None, None, None
-            if a.encuadre in ("recorte", "completo"):
-                enc = a.encuadre
-            elif a.encuadre == "auto" and w > h:
-                enc, ratio, extra = decidir_encuadre(ent, c["ini"], c["fin"])
-                if ratio is not None:
-                    c["detalle_laterales"] = ratio
-                if enc == "cara":
-                    cx = c["cara_x"] = extra
-                elif enc == "reaccion":
-                    caja = extra
-                    c["webcam"] = list(extra)
-            c["encuadre"] = enc or "original"
             palabras = []
             if subtitular:
                 # Se transcribe con margen para poder mover los cortes a una
                 # pausa del habla: un clip que empieza a media palabra suena roto.
                 margen = subtitulos.ATRAS_FIN + 1
-                palabras = subtitulos.transcribir(ent, max(0.0, c["ini"] - margen),
+                palabras = subtitulos.transcribir(ent, max(0.0, c["ini"] - subtitulos.ENTRADA_TRANSCRIPCION),
                                                   min(r["duracion_fuente"], c["fin"] + margen),
                                                   vocabulario=a.vocabulario)
+                palabras = subtitulos.corregir(palabras, a.corregir)
                 c["ini_medido"], c["fin_medido"] = c["ini"], c["fin"]
-                c["ini"], c["fin"] = subtitulos.ajustar_cortes(c["ini"], c["fin"], palabras)
+                # Un tramo elegido leyendo la transcripción ya cae donde debe:
+                # solo se mueve unas décimas, hasta la palabra más cercana. Con
+                # la holgura normal (8 s) el clip 2 del cirujano retrocedió hasta
+                # el nombre de una paciente que se había dejado fuera adrede.
+                ajuste = {"holgura": 0.4, "atras_fin": 0.4} if a.tramos else {}
+                c["ini"], c["fin"] = subtitulos.ajustar_cortes(c["ini"], c["fin"], palabras, **ajuste)
                 palabras = [p for p in palabras if p["fin"] > c["ini"] and p["ini"] < c["fin"]]
                 c["texto"] = " ".join(p["t"] for p in palabras)
+
+            # Encuadre, plano a plano, sobre el corte ya ajustado.
+            if a.encuadre in ("recorte", "completo"):
+                lista = [{"ini": c["ini"], "fin": c["fin"], "encuadre": a.encuadre, "extra": None}]
+            elif a.encuadre == "auto" and w > h:
+                lista = encuadres_por_plano(ent, c["ini"], c["fin"])
+            else:
+                lista = [{"ini": c["ini"], "fin": c["fin"], "encuadre": None, "extra": None}]
+            c["encuadre"] = "+".join(dict.fromkeys(p["encuadre"] or "original" for p in lista))
+            c["planos"] = [{"ini": p["ini"], "fin": p["fin"], "encuadre": p["encuadre"] or "original"}
+                           for p in lista]
+            # La versión con fondo usa un solo encuadre: el del plano más largo.
+            principal = max(lista, key=lambda p: p["fin"] - p["ini"])
 
             versiones = [("", None)]
             if fondo:
@@ -620,26 +757,27 @@ def main():
             c["archivos"] = []
             for sufijo, ini_fondo in versiones:
                 sal = destino / f"clip{i}_{c['ini']:.0f}-{c['fin']:.0f}s{sufijo}.mp4"
-                args = dict(encuadre=enc, cx=cx, caja=caja, fondo=fondo if sufijo else None,
-                            fondo_ini=ini_fondo or 0.0)
-                if palabras:
-                    crudo = destino / f".clip{i}{sufijo}_sin_sub.mp4"
-                    cortar(ent, c["ini"], c["fin"], crudo, **args)
-                    w_sal, h_sal = medidas(crudo)
-                    # En pantalla partida, el rótulo va en la costura entre las
-                    # dos mitades: no tapa la cara ni el juego.
-                    estilo = estilo_subtitulos(enc, bool(sufijo))
-                    subtitulos.quemar(crudo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal,
-                                                            estilo), sal)
-                    crudo.unlink()
+                objetivo = (destino / f".clip{i}{sufijo}_sin_sub.mp4") if palabras else sal
+                if sufijo:
+                    cortar(ent, c["ini"], c["fin"], objetivo, fondo=fondo, fondo_ini=ini_fondo or 0.0,
+                           **args_plano(principal))
+                    por_tramo = None
+                    estilo = estilo_subtitulos(principal["encuadre"], True)
                 else:
-                    cortar(ent, c["ini"], c["fin"], sal, **args)
+                    cortar_planos(ent, c["ini"], c["fin"], objetivo, lista)
+                    # El rótulo cambia de sitio con el encuadre de cada plano.
+                    por_tramo = [(p["ini"], p["fin"], estilo_subtitulos(p["encuadre"], False)) for p in lista]
+                    estilo = por_tramo[0][2]
+                if palabras:
+                    w_sal, h_sal = medidas(objetivo)
+                    subtitulos.quemar(objetivo, subtitulos.ass(palabras, c["ini"], w_sal, h_sal, estilo,
+                                                               por_tramo), sal)
+                    objetivo.unlink()
                 c["archivos"].append(str(sal))
             c["subtitulos"] = bool(palabras)
             if not a.json:
                 print(f"  clip{i}: {c['encuadre']}"
-                      + (f" (laterales al {c['detalle_laterales']:.0%} del centro)"
-                         if "detalle_laterales" in c else "")
+                      + (f" ({len(c['planos'])} planos)" if len(c["planos"]) > 1 else "")
                       + (f" · {len(palabras)} palabras subtituladas" if palabras else "")
                       + (" · con y sin fondo" if fondo else ""))
         (destino / "informe.json").write_text(json.dumps(

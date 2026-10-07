@@ -56,6 +56,14 @@ class TestLogica(unittest.TestCase):
         movidas = [dict(p, ini=p["ini"] + 100, fin=p["fin"] + 100) for p in FRASE]
         self.assertEqual(st.eventos(st.ass(movidas, desplazamiento=100)), st.eventos(st.ass(FRASE)))
 
+    def test_rotulo_cambia_de_sitio_con_el_plano(self):
+        arriba = dict(st.ESTILO, margen_v=1000)
+        texto = st.ass(FRASE, 0, por_tramo=[(0, 2.0, arriba), (2.0, 10, st.ESTILO)])
+        self.assertEqual(sum(1 for l in texto.splitlines() if l.startswith("Style:")), 2)
+        dialogos = [l.split(",")[3] for l in texto.splitlines() if l.startswith("Dialogue")]
+        self.assertEqual(dialogos[0], "E0")
+        self.assertEqual(dialogos[-1], "E1")
+
     def test_ass_escapa_llaves(self):
         texto = st.ass(pal(("{\\b1}hola", 0, 0.5)))
         dialogo = [l for l in texto.splitlines() if l.startswith("Dialogue")][0]
@@ -79,6 +87,28 @@ class TestLogica(unittest.TestCase):
         # Tras «7.» (753.78) o tras «bien.» (752.56); nunca dentro de la frase.
         self.assertIn(round(ini, 2), (752.56, 753.78))
         self.assertEqual(round(ini, 2), 753.78, "el punto más cercano")
+
+    def test_correcciones_y_guiones(self):
+        x = pal(("de", 0, 0.2), ("pagos.", 0.2, 0.6), ("al", 0.6, 0.8), ("Bolt", 0.8, 1.0))
+        st.corregir(x, "pagos=pavos, bolt=goat")
+        self.assertEqual([p["t"] for p in x], ["de", "pavos.", "al", "goat"])
+        self.assertEqual(x[1]["ini"], 0.2, "los tiempos no se tocan")
+
+    def test_transcripcion_empieza_lejos_del_clip(self):
+        # El desfase del prompt de whisper llegaba hasta ~13 s dentro de la ventana.
+        self.assertGreaterEqual(st.ENTRADA_TRANSCRIPCION, 20)
+        fuente = (REPO / "clipper" / "autoclipper.py").read_text()
+        self.assertIn("c[\"ini\"] - subtitulos.ENTRADA_TRANSCRIPCION", fuente)
+
+    def test_tramo_elegido_casi_no_se_mueve(self):
+        # Cirujano 43:31: con la holgura normal retrocede hasta «Dana…».
+        x = pal(("contenido.", 2611.9, 2612.5), ("Dana", 2612.6, 2613.0), ("es", 2613.1, 2613.3),
+                ("una", 2613.3, 2613.6), ("de", 2613.6, 2613.8), ("ellas.", 2613.8, 2614.5),
+                ("Me", 2616.2, 2616.4), ("alegro", 2616.4, 2617.0), ("mucho.", 2617.1, 2617.4),
+                ("La", 2617.5, 2617.7), ("gente", 2617.7, 2618.1))
+        ini, _ = st.ajustar_cortes(2617.45, 2648.0, x, holgura=0.4, atras_fin=0.4)
+        self.assertGreaterEqual(ini, 2617.0)
+        self.assertLess(abs(ini - 2617.45), 0.5)
 
     def test_inicio_en_frase_entera_no_tras_coma(self):
         # Caso «Ceuta a nado»: el corte caía tras una coma, a mitad de idea.

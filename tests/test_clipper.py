@@ -176,6 +176,10 @@ class TestClipper(unittest.TestCase):
         tour = [[(0.479, 0.446, 0.591, 0.186)], [(0.414, 0.15, 0.276, 0.061)],
                 [(0.453, 0.081, 0.354, 0.037)], [(0.443, 0.156, 0.317, 0.072)], [(0.45, 0.13, 0.30, 0.07)]]
         self.assertIsNone(ac.webcam(tour))
+        # El Xokas entrando en el plano por arriba: cara cortada por el borde.
+        entrando = [[], [], [(0.3, 0.13, 0.07, 0.09)], [(0.28, 0.15, 0.08, 0.1)],
+                    [(0.29, 0.15, 0.08, 0.11)], [(0.3, 0.16, 0.08, 0.1)], [(0.31, 0.16, 0.08, 0.1)]]
+        self.assertIsNone(ac.webcam(entrando))
         # Una cara pequeña que salta de sitio no es una webcam fija.
         self.assertIsNone(ac.webcam([(0.2, 0.2, 0.3, 0.1), (0.8, 0.2, 0.7, 0.1), (0.5, 0.2, 0.2, 0.1)]))
         x, y, cw, ch = ac.recorte_webcam(caja, 1920, 1080)
@@ -188,6 +192,34 @@ class TestClipper(unittest.TestCase):
         sal = d / "reaccion.mp4"
         ac.cortar(self.largo, 60, 64, sal, "reaccion", caja=caja)
         self.assertEqual(ac.medidas(sal), (1080, 1920))
+
+    def test_tramos_elegidos_a_mano(self):
+        r = ac.tramos_fijos(self.largo, "10-20, 1:00-1:30")
+        self.assertEqual([(c["ini"], c["fin"]) for c in r["clips"]], [(10.0, 20.0), (60.0, 90.0)])
+        self.assertTrue(r["con_audio"])
+        with self.assertRaises(SystemExit):
+            ac.tramos_fijos(self.largo, "230-300")
+
+    def test_encuadre_por_plano(self):
+        # Cambios de plano a 5, 6 y 20 s: el de 6 está a 1 s del anterior y se suma.
+        self.assertEqual(ac.planos([5, 6, 20], 0, 30), [(0, 5), (5, 20), (20, 30)])
+        lista = [{"ini": 0, "fin": 5, "encuadre": "reaccion", "extra": (0.85, 0.15, 0.07, 0.16)},
+                 {"ini": 5, "fin": 12, "encuadre": "cara", "extra": 0.50},
+                 {"ini": 12, "fin": 20, "encuadre": "cara", "extra": 0.53},
+                 {"ini": 20, "fin": 30, "encuadre": "cara", "extra": 0.80}]
+        unidos = ac.unir_planos(lista)
+        self.assertEqual([(p["ini"], p["fin"], p["encuadre"]) for p in unidos],
+                         [(0, 5, "reaccion"), (5, 20, "cara"), (20, 30, "cara")])
+        # Un clip con dos encuadres sale entero, vertical y con su audio.
+        sal = Path(self.tmp.name) / "planos.mp4"
+        ac.cortar_planos(self.largo, 60, 66, sal,
+                         [{"ini": 60, "fin": 63, "encuadre": "completo", "extra": None},
+                          {"ini": 63, "fin": 66, "encuadre": "recorte", "extra": None}])
+        self.assertEqual(ac.medidas(sal), (1080, 1920))
+        self.assertAlmostEqual(ac.datos_video(sal)["duracion"], 6.0, delta=0.3)
+        flujos = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type",
+                                 "-of", "csv=p=0", str(sal)], capture_output=True, text=True).stdout
+        self.assertIn("audio", flujos)
 
     def test_pantalla_partida_mitades(self):
         d = Path(self.tmp.name)

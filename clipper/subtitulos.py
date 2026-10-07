@@ -43,6 +43,12 @@ HOLGURA_CORTE = 3.0
 # El final puede adelantarse más: es mejor un clip unos segundos más corto que
 # uno que acaba a media frase o con el arranque de otra persona hablando.
 ATRAS_FIN = 8.0
+# Cuánto audio se transcribe ANTES del clip. Con vocabulario (--prompt),
+# whisper coloca mal los tiempos de las primeras palabras de lo que transcribe:
+# en el Xokas, «gente» salió 13 s antes y «abierto» 4,5 s después de donde
+# suenan. Con 9 s de margen ese desfase caía dentro del clip, en el gancho;
+# con 30 s cae fuera.
+ENTRADA_TRANSCRIPCION = 30.0
 
 
 # ------------------------------------------------------------ transcripción
@@ -50,6 +56,23 @@ ATRAS_FIN = 8.0
 def _ms(marca):
     h, m, s = marca.replace(",", ".").split(":")
     return int(h) * 3600 + int(m) * 60 + float(s)
+
+
+def corregir(palabras, correcciones):
+    """Cambia palabras mal oídas («pagos=pavos») conservando puntuación y tiempos.
+
+    El vocabulario de whisper ayuda pero no basta: «PlayStation de 4 millones
+    de pagos» siguió saliendo con «pavos» en el vocabulario.
+    """
+    if not correcciones:
+        return palabras
+    mapa = {k.strip().lower(): v.strip() for k, v in
+            (par.split("=", 1) for par in correcciones.split(",") if "=" in par)}
+    for p in palabras:
+        m = re.match(r"^(\W*)(.*?)(\W*)$", p["t"])
+        if m and m.group(2).lower() in mapa:
+            p["t"] = m.group(1) + mapa[m.group(2).lower()] + m.group(3)
+    return palabras
 
 
 def transcribir(ruta, ini=0.0, fin=None, idioma="es", vocabulario=None, modelo=MODELO):
@@ -73,7 +96,9 @@ def transcribir(ruta, ini=0.0, fin=None, idioma="es", vocabulario=None, modelo=M
         datos = json.loads(Path(f"{base}.json").read_text(errors="replace"))
     palabras = []
     for seg in datos.get("transcription", []):
-        t = seg["text"].strip()
+        # Whisper marca los cambios de hablante con un guion («-Claro»): en un
+        # subtítulo es ruido.
+        t = seg["text"].strip().lstrip("-–—").strip()
         if not t or re.fullmatch(r"\[.*\]|\(.*\)", t):
             continue
         a, b = _ms(seg["timestamps"]["from"]), _ms(seg["timestamps"]["to"])
@@ -199,14 +224,29 @@ ESTILO = {
 }
 
 
-def ass(palabras, desplazamiento=0.0, ancho=1080, alto=1920, estilo=ESTILO):
+def ass(palabras, desplazamiento=0.0, ancho=1080, alto=1920, estilo=ESTILO, por_tramo=None):
     """Subtítulos ASS. desplazamiento: segundo del vídeo donde empieza el clip.
 
     Un evento por palabra que suena: muestra la frase entera con esa palabra
     resaltada y un salto de escala. Los eventos de una frase son consecutivos y
     no se pisan, así que nunca hay dos rótulos a la vez.
     """
-    e = estilo
+    # por_tramo: [(ini, fin, estilo)] en segundos del vídeo. Cuando el clip
+    # cambia de encuadre (webcam arriba / persona a cámara), el rótulo cambia
+    # de sitio con él.
+    tramos = por_tramo or [(float("-inf"), float("inf"), estilo)]
+    estilos = []
+    for _, _, x in tramos:
+        if x not in estilos:
+            estilos.append(x)
+
+    def nombre(t):
+        for a, b, x in tramos:
+            if a <= t < b:
+                return f"E{estilos.index(x)}"
+        return f"E{estilos.index(tramos[-1][2])}"
+
+    e = estilos[0]
     cab = (
         "[Script Info]\nScriptType: v4.00+\nWrapStyle: 0\nScaledBorderAndShadow: yes\n"
         f"PlayResX: {ancho}\nPlayResY: {alto}\n\n"
@@ -214,9 +254,10 @@ def ass(palabras, desplazamiento=0.0, ancho=1080, alto=1920, estilo=ESTILO):
         "OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, "
         "Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, "
         "MarginV, Encoding\n"
-        f"Style: Base,{e['fuente']},{e['tam']},{e['blanco']},{e['blanco']},&H00000000,"
-        f"&H64000000,-1,0,0,0,100,100,0,0,1,{e['borde']},3,{e.get('alineacion', 2)},60,60,"
-        f"{e['margen_v']},1\n\n"
+        + "".join(
+            f"Style: E{k},{x['fuente']},{x['tam']},{x['blanco']},{x['blanco']},&H00000000,"
+            f"&H64000000,-1,0,0,0,100,100,0,0,1,{x['borde']},3,{x.get('alineacion', 2)},60,60,"
+            f"{x['margen_v']},1\n" for k, x in enumerate(estilos)) + "\n"
         "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, "
         "Effect, Text\n")
     lineas = []
@@ -241,7 +282,7 @@ def ass(palabras, desplazamiento=0.0, ancho=1080, alto=1920, estilo=ESTILO):
                                  "{\\c%s\\fscx100\\fscy100}" % (e["resalte"], w, e["blanco"]))
                 else:
                     texto.append(w)
-            lineas.append(f"Dialogue: 0,{_t(a)},{_t(b)},Base,,0,0,0,,{' '.join(texto)}")
+            lineas.append(f"Dialogue: 0,{_t(a)},{_t(b)},{nombre(p['ini'])},,0,0,0,,{' '.join(texto)}")
     return cab + "\n".join(lineas) + "\n"
 
 

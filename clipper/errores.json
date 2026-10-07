@@ -110,7 +110,8 @@
    "evidencia": "Leyendo el bucle al añadir la pantalla partida: la holgura de los subtítulos se guardaba en `h`, la misma variable que el alto del vídeo. Desde el segundo clip, `w > h` comparaba el ancho con 4: un vídeo vertical se habría reencuadrado como si fuera horizontal. No llegó a pasar porque todas las pruebas eran horizontales.",
    "causa": "Reutilizar un nombre de una letra dentro del bucle.",
    "arreglo": "La holgura tiene nombre propio (`margen`).",
-   "test": "test_alto_del_video_no_se_pisa"
+   "test": "test_alto_del_video_no_se_pisa",
+   "repetido": "8 oct: volvió a pasar al añadir --tramos (otra vez `h` para una holgura). Lo cazó test_alto_del_video_no_se_pisa antes de cortar un solo clip. Regla: dentro de main, ninguna variable nueva de una letra."
   },
   {
    "id": "pierde_el_origen_al_reprocesar",
@@ -131,10 +132,35 @@
   {
    "id": "reaccion_sin_webcam_arriba",
    "fecha": "2026-10-07",
-   "evidencia": "Clip 3 del Xokas (1168-1197 s): lee un tuit con su webcam en la esquina inferior derecha. Salió en encuadre «completo»: la pantalla entera en una franja central y su cara diminuta en la esquina. Roberto: lo estándar es la cámara arriba y lo que enseña abajo. Primera versión del arreglo: el Xokas salía dos veces, grande arriba y pequeño en su esquina abajo. Segunda vuelta (reacción a la casa de Grefg): la webcam medía 0,078 del alto, bajo el mínimo de 0,10, y cuando el vídeo enseñaba una cara grande el detector solo veía esa y perdía la webcam. Al ampliarlo, la gente del tour por el centro dio un falso positivo.",
+   "evidencia": "Clip 3 del Xokas (1168-1197 s): lee un tuit con su webcam en la esquina inferior derecha. Salió en encuadre «completo»: la pantalla entera en una franja central y su cara diminuta en la esquina. Roberto: lo estándar es la cámara arriba y lo que enseña abajo. Primera versión del arreglo: el Xokas salía dos veces, grande arriba y pequeño en su esquina abajo. Segunda vuelta (reacción a la casa de Grefg): la webcam medía 0,078 del alto, bajo el mínimo de 0,10, y cuando el vídeo enseñaba una cara grande el detector solo veía esa y perdía la webcam. Al ampliarlo, la gente del tour por el centro dio un falso positivo. Tercera vuelta: con el encuadre por planos, el Xokas levantándose y entrando por arriba en su propio plano se tomó por webcam.",
    "causa": "El encuadre conocía dos casos, persona a cámara (cara grande) y pantalla con información. La webcam superpuesta (cara del 20 % del alto, siempre en el mismo sitio) no la distinguía.",
-   "arreglo": "Tercer encuadre, «reaccion»: una cara de entre el 10 % y el 35 % del alto en 3 de 5 fotogramas y casi en el mismo sitio es la webcam. Arriba (1080x768) va la webcam ampliada con hombros; abajo, la pantalla sin la columna de la webcam, a todo el ancho. Los subtítulos, en la costura. Límite: si el clip alterna entre pantalla completa a cámara y reacción, manda la mayoría; no cambia de encuadre a mitad del clip. Ahora se miran todas las caras de 7 fotogramas, el mínimo baja a 0,05, la cara tiene que repetirse en el mismo sitio (±0,06) en la mitad de los fotogramas y estar en un borde de la imagen. La webcam se busca antes que «persona a cámara».",
+   "arreglo": "Tercer encuadre, «reaccion»: una cara de entre el 10 % y el 35 % del alto en 3 de 5 fotogramas y casi en el mismo sitio es la webcam. Arriba (1080x768) va la webcam ampliada con hombros; abajo, la pantalla sin la columna de la webcam, a todo el ancho. Los subtítulos, en la costura. Límite: si el clip alterna entre pantalla completa a cámara y reacción, manda la mayoría; no cambia de encuadre a mitad del clip. Ahora se miran todas las caras de 7 fotogramas, el mínimo baja a 0,05, la cara tiene que repetirse en el mismo sitio (±0,06) en la mitad de los fotogramas y estar en un borde de la imagen. La webcam se busca antes que «persona a cámara». Además la webcam tiene que estar en una esquina y con la cara entera dentro de la imagen (no cortada por el borde).",
    "test": "test_reaccion_webcam_arriba_y_una_sola_vez"
+  },
+  {
+   "id": "tramo_elegido_se_desplaza",
+   "fecha": "2026-10-08",
+   "evidencia": "Seis clips del Xokas elegidos leyendo la transcripción (--tramos). El del cirujano 43:31 empezó en «Dana es una de ellas»: el nombre de una paciente, que se había dejado fuera adrede. Otros cuatro empezaban o acababan a media palabra de lo elegido.",
+   "causa": "El ajuste a frases busca hasta 8 s atrás; tiene sentido cuando el clipper elige solo, no cuando el tramo ya está elegido leyendo.",
+   "arreglo": "Con --tramos la holgura baja a 0,4 s: solo se ajusta a la palabra más cercana.",
+   "test": "test_tramo_elegido_casi_no_se_mueve"
+  },
+  {
+   "id": "subtitulos_desfasados_con_vocabulario",
+   "modulo": "subtitulos",
+   "fecha": "2026-10-08",
+   "evidencia": "Clips elegidos del cirujano: el texto del clip 3 empezaba con «abierto las puertas del hospital», que suena 4,5 s antes del corte. Medido: con vocabulario, «abierto» salía a 3022,6 s (suena a 3018,1) y «gente» a 2609,4 (suena a 2622,1). Sin vocabulario, bien. Los subtítulos de los primeros segundos —el gancho— iban desincronizados con la voz. Afecta también a los dos Shorts ya publicados, hechos con vocabulario.",
+   "causa": "El prompt inicial de whisper descoloca los tiempos de las primeras palabras de la ventana transcrita, y la ventana empezaba solo 9 s antes del clip.",
+   "arreglo": "La transcripción empieza 30 s antes del clip: el tramo con tiempos descolocados queda fuera. Medido tras el cambio: «abierto» 3017,8, «Yo» 3022,3, «gente» 2622,2.",
+   "test": "test_transcripcion_empieza_lejos_del_clip"
+  },
+  {
+   "id": "un_encuadre_para_todo_el_clip",
+   "fecha": "2026-10-08",
+   "evidencia": "Clip de la reacción a la casa de Grefg (0-23 s): los primeros 7 s son la pantalla de YouTube con la webcam del Xokas en una esquina y luego habla a cámara. Salió entero como «cara»: el gancho era la pantalla recortada por el centro, ilegible y con el rótulo encima.",
+   "causa": "Se decidía un encuadre por clip, por mayoría de fotogramas.",
+   "arreglo": "Se detectan los cambios de plano dentro del clip (ffmpeg scene > 0,30), cada plano de al menos 2,5 s decide su encuadre, los seguidos iguales se juntan y se cortan por separado; la imagen se une y el audio sale de un solo corte continuo. El rótulo cambia de sitio con el plano (estilos ASS por tramo). La versión con fondo sigue con un solo encuadre, el del plano más largo.",
+   "test": "test_encuadre_por_plano"
   }
  ]
 }
