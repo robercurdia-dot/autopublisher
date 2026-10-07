@@ -2,7 +2,7 @@
 /* Suite: un raíl de herramientas a la izquierda y una vista por herramienta.
    Usa los tokens del tablero (--ground, --surface, --ink, --ambar…): la suite
    y el Autopublisher son el mismo producto. */
-:root { --rail: 76px; }
+:root { --rail: 92px; }
 
 .suite { display: flex; height: 100%; min-height: 0; }
 
@@ -138,5 +138,24 @@ article.trabajo { background: var(--surface); border: 1px solid var(--line); bor
   .herr { padding-inline: 16px; }
   .clips { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
+/* La suite con Guagua: el raíl es el azul de la marca y lo activo, amarillo. */
+
+:root[data-paleta="guagua"] nav.rail { background: var(--guagua); color: #fff; }
+
+:root[data-paleta="guagua"] nav.rail .marca { color: var(--ambar); font-weight: 800; letter-spacing: -0.02em; }
+
+:root[data-paleta="guagua"] nav.rail button { color: rgba(255,255,255,.72); }
+
+:root[data-paleta="guagua"] nav.rail button:hover:not(:disabled) { color: #fff; background: rgba(255,255,255,.12); }
+
+:root[data-paleta="guagua"] nav.rail button[aria-current="page"] { background: var(--ambar); color: #0A0A0C; }
+
+:root[data-paleta="guagua"] button.principal { color: #0A0A0C; }
+
+:root[data-paleta="guagua"] .clip .puntos { color: var(--ambar); }
+
+:root[data-paleta="guagua"] .trabajo-cab .fuente { color: var(--azul); }
+
+:root[data-paleta="guagua"] .aviso-motor { border-left-color: var(--cobre); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
