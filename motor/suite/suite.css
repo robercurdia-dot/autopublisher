@@ -175,6 +175,34 @@ article.trabajo { padding: 16px 18px; display: flex; flex-direction: column; gap
 .fila-m .k { color: var(--tinta-2); min-width: 0; overflow-wrap: anywhere; }
 .fila-m .v { font: 12.5px var(--datos); text-align: right; }
 
+
+/* flujo editor */
+.datos-fuente { font-size: 13.5px; color: var(--tinta-2); }
+.propuestas { display: flex; flex-direction: column; gap: 10px; }
+.lista-propuestas { display: flex; flex-direction: column; gap: 8px; }
+.propuesta { display: flex; gap: 10px; align-items: flex-start; background: rgba(255,255,255,.7); border-radius: 14px; padding: 10px 12px; }
+.propuesta input[type=checkbox] { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--aqua); flex: none; }
+.prop-cuerpo { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.prop-titulo { font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
+.prop-gancho { font-size: 14px; color: var(--tinta-2); overflow-wrap: anywhere; }
+.prop-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--tinta-3); }
+.prop-meta .tiempo { width: 62px; font: 13px var(--datos); padding: 3px 6px; border: 1px solid rgba(15,46,69,.16); border-radius: 8px; background: #fff; color: var(--tinta); }
+.prop-dur { font-weight: 700; color: var(--tinta-2); }
+.prop-porque { font-style: italic; min-width: 0; overflow-wrap: anywhere; }
+.aqua.pequeño { font-size: 14px; padding: 7px 18px; }
+.clip-pub { gap: 8px; }
+.form-pub { display: flex; flex-direction: column; gap: 6px; }
+.campo-pub { font: 13.5px var(--fuente); color: var(--tinta); background: #fff; border: 1px solid rgba(15,46,69,.16); border-radius: 10px; padding: 6px 8px; width: 100%; min-width: 0; resize: vertical; }
+.campo-pub:focus-visible { outline: 3px solid rgba(92,199,245,.4); outline-offset: 0; }
+.clips:has(.clip-pub) { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.nota-cola { padding: 12px 16px; font-size: 14px; color: var(--tinta-2); }
+#lista-cola { display: flex; flex-direction: column; gap: 10px; }
+.fila-cola { display: flex; gap: 12px; align-items: center; padding: 12px 16px; flex-wrap: wrap; }
+.cola-cuando { font: 600 13px var(--datos); color: var(--tinta-2); white-space: nowrap; }
+.cola-titulo { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; }
+.cola-titulo small { font-weight: 400; color: #A33519; font-size: 12.5px; }
+.fila-cola a.cristal-btn { text-decoration: none; }
+
 @media (max-width: 640px) {
   .barra-suite { border-radius: 22px; }
   .conexion { margin-left: 0; }

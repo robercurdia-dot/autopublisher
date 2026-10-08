@@ -34,7 +34,8 @@ class TestProtocolo(unittest.TestCase):
         self.assertEqual(len(r), 2, "la notificación no lleva respuesta")
         self.assertEqual(r[0]["result"]["serverInfo"]["name"], "autopublisher")
         nombres = {t["name"] for t in r[1]["result"]["tools"]}
-        self.assertEqual(nombres, {"clipear", "trabajos", "miniatura", "abrir", "estado"})
+        self.assertEqual(nombres, {"analizar", "transcripcion", "clipear", "trabajos", "miniatura",
+                                   "abrir", "programar", "cola", "actualizar_cola", "estado"})
         lectura = {t["name"]: t["annotations"]["readOnlyHint"] for t in r[1]["result"]["tools"]}
         self.assertFalse(lectura["clipear"])
         self.assertTrue(lectura["trabajos"])
@@ -85,6 +86,58 @@ class TestHerramientas(unittest.TestCase):
         self.assertEqual(e["enmiendas_activas"],
                          sum(1 for x in enm if x.get("estado", "activa") == "activa"))
         self.assertIn("youtube_clips", e["cuentas"])
+
+
+class TestFlujoEditor(unittest.TestCase):
+    """Análisis → transcripción → tramos → cola de publicación, sin red."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(dir=REPO / "motor")
+        d = Path(self.tmp.name)
+        self.orig = (m.TRABAJOS, m.COLA, m.SUBIR)
+        m.TRABAJOS, m.COLA, m.SUBIR = d / "trabajos", d / "cola.json", d / "subir"
+        m.TRABAJOS.mkdir()
+        # Un análisis terminado, como lo dejaría transcribir_fuente.py.
+        self.fuente = d / "fuente"
+        self.fuente.mkdir()
+        subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=320x180:d=3",
+                        "-pix_fmt", "yuv420p", str(self.fuente / "original.mp4")], check=True)
+        (self.fuente / "transcripcion.json").write_text(json.dumps(
+            {"duracion": 75, "titulo": "Prueba", "canal": "alguien", "url": "https://youtu.be/x",
+             "segmentos": [{"ini": 1, "fin": 3, "t": "Hola."}, {"ini": 40, "fin": 42, "t": "Adiós."}]}))
+        self.aid = "abcd1234"
+        (m.TRABAJOS / f"{self.aid}.json").write_text(json.dumps(
+            {"id": self.aid, "tipo": "analisis", "pid": None, "creado": 0, "carpeta": str(self.fuente)}))
+        (m.TRABAJOS / f"{self.aid}.log").write_text(f"40 frases transcritas en {self.fuente}/\n")
+
+    def tearDown(self):
+        m.TRABAJOS, m.COLA, m.SUBIR = self.orig
+        self.tmp.cleanup()
+
+    def test_transcripcion_en_bloques(self):
+        self.assertEqual(m.transcripcion(self.aid)["texto"].splitlines(), ["00:01 Hola.", "00:40 Adiós."])
+        t = m.transcripcion(self.aid, bloque=30)
+        self.assertEqual(t["texto"].splitlines(), ["[00:00] Hola.", "[00:30] Adiós."])
+        self.assertEqual(m._leer(self.aid)["fuente"]["frases"], 2)
+
+    def test_tramos_mal_escritos_se_rechazan(self):
+        with self.assertRaises(ValueError):
+            m.clipear(analisis=self.aid, tramos="desde el 3 al 10")
+
+    def test_cola_de_publicacion(self):
+        video = self.fuente / "original.mp4"
+        with self.assertRaises(ValueError):
+            m.programar(str(video), "Título", "", "2020-01-01T09:00")
+        with self.assertRaises(ValueError):
+            m.programar(str(video), "x" * 101, "", "2099-01-01T09:00")
+        with self.assertRaises(ValueError):
+            m.programar("/etc/hosts", "Título", "", "2099-01-01T09:00")
+        item = m.programar(str(video), "Título", "Desc", "2099-01-01T09:00")
+        self.assertTrue(Path(item["subir"]).exists())
+        self.assertLessEqual(Path(item["subir"]).stat().st_size, m.MAX_SUBIDA)
+        m.actualizar_cola(item["id"], "programado", url="https://youtube.com/shorts/abc")
+        c = m.cola()["cola"]
+        self.assertEqual((c[0]["estado"], c[0]["url"]), ("programado", "https://youtube.com/shorts/abc"))
 
 
 if __name__ == "__main__":

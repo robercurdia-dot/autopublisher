@@ -5,6 +5,7 @@
   <div class="logo"><span class="orbe" aria-hidden="true"></span>Suite</div>
   <nav class="rail" aria-label="Herramientas">
     <button type="button" data-vista="clipper" aria-current="page">Clipper</button>
+    <button type="button" data-vista="publicacion">Publicación</button>
     <button type="button" data-vista="autopublisher">Autopublisher</button>
     <button type="button" data-vista="motor">Motor</button>
   </nav>
@@ -22,36 +23,35 @@
         <div class="buscador">
           <label class="oculto" for="c-url">Enlace del vídeo</label>
           <input id="c-url" type="url" required placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
-          <button type="submit" class="aqua" id="c-enviar" disabled>Sacar clips</button>
+          <button type="submit" class="aqua" id="c-enviar" disabled>Analizar</button>
         </div>
         <details class="opciones">
           <summary>Opciones</summary>
           <div class="rejilla-opciones">
-            <div class="campo">
-              <label for="c-cuantos">Clips</label>
-              <select id="c-cuantos"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
-            </div>
-            <div class="campo">
-              <label for="c-dur">Duración</label>
-              <select id="c-dur">
-                <option value="" selected>Automática</option>
-                <option value="14">14 s</option><option value="20">20 s</option>
-                <option value="30">30 s</option><option value="45">45 s</option><option value="58">58 s</option>
-              </select>
-            </div>
             <div class="campo ancho">
               <label for="c-vocab">Nombres propios para los subtítulos</label>
-              <input id="c-vocab" type="text" placeholder="Xokas, Ceuta, Marruecos" autocomplete="off">
+              <input id="c-vocab" type="text" placeholder="Xokas, Grefg, Andorra" autocomplete="off">
             </div>
             <div class="campo ancho">
-              <label for="c-fondo">Vídeo de fondo (pantalla partida)</label>
-              <input id="c-fondo" type="text" placeholder="~/Downloads/clips/fondos/gameplay.mp4" autocomplete="off">
+              <label for="c-corregir">Palabras que whisper oye mal</label>
+              <input id="c-corregir" type="text" placeholder="pagos=pavos, bolt=goat" autocomplete="off">
+            </div>
+            <div class="campo">
+              <label for="c-cuantos">Momentos a proponer</label>
+              <select id="c-cuantos"><option>3</option><option>4</option><option>5</option><option selected>6</option><option>8</option><option>10</option></select>
+            </div>
+            <div class="campo">
+              <label for="c-modo">Cómo se eligen</label>
+              <select id="c-modo">
+                <option value="leyendo" selected>Leyendo lo que se dice</option>
+                <option value="rapido">Rápido, por volumen e imagen</option>
+              </select>
             </div>
             <label class="check ancho"><input type="checkbox" id="c-chrome"> Usar mi sesión de Chrome (si YouTube pide confirmar que no eres un bot)</label>
           </div>
         </details>
       </form>
-      <div class="nota-envio" id="c-nota">Tarda unos 5 minutos por cada media hora de vídeo.</div>
+      <div class="nota-envio" id="c-nota">Lo baja y lo transcribe entero; luego Claude propone los mejores momentos y tú eliges.</div>
     </div>
 
     <div class="aviso-motor cristal" id="aviso-motor" hidden>
@@ -65,13 +65,26 @@
     </div>
 
     <div class="cab-trabajos">
-      <h2>Tus clips</h2>
+      <h2>Tus vídeos</h2>
       <button type="button" class="cristal-btn" id="c-actualizar" disabled>Actualizar</button>
     </div>
     <div id="lista-trabajos">
-      <div class="vacio-lista cristal"><b>Aquí aparecen tus clips.</b>Cada uno con su miniatura, lo que se dice y un botón para verlo.</div>
+      <div class="vacio-lista cristal"><b>Aquí aparece cada vídeo que analices.</b>Primero la transcripción y los momentos propuestos; después, los clips listos para programar.</div>
     </div>
 
+  </div>
+</section>
+
+<section class="vista" id="v-publicacion" aria-label="Publicación" hidden>
+  <div class="columna">
+    <div class="cab-trabajos">
+      <h2>Publicación</h2>
+      <button type="button" class="cristal-btn" id="p-actualizar" disabled>Actualizar</button>
+    </div>
+    <div class="cristal nota-cola">El publicador recoge la cola cada hora, sube cada clip a YouTube Studio y lo deja programado a su hora. Los que ya tienen enlace están en YouTube.</div>
+    <div id="lista-cola">
+      <div class="vacio-lista cristal"><b>La cola está vacía.</b>Programa un clip desde el Clipper y aparecerá aquí con su fecha.</div>
+    </div>
   </div>
 </section>
 

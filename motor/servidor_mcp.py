@@ -29,6 +29,7 @@ import subprocess
 import sys
 import time
 import uuid
+from datetime import datetime
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -62,43 +63,86 @@ def _vivo(pid):
         return False
 
 
-def clipear(url, cuantos=3, duracion=None, fondo=None, vocabulario=None,
-            sesion_chrome=False):
-    if not re.match(r"^https?://", url or ""):
-        raise ValueError("hace falta un enlace http(s)")
-    cuantos = max(1, min(int(cuantos), 10))
+def _lanzar(cmd, datos):
+    """Arranca un proceso aparte (sobrevive al servidor) y guarda su ficha."""
     TRABAJOS.mkdir(parents=True, exist_ok=True)
     tid = uuid.uuid4().hex[:8]
-    log = TRABAJOS / f"{tid}.log"
-    cmd = [PYTHON, str(REPO / "clipper" / "autoclipper.py"), url, "--cuantos", str(cuantos)]
-    if duracion:
-        cmd += ["--duracion", str(float(duracion))]
-    if fondo:
-        cmd += ["--fondo", str(_permitida(fondo))]
-    if vocabulario:
-        cmd += ["--vocabulario", str(vocabulario)[:300]]
-    if sesion_chrome:
-        cmd += ["--cookies-de", "chrome"]
-    with open(log, "w") as f:
+    with open(TRABAJOS / f"{tid}.log", "w") as f:
         p = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT, cwd=REPO,
                              start_new_session=True, env={**os.environ, "PYTHONUNBUFFERED": "1"})
-    datos = {"id": tid, "url": url, "cuantos": cuantos, "duracion": duracion,
-             "fondo": fondo, "vocabulario": vocabulario, "sesion_chrome": sesion_chrome,
-             "pid": p.pid, "creado": time.time(), "carpeta": None}
+    datos = {"id": tid, "pid": p.pid, "creado": time.time(), "carpeta": None, **datos}
     _ruta_trabajo(tid).write_text(json.dumps(datos, ensure_ascii=False))
     return {"id": tid, "estado": "en_curso"}
 
 
+def analizar(url, vocabulario=None, sesion_chrome=False):
+    """Baja el vídeo y lo transcribe entero: primer paso para elegir clips leyendo."""
+    if not re.match(r"^https?://", url or ""):
+        raise ValueError("hace falta un enlace http(s)")
+    cmd = [PYTHON, str(REPO / "clipper" / "transcribir_fuente.py"), url]
+    if vocabulario:
+        cmd += ["--vocabulario", str(vocabulario)[:300]]
+    if sesion_chrome:
+        cmd += ["--cookies-de", "chrome"]
+    return _lanzar(cmd, {"tipo": "analisis", "url": url, "vocabulario": vocabulario})
+
+
+def _fuente(trabajo):
+    """Carpeta y vídeo original de un análisis terminado."""
+    d = _leer(trabajo)
+    if d.get("tipo") != "analisis" or d["estado"] != "terminado":
+        raise ValueError("ese análisis no ha terminado")
+    return Path(d["carpeta"]), Path(d["carpeta"]) / "original.mp4", d
+
+
+def clipear(url=None, cuantos=3, duracion=None, fondo=None, vocabulario=None,
+            sesion_chrome=False, analisis=None, tramos=None, propuestas=None, corregir=None):
+    """Corta clips. Dos modos:
+
+    - url: el clipper elige solo (por audio, imagen y ritmo).
+    - analisis + tramos: corta los momentos elegidos leyendo la transcripción
+      de un análisis («356-386,19:30-20:02»), con sus propuestas de título.
+    """
+    if analisis:
+        carpeta, video, a = _fuente(analisis)
+        if not re.fullmatch(r"[\d.:]+-[\d.:]+(\s*,\s*[\d.:]+-[\d.:]+)*", (tramos or "").strip()):
+            raise ValueError("tramos no válidos: «356-386,19:30-20:02»")
+        salida = carpeta / f"clips_{datetime.now():%Y%m%d-%H%M%S}"
+        cmd = [PYTHON, str(REPO / "clipper" / "autoclipper.py"), str(video),
+               "--tramos", tramos.strip(), "--salida", str(salida)]
+        url = a.get("url")
+        vocabulario = vocabulario or a.get("vocabulario")
+    else:
+        if not re.match(r"^https?://", url or ""):
+            raise ValueError("hace falta un enlace http(s)")
+        cmd = [PYTHON, str(REPO / "clipper" / "autoclipper.py"), url,
+               "--cuantos", str(max(1, min(int(cuantos), 10)))]
+        if duracion:
+            cmd += ["--duracion", str(float(duracion))]
+        if sesion_chrome:
+            cmd += ["--cookies-de", "chrome"]
+    if fondo:
+        cmd += ["--fondo", str(_permitida(fondo))]
+    if vocabulario:
+        cmd += ["--vocabulario", str(vocabulario)[:300]]
+    if corregir:
+        cmd += ["--corregir", str(corregir)[:300]]
+    return _lanzar(cmd, {"tipo": "clips", "url": url, "analisis": analisis, "tramos": tramos,
+                         "propuestas": propuestas or [], "vocabulario": vocabulario})
+
+
 def _leer(tid):
     d = json.loads(_ruta_trabajo(tid).read_text())
+    d.setdefault("tipo", "clips")
     log = TRABAJOS / f"{tid}.log"
     texto = log.read_text(errors="replace") if log.exists() else ""
-    m = re.search(r"clips en (.+?)/?\s*$", texto, re.M)
+    m = re.search(r"(?:clips|frases transcritas) en (.+?)/?\s*$", texto, re.M)
     if m and not d.get("carpeta"):
         d["carpeta"] = m.group(1)
         _ruta_trabajo(tid).write_text(json.dumps(d, ensure_ascii=False))
     vivo = _vivo(d.get("pid"))
-    if d.get("carpeta") and (Path(d["carpeta"]) / "informe.json").exists() and not vivo:
+    hecho = "transcripcion.json" if d["tipo"] == "analisis" else "informe.json"
+    if d.get("carpeta") and (Path(d["carpeta"]) / hecho).exists() and not vivo:
         estado = "terminado"
     elif vivo:
         estado = "en_curso"
@@ -109,7 +153,11 @@ def _leer(tid):
     d["registro"] = lineas[-12:]
     if estado == "fallido":
         d["motivo"] = _motivo(texto)
-    d["clips"] = _clips(d["carpeta"]) if estado == "terminado" else []
+    d["clips"] = _clips(d["carpeta"], d.get("propuestas")) if estado == "terminado" and d["tipo"] == "clips" else []
+    if estado == "terminado" and d["tipo"] == "analisis":
+        t = json.loads((Path(d["carpeta"]) / "transcripcion.json").read_text())
+        d["fuente"] = {"titulo": t.get("titulo"), "canal": t.get("canal"),
+                       "duracion": t.get("duracion"), "frases": len(t.get("segmentos", []))}
     return d
 
 
@@ -122,18 +170,21 @@ def _motivo(texto):
     return (errores[-1] if errores else "el proceso terminó sin dejar informe")[:300]
 
 
-def _clips(carpeta):
+def _clips(carpeta, propuestas=None):
     inf = Path(carpeta) / "informe.json"
     if not inf.exists():
         return []
     r = json.loads(inf.read_text())
+    origen = r.get("origen") or {}
     out = []
     for i, c in enumerate(r.get("clips", []), 1):
         archivos = c.get("archivos") or ([c["archivo"]] if c.get("archivo") else [])
+        prop = (propuestas or [])[i - 1] if propuestas and i <= len(propuestas) else None
         out.append({"n": i, "ini": c["ini"], "fin": c["fin"], "puntos": c.get("puntos"),
                     "audio": c.get("audio"), "encuadre": c.get("encuadre"),
                     "texto": c.get("texto", ""), "archivos": archivos,
-                    "publicado": c.get("publicado")})
+                    "publicado": c.get("publicado"), "propuesta": prop,
+                    "origen": {"url": origen.get("webpage_url"), "canal": origen.get("uploader")}})
     return out
 
 
@@ -142,6 +193,101 @@ def trabajos(limite=20):
         return {"trabajos": []}
     fs = sorted(TRABAJOS.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
     return {"trabajos": [_leer(f.stem) for f in fs[: int(limite)]]}
+
+
+def transcripcion(analisis, bloque=0):
+    """La transcripción de un análisis: frase a frase («mm:ss texto») o, con
+    `bloque`, agrupada en bloques de tantos segundos («[mm:ss] texto»)."""
+    carpeta, _, _ = _fuente(analisis)
+    t = json.loads((carpeta / "transcripcion.json").read_text())
+    if not bloque:
+        # Frase a frase, con su segundo exacto: para que quien elige los cortes
+        # pueda empezar justo donde arranca una frase.
+        texto = "\n".join(f"{int(x['ini']) // 60:02d}:{int(x['ini']) % 60:02d} {x['t']}"
+                          for x in t["segmentos"])
+    else:
+        grupos = {}
+        for x in t["segmentos"]:
+            grupos.setdefault(int(x["ini"] // bloque) * bloque, []).append(x["t"])
+        texto = "\n".join(f"[{k // 60:02d}:{k % 60:02d}] " + " ".join(v) for k, v in sorted(grupos.items()))
+    return {"titulo": t.get("titulo"), "canal": t.get("canal"), "url": t.get("url"),
+            "duracion": t.get("duracion"), "texto": texto}
+
+
+# -------------------------------------------------------------- publicación
+
+COLA = REPO / "motor" / "cola_publicacion.json"
+SUBIR = CLIPS / "subir"
+# La subida por Chrome admite como mucho 10 MB por fichero: se prepara una
+# copia por debajo de este tamaño al programar, con la misma resolución.
+MAX_SUBIDA = 9_000_000
+
+
+def _cola():
+    return json.loads(COLA.read_text()) if COLA.exists() else []
+
+
+def _guardar_cola(items):
+    COLA.write_text(json.dumps(items, ensure_ascii=False, indent=1))
+
+
+def _copia_para_subir(video, pid):
+    SUBIR.mkdir(parents=True, exist_ok=True)
+    destino = SUBIR / f"{pid}.mp4"
+    if video.stat().st_size <= MAX_SUBIDA:
+        destino.write_bytes(video.read_bytes())
+        return destino
+    dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                "-of", "csv=p=0", str(video)], capture_output=True, text=True).stdout)
+    kbps = int(MAX_SUBIDA * 0.95 * 8 / dur / 1000 - 130)
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", str(video), "-c:v", "libx264",
+                    "-preset", "slow", "-b:v", f"{kbps}k", "-maxrate", f"{kbps * 3 // 2}k",
+                    "-bufsize", f"{kbps * 2}k", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
+                    "-movflags", "+faststart", str(destino)], check=True)
+    return destino
+
+
+def programar(archivo, titulo, descripcion, cuando, plataforma="youtube"):
+    """Deja un clip en la cola de publicación. `cuando`: «2026-10-09T09:00», hora de Madrid."""
+    video = _permitida(archivo)
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", cuando or ""):
+        raise ValueError("fecha no válida: «2026-10-09T09:00»")
+    if datetime.strptime(cuando, "%Y-%m-%dT%H:%M") <= datetime.now():
+        raise ValueError("esa hora ya ha pasado")
+    titulo = (titulo or "").strip()
+    if not 0 < len(titulo) <= 100:
+        raise ValueError("el título tiene que tener entre 1 y 100 caracteres")
+    pid = uuid.uuid4().hex[:8]
+    subir = _copia_para_subir(video, pid)
+    item = {"id": pid, "plataforma": plataforma, "archivo": str(video), "subir": str(subir),
+            "titulo": titulo, "descripcion": (descripcion or "").strip()[:4900],
+            "cuando": cuando, "zona": "Europe/Madrid", "estado": "pendiente",
+            "creado": time.time(), "url": None, "nota": None}
+    items = _cola()
+    items.append(item)
+    _guardar_cola(items)
+    return item
+
+
+def cola():
+    return {"cola": sorted(_cola(), key=lambda x: x["cuando"])}
+
+
+def actualizar_cola(id, estado, url=None, nota=None):
+    """Para el publicador: marca un elemento como programado, publicado o fallido."""
+    if estado not in ("pendiente", "programado", "publicado", "fallido", "cancelado"):
+        raise ValueError("estado no válido")
+    items = _cola()
+    for x in items:
+        if x["id"] == id:
+            x["estado"], x["actualizado"] = estado, time.time()
+            if url:
+                x["url"] = url
+            if nota:
+                x["nota"] = str(nota)[:300]
+            _guardar_cola(items)
+            return x
+    raise ValueError("no está en la cola")
 
 
 # ------------------------------------------------------------------ ficheros
@@ -199,21 +345,42 @@ def _obj(props, req=()):
 
 
 HERRAMIENTAS = {
-    "clipear": (clipear, "Lanza el autoclipper sobre un enlace (YouTube, TikTok, Instagram, X, "
-                "Facebook) en segundo plano y devuelve el id del trabajo. Tarda minutos.",
-                _obj({"url": {"type": "string"},
+    "analizar": (analizar, "Baja un vídeo y lo transcribe entero, en segundo plano. Devuelve el id del "
+                 "análisis; con él se piden la transcripción y los clips elegidos.",
+                 _obj({"url": {"type": "string"}, "vocabulario": {"type": "string"},
+                       "sesion_chrome": {"type": "boolean"}}, ["url"]), False),
+    "transcripcion": (transcripcion, "La transcripción de un análisis terminado, en bloques de 30 s.",
+                      _obj({"analisis": {"type": "string"}, "bloque": {"type": "integer"}},
+                           ["analisis"]), True),
+    "clipear": (clipear, "Corta clips. Con url, el clipper elige solo. Con analisis + tramos, corta "
+                "los momentos elegidos («356-386,19:30-20:02») y guarda sus propuestas de título.",
+                _obj({"url": {"type": "string"}, "analisis": {"type": "string"},
+                      "tramos": {"type": "string"},
+                      "propuestas": {"type": "array", "items": {"type": "object"}},
                       "cuantos": {"type": "integer", "minimum": 1, "maximum": 10},
                       "duracion": {"type": "number"},
                       "fondo": {"type": "string", "description": "ruta a un vídeo de fondo"},
-                      "vocabulario": {"type": "string"},
-                      "sesion_chrome": {"type": "boolean"}}, ["url"]), False),
-    "trabajos": (trabajos, "Trabajos del clipper, del más reciente al más antiguo, con estado, "
+                      "vocabulario": {"type": "string"}, "corregir": {"type": "string"},
+                      "sesion_chrome": {"type": "boolean"}}), False),
+    "trabajos": (trabajos, "Análisis y trabajos de clips, del más reciente al más antiguo, con estado, "
                  "registro y clips.", _obj({"limite": {"type": "integer"}}), True),
     "miniatura": (miniatura, "Un fotograma JPEG en base64 de un clip.",
                   _obj({"ruta": {"type": "string"}, "segundo": {"type": "number"},
                         "ancho": {"type": "integer"}}, ["ruta"]), True),
     "abrir": (abrir, "Abre un clip en el reproductor del Mac, o su carpeta en el Finder.",
               _obj({"ruta": {"type": "string"}, "carpeta": {"type": "boolean"}}, ["ruta"]), False),
+    "programar": (programar, "Deja un clip en la cola de publicación con su título, descripción y "
+                  "hora (hora de Madrid, «2026-10-09T09:00»).",
+                  _obj({"archivo": {"type": "string"}, "titulo": {"type": "string"},
+                        "descripcion": {"type": "string"}, "cuando": {"type": "string"},
+                        "plataforma": {"type": "string"}},
+                       ["archivo", "titulo", "cuando"]), False),
+    "cola": (cola, "La cola de publicación, por fecha.", _obj({}), True),
+    "actualizar_cola": (actualizar_cola, "Marca un elemento de la cola: programado, publicado, "
+                        "fallido o cancelado.",
+                        _obj({"id": {"type": "string"}, "estado": {"type": "string"},
+                              "url": {"type": "string"}, "nota": {"type": "string"}},
+                             ["id", "estado"]), False),
     "estado": (estado, "Estado del motor: subtítulos, caras, errores, enmiendas, cuentas y saldos.",
                _obj({}), True),
 }

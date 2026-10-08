@@ -46,3 +46,4 @@ clipper/modelos/
 motor/trabajos/
 motor/suite/autopublisher_suite.html
 motor/suite/tablero_original.html
+motor/cola_publicacion.json
