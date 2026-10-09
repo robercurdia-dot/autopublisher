@@ -25,6 +25,18 @@ def hablar(*mensajes):
 
 class TestProtocolo(unittest.TestCase):
 
+    def test_proceso_acabado_no_cuenta_como_vivo(self):
+        # 9 oct: el análisis acabó pero quedó zombi (hijo sin recoger) y el motor lo
+        # daba por «en curso» para siempre, así que no dejaba cortar los clips.
+        import time
+        p = subprocess.Popen([sys.executable, "-c", "pass"])
+        for _ in range(50):
+            time.sleep(0.1)
+            if subprocess.run(["ps", "-o", "stat=", "-p", str(p.pid)],
+                              capture_output=True, text=True).stdout.strip().startswith("Z"):
+                break
+        self.assertFalse(m._vivo(p.pid))
+
     def test_saludo_y_lista_por_stdio(self):
         r = hablar({"jsonrpc": "2.0", "id": 1, "method": "initialize",
                     "params": {"protocolVersion": "2025-06-18", "capabilities": {},

@@ -56,6 +56,12 @@ def _ruta_trabajo(tid):
 
 
 def _vivo(pid):
+    # Un hijo que ya acabó sigue «existiendo» como zombi hasta que se recoge: recogerlo aquí.
+    try:
+        if os.waitpid(pid, os.WNOHANG)[0] == pid:
+            return False
+    except (ChildProcessError, TypeError):
+        pass
     try:
         os.kill(pid, 0)
         return True
