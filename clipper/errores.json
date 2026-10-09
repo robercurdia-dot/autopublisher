@@ -169,6 +169,14 @@
       "causa": "El motor lanza el trabajo con Popen y nunca lo recoge: al acabar queda zombi y os.kill(pid, 0) sigue respondiendo, así que _vivo lo daba por vivo.",
       "arreglo": "_vivo recoge primero al hijo con os.waitpid(pid, WNOHANG); si ha acabado, cuenta como muerto. El motor en marcha necesita reiniciarse para cargar el arreglo.",
       "test": "test_proceso_acabado_no_cuenta_como_vivo"
+    },
+    {
+      "id": "tramo_elegido_abre_con_la_cola_de_otra_frase",
+      "fecha": "2026-10-09",
+      "evidencia": "Clips de Auron con tramos elegidos a mano: 6 de 7 abrían con la última palabra de la frase anterior («disfrutándolo.», «eres un alien.», «verlo.»).",
+      "causa": "Los tramos se escriben en segundos enteros redondeados hacia abajo y el ajuste solo buscaba cierre de frase a ±0,4 s; el cierre quedaba a 0,45 s y caía en el respaldo «entre dos palabras cualesquiera».",
+      "arreglo": "Con tramos, el inicio y el fin pueden avanzar hasta 1,2 s (TRAMO_ADELANTE) para llegar al cierre de frase y siguen sin retroceder más de 0,4 s (TRAMO_ATRAS). Al elegir tramos, mirar las palabras con tiempos exactos, no el resumen en mm:ss.",
+      "test": "test_tramo_elegido_avanza_hasta_el_cierre_de_frase"
     }
   ]
 }

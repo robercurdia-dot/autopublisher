@@ -22,14 +22,23 @@ Canal: **ClipperZero** · `UCZjfgv3NmW68ikiMS1wIkrQ` (I mayúscula antes de «kr
       el texto se pierde.
    4. Título: pincha el campo, `cmd+a`, escribe `titulo`. Descripción: pincha el campo
       y escribe `descripcion`. **No pulses Escape nunca**: cierra el diálogo.
-      Comprueba con una captura que los dos han entrado.
+      Comprueba con un zoom que los dos han entrado. **El primer intento casi siempre
+      se pierde** (9 oct: 6 de 7 veces, esperase 10 o 15 s): el formulario se rehace
+      cuando la subida pasa a «Procesando vídeo». Si el título sigue siendo el nombre
+      del fichero, repite el paso entero en otra llamada; la segunda entra.
+      Al escribir un `#` se abre el autocompletado de hashtags: ciérralo pinchando en
+      el encabezado «Detalles», no con Escape.
    5. Marca «No, no es contenido creado para niños» y **comprueba con un zoom** que ha
       quedado marcado: a veces el clic no entra.
    6. «Siguiente» tres veces hasta «Visibilidad». Despliega «Programar».
-   7. Hora: localiza con `find` el campo de hora, triple clic sobre él y escribe la hora
-      en formato `9:00 a.m.` / `1:00 p.m.`, y Enter.
-   8. Zona horaria: abre «Zona horaria» y elige **«(GMT+0200) Hora local»** (Madrid en
-      horario de verano; en invierno será GMT+0100). Sin esto puede quedar en otra zona.
+   7. Zona horaria primero: pincha «Zona horaria» (a veces hace falta un segundo clic
+      para que se abra la lista) y elige **«(GMT+0200) Hora local»**, la primera
+      (Madrid en horario de verano; en invierno será GMT+0100).
+   8. Hora: escribirla no funciona y pinchar la opción por `ref` tampoco se queda.
+      Abre el campo de hora, baja la lista con la rueda (unas 3 opciones de 15 min por
+      golpe), haz una captura y pincha la hora por coordenadas. Al elegir la zona la
+      página a veces se desplaza y el campo de hora cambia de sitio: vuelve a
+      localizarlo con una captura antes de pinchar.
    9. Fecha: abre el selector de fecha y elige el día de `cuando`.
    10. **Verifica con un zoom** que fecha, hora y zona son las correctas. Pulsa
        «Programar».

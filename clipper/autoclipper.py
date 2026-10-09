@@ -724,11 +724,12 @@ def main():
                                                   vocabulario=a.vocabulario)
                 palabras = subtitulos.corregir(palabras, a.corregir)
                 c["ini_medido"], c["fin_medido"] = c["ini"], c["fin"]
-                # Un tramo elegido leyendo la transcripción ya cae donde debe:
-                # solo se mueve unas décimas, hasta la palabra más cercana. Con
-                # la holgura normal (8 s) el clip 2 del cirujano retrocedió hasta
-                # el nombre de una paciente que se había dejado fuera adrede.
-                ajuste = {"holgura": 0.4, "atras_fin": 0.4} if a.tramos else {}
+                # Un tramo elegido leyendo la transcripción ya cae casi donde debe:
+                # retrocede unas décimas como mucho (con la holgura normal el clip 2
+                # del cirujano llegó al nombre de una paciente) y avanza hasta el
+                # cierre de frase que el redondeo a segundos deja justo detrás.
+                ajuste = ({"holgura": subtitulos.TRAMO_ADELANTE, "atras_fin": subtitulos.TRAMO_ATRAS}
+                          if a.tramos else {})
                 c["ini"], c["fin"] = subtitulos.ajustar_cortes(c["ini"], c["fin"], palabras, **ajuste)
                 palabras = [p for p in palabras if p["fin"] > c["ini"] and p["ini"] < c["fin"]]
                 c["texto"] = " ".join(p["t"] for p in palabras)

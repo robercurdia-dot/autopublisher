@@ -110,6 +110,19 @@ class TestLogica(unittest.TestCase):
         self.assertGreaterEqual(ini, 2617.0)
         self.assertLess(abs(ini - 2617.45), 0.5)
 
+    def test_tramo_elegido_avanza_hasta_el_cierre_de_frase(self):
+        # Auron 0:41 (9 oct): el tramo se elige en segundos enteros, redondeados hacia
+        # abajo; el cierre quedaba a 0,45 s, fuera del margen, y el clip abría con
+        # «disfrutándolo.», la cola de la frase anterior. Hacia delante puede ir más lejos.
+        x = pal(("tema,", 40.35, 40.62), ("disfrutándolo.", 40.62, 41.4), ("Sí.", 41.5, 42.5),
+                ("Tú", 42.5, 42.58), ("porque", 42.58, 42.83), ("eres", 42.83, 42.99))
+        ini, _ = st.ajustar_cortes(41.0, 62.0, x, holgura=st.TRAMO_ADELANTE, atras_fin=st.TRAMO_ATRAS)
+        anterior = [p for p in x if p["fin"] <= ini + 0.01][-1]["t"]
+        self.assertTrue(anterior.endswith("."), "empieza con la cola de otra frase")
+        self.assertLess(ini - 41.0, st.TRAMO_ADELANTE + 0.01)
+        fuente = (REPO / "clipper" / "autoclipper.py").read_text()
+        self.assertIn("subtitulos.TRAMO_ADELANTE", fuente)
+
     def test_inicio_en_frase_entera_no_tras_coma(self):
         # Caso «Ceuta a nado»: el corte caía tras una coma, a mitad de idea.
         x = pal(("La", 450.0, 450.2), ("cosa", 450.2, 450.5), ("es", 450.5, 450.6), ("así.", 450.6, 451.0),

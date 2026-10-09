@@ -43,6 +43,12 @@ HOLGURA_CORTE = 3.0
 # El final puede adelantarse más: es mejor un clip unos segundos más corto que
 # uno que acaba a media frase o con el arranque de otra persona hablando.
 ATRAS_FIN = 8.0
+# Tramos elegidos a mano leyendo la transcripción: casi no se tocan. Hacia atrás
+# solo unas décimas (con 8 s el clip del cirujano retrocedió hasta el nombre de
+# una paciente); hacia delante algo más, porque los tramos se escriben en segundos
+# enteros redondeados hacia abajo y el cierre de frase puede quedar a medio segundo.
+TRAMO_ATRAS = 0.4
+TRAMO_ADELANTE = 1.2
 # Cuánto audio se transcribe ANTES del clip. Con vocabulario (--prompt),
 # whisper coloca mal los tiempos de las primeras palabras de lo que transcribe:
 # en el Xokas, «gente» salió 13 s antes y «abierto» 4,5 s después de donde
