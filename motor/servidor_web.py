@@ -1,9 +1,10 @@
-"""La suite como web: el motor detrás de HTTP para usuarios externos.
+"""La suite como web: el motor detrás de HTTP para usuarios externos, con planes y tokens.
 
 Solo expone lo que necesita quien la usa: analizar un enlace, que Claude elija los
-momentos, cortarlos y descargar cada clip con su título y descripción. El usuario los
-sube a mano a su canal. Nada de cola de publicación, abrir en el Mac ni rutas
-arbitrarias: cada sesión ve únicamente sus propios trabajos.
+momentos, cortarlos y descargar cada clip con su título y descripción. Cada acción
+cuesta tokens (motor/planes.json): se cobran antes de lanzarla y se devuelven solos
+si el trabajo falla. Nada de cola de publicación, abrir en el Mac ni rutas
+arbitrarias: cada cuenta ve únicamente sus propios trabajos.
 
     motor/.venv/bin/python motor/servidor_web.py [--puerto 8787]
 
@@ -25,16 +26,19 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clipper"))
 import servidor_mcp as m  # noqa: E402
+import tokens  # noqa: E402
 
 AQUI = Path(__file__).resolve().parent
 WEB = AQUI / "web"
 SUITE_JS = AQUI / "suite" / "suite.js"
 ENV = m.REPO / "fase0" / ".env"
 MODELO = "claude-opus-5-5"
-# El Mac transcribe y corta de uno en uno; más de dos trabajos a la vez lo atascan.
-MAX_EN_CURSO = 2
+# El Mac transcribe y corta de uno en uno; más trabajos a la vez lo atascan.
+MAX_EN_CURSO = 3
 MAX_MOMENTOS = 8
+MAX_MINUTOS = 240
 
 ESQUEMA = {
     "type": "object",
@@ -48,7 +52,7 @@ ESQUEMA = {
     "additionalProperties": False,
 }
 
-SESIONES = {}            # token -> ids de trabajos de esa sesión
+SESIONES = {}            # token de sesión -> email
 CANDADO = threading.Lock()
 
 
@@ -114,15 +118,50 @@ def tramos_de(momentos):
     return ",".join(partes)
 
 
-def en_curso():
-    return sum(1 for t in m.trabajos(50)["trabajos"] if t["estado"] == "en_curso")
+def duracion_minutos(url):
+    """Lo que dura el vídeo según la plataforma, para cobrar antes de bajarlo."""
+    import descargar
+    d = descargar.metadatos(url) or {}
+    if not d.get("duration"):
+        raise ValueError("no he podido leer ese vídeo; revisa el enlace")
+    minutos = d["duration"] / 60
+    if minutos > MAX_MINUTOS:
+        raise ValueError(f"el vídeo dura {minutos:.0f} min; el máximo es {MAX_MINUTOS}")
+    return minutos
+
+
+def _ficha(tid):
+    return json.loads(m._ruta_trabajo(tid).read_text())
+
+
+def _anotar(tid, **datos):
+    """Guarda en la ficha del trabajo de quién es y qué se cobró por él."""
+    f = _ficha(tid)
+    f.update(datos)
+    m._ruta_trabajo(tid).write_text(json.dumps(f, ensure_ascii=False))
+
+
+def de_quien(tid):
+    if not re.fullmatch(r"[0-9a-f]{8}", tid or "") or not m._ruta_trabajo(tid).exists():
+        return None
+    return _ficha(tid).get("email")
+
+
+def en_curso(email=None):
+    return sum(1 for t in m.trabajos(60)["trabajos"]
+               if t["estado"] == "en_curso" and (email is None or t.get("email") == email))
 
 
 def vista(tid):
-    """Lo que el usuario puede ver de un trabajo suyo: sin rutas del Mac."""
+    """Lo que el usuario puede ver de un trabajo suyo: sin rutas del Mac. Si falló,
+    le devuelve los tokens (una sola vez)."""
     d = m._leer(tid)
+    devuelto = False
+    if d["estado"] == "fallido" and d.get("email") and d.get("cobro"):
+        devuelto = tokens.devolver(d["email"], d["cobro"])
     out = {"id": tid, "tipo": d["tipo"], "estado": d["estado"],
-           "paso": (d["registro"] or [""])[-1][:160], "motivo": d.get("motivo"), "fuente": d.get("fuente")}
+           "paso": (d["registro"] or [""])[-1][:160], "motivo": d.get("motivo"), "fuente": d.get("fuente"),
+           "devuelto": devuelto}
     out["clips"] = [{"n": c["n"], "duracion": round(c["fin"] - c["ini"]),
                      "titulo": (c["propuesta"] or {}).get("titulo", ""),
                      "descripcion": (c["propuesta"] or {}).get("descripcion", ""),
@@ -137,6 +176,24 @@ def archivo_clip(tid, n):
     if not clip or not clip["archivos"]:
         raise ValueError("ese clip no existe")
     return m._permitida(clip["archivos"][0])
+
+
+def planes_publicos():
+    c = tokens.config()
+    return {"planes": c["planes"], "packs": c["packs"], "costes": c["costes"]}
+
+
+def lanzar_cobrando(email, coste, concepto, lanzar):
+    """Cobra, lanza y apunta el cobro en el trabajo; si no se llega a lanzar, devuelve."""
+    ref = "c" + secrets.token_hex(6)
+    tokens.cobrar(email, coste, concepto, ref)
+    try:
+        r = lanzar()
+    except Exception:
+        tokens.devolver(email, ref)
+        raise
+    _anotar(r["id"], email=email, cobro=ref)
+    return {**r, "coste": coste, "saldo": tokens.saldo(email)["tokens"]}
 
 
 class Manejador(BaseHTTPRequestHandler):
@@ -175,14 +232,20 @@ class Manejador(BaseHTTPRequestHandler):
             raise ValueError("petición demasiado grande")
         return json.loads(self.rfile.read(largo) or b"{}")
 
-    def _sesion(self):
+    def _email(self):
         c = cookies.SimpleCookie(self.headers.get("Cookie") or "")
-        tok = c["sesion"].value if "sesion" in c else None
-        return tok if tok in SESIONES else None
+        return SESIONES.get(c["sesion"].value) if "sesion" in c else None
 
-    def _mio(self, tok, tid):
-        if not re.fullmatch(r"[0-9a-f]{8}", tid or "") or tid not in SESIONES[tok]:
+    def _mio(self, email, tid):
+        if de_quien(tid) != email:
             raise PermissionError("ese trabajo no es tuyo")
+
+    def _ocupado(self, email):
+        if en_curso() >= MAX_EN_CURSO:
+            return "hay muchos vídeos procesándose; prueba en unos minutos"
+        if en_curso(email) >= tokens.saldo(email)["trabajos_a_la_vez"]:
+            return "ya tienes el máximo de trabajos a la vez de tu plan; espera a que acabe alguno"
+        return None
 
     # ------------------------------------------------------------------- rutas
     def do_GET(self):
@@ -190,17 +253,21 @@ class Manejador(BaseHTTPRequestHandler):
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
         if u.path in ("/", "/index.html"):
             return self._fichero(WEB / "index.html", "text/html; charset=utf-8")
-        tok = self._sesion()
+        if u.path == "/api/planes":
+            return self._json(200, planes_publicos())
+        email = self._email()
         if u.path == "/api/yo":
-            return self._json(200 if tok else 401, {"dentro": bool(tok)})
-        if not tok:
-            return self._json(401, {"error": "entra con la clave de la beta"})
+            return self._json(200 if email else 401, {"dentro": bool(email)})
+        if not email:
+            return self._json(401, {"error": "entra con tu email y la clave de la beta"})
         try:
+            if u.path == "/api/cuenta":
+                return self._json(200, {**tokens.saldo(email), "movimientos": tokens.movimientos(email)})
             if u.path == "/api/trabajo":
-                self._mio(tok, q.get("id"))
+                self._mio(email, q.get("id"))
                 return self._json(200, vista(q["id"]))
             if u.path == "/api/clip":
-                self._mio(tok, q.get("id"))
+                self._mio(email, q.get("id"))
                 ruta = archivo_clip(q["id"], q.get("n", 0))
                 return self._fichero(ruta, "video/mp4",
                                      descarga=f"clip{int(q['n'])}.mp4" if q.get("descargar") else None)
@@ -218,33 +285,49 @@ class Manejador(BaseHTTPRequestHandler):
                 clave = _env("SUITE_CLAVE")
                 if not clave or not hmac.compare_digest(str(datos.get("clave", "")), clave):
                     return self._json(403, {"error": "clave incorrecta"})
+                email = tokens.saldo(datos.get("email"))["email"]
                 tok = secrets.token_urlsafe(32)
                 with CANDADO:
-                    SESIONES[tok] = set()
+                    SESIONES[tok] = email
                 seguro = "; Secure" if self.headers.get("X-Forwarded-Proto") == "https" else ""
                 return self._json(200, {"dentro": True}, {
                     "Set-Cookie": f"sesion={tok}; HttpOnly; SameSite=Strict; Path=/{seguro}"})
-            tok = self._sesion()
-            if not tok:
-                return self._json(401, {"error": "entra con la clave de la beta"})
+            email = self._email()
+            if not email:
+                return self._json(401, {"error": "entra con tu email y la clave de la beta"})
+            if u.path == "/api/salir":
+                with CANDADO:
+                    for k in [k for k, v in SESIONES.items() if v == email]:
+                        SESIONES.pop(k)
+                return self._json(200, {"dentro": False})
             if u.path == "/api/analizar":
-                if en_curso() >= MAX_EN_CURSO:
-                    return self._json(429, {"error": "hay otros vídeos procesándose; prueba en unos minutos"})
-                r = m.analizar(str(datos.get("url", ""))[:500])
-            elif u.path == "/api/proponer":
-                self._mio(tok, datos.get("id"))
-                return self._json(200, proponer(datos["id"], datos.get("n", 5)))
-            elif u.path == "/api/clipear":
-                self._mio(tok, datos.get("id"))
-                if en_curso() >= MAX_EN_CURSO:
-                    return self._json(429, {"error": "hay otros vídeos procesándose; prueba en unos minutos"})
-                momentos = datos.get("momentos") or []
-                r = m.clipear(analisis=datos["id"], tramos=tramos_de(momentos), propuestas=momentos)
-            else:
-                return self._json(404, {"error": "no existe"})
-            with CANDADO:
-                SESIONES[tok].add(r["id"])
-            return self._json(200, r)
+                if (motivo := self._ocupado(email)):
+                    return self._json(429, {"error": motivo})
+                url = str(datos.get("url", ""))[:500]
+                coste = tokens.coste_analizar(duracion_minutos(url))
+                return self._json(200, lanzar_cobrando(email, coste, "analizar vídeo", lambda: m.analizar(url)))
+            if u.path == "/api/proponer":
+                self._mio(email, datos.get("id"))
+                ref = "c" + secrets.token_hex(6)
+                tokens.cobrar(email, tokens.coste_proponer(), "elegir momentos", ref)
+                try:
+                    return self._json(200, {**proponer(datos["id"], datos.get("n", 5)),
+                                            "saldo": tokens.saldo(email)["tokens"]})
+                except Exception:
+                    tokens.devolver(email, ref)
+                    raise
+            if u.path == "/api/clipear":
+                self._mio(email, datos.get("id"))
+                if (motivo := self._ocupado(email)):
+                    return self._json(429, {"error": motivo})
+                momentos = (datos.get("momentos") or [])[:MAX_MOMENTOS]
+                tramos = tramos_de(momentos)
+                return self._json(200, lanzar_cobrando(
+                    email, tokens.coste_clips(len(momentos)), f"cortar {len(momentos)} clips",
+                    lambda: m.clipear(analisis=datos["id"], tramos=tramos, propuestas=momentos)))
+            return self._json(404, {"error": "no existe"})
+        except tokens.SinSaldo as e:
+            return self._json(402, {"error": f"no te quedan tokens suficientes: {e}"})
         except PermissionError as e:
             return self._json(403, {"error": str(e)})
         except (ValueError, KeyError, TypeError, json.JSONDecodeError) as e:

@@ -1,0 +1,24 @@
+{
+  "_nota": "Planes y precio en tokens de cada acción. 1 token = 0,01 € de valor de cara al usuario. Los tokens del plan se renuevan cada mes y no se acumulan; los de packs comprados no caducan. Los costes de fal se calculan con su precio real × factor_fal.",
+  "planes": {
+    "gratis": {"nombre": "Gratis", "precio_eur": 0, "tokens_mes": 150, "trabajos_a_la_vez": 1,
+               "incluye": ["Clipper con subtítulos", "Momentos elegidos por IA", "Unos 5 clips al mes"]},
+    "creador": {"nombre": "Creador", "precio_eur": 9, "tokens_mes": 1200, "trabajos_a_la_vez": 2,
+                "incluye": ["Todo lo de Gratis", "Generador con modelos de fal", "Autopublisher"]},
+    "pro": {"nombre": "Pro", "precio_eur": 29, "tokens_mes": 4500, "trabajos_a_la_vez": 3,
+            "incluye": ["Todo lo de Creador", "Avatares y voces", "Prioridad en la cola"]},
+    "agencia": {"nombre": "Agencia", "precio_eur": 79, "tokens_mes": 14000, "trabajos_a_la_vez": 5,
+                "incluye": ["Todo lo de Pro", "Varios canales", "Soporte directo"]}
+  },
+  "packs": {
+    "p500": {"tokens": 500, "precio_eur": 5},
+    "p2000": {"tokens": 2000, "precio_eur": 18}
+  },
+  "costes": {
+    "analizar_por_minuto": 1,
+    "analizar_minimo": 5,
+    "proponer": 25,
+    "clip": 5
+  },
+  "factor_fal": 2.0
+}

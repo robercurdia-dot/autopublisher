@@ -32,16 +32,29 @@ button:disabled{opacity:.5;cursor:default}
 .clip video{width:100%;border-radius:12px;background:#000;aspect-ratio:9/16}
 .campo{background:rgba(255,255,255,.55);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-wrap;color:#10324a}
 @media (max-width:520px){.clip{grid-template-columns:1fr}.clip video{max-width:220px}}
+.cabecera{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.saldo{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--vidrio);border:1px solid var(--borde);border-radius:14px;padding:8px 12px;font-size:14px}
+#s-tokens{font-weight:700;color:var(--agua-osc);font-variant-numeric:tabular-nums}
+#s-plan{color:var(--suave)}
+input[type=email]{flex:1;min-width:0;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--borde);background:rgba(255,255,255,.85);color:#10324a}
+.planes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.plan{border:1px solid var(--borde);border-radius:14px;padding:14px;background:rgba(255,255,255,.35)}
+.plan.actual{outline:2px solid var(--agua)}
+.plan h3{margin:0;font-size:17px}
+.precio{font-size:22px;font-weight:700;margin:4px 0}
+.plan ul{padding-left:18px;margin:8px 0 0;font-size:13px;color:var(--suave)}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main>
-<h1>Clipper</h1>
-<p class="sub">Pega un vídeo largo y llévate los mejores momentos en vertical, con subtítulos, título y descripción.</p>
+<div class="cabecera"><div><h1>Clipper</h1>
+<p class="sub">Pega un vídeo largo y llévate los mejores momentos en vertical, con subtítulos, título y descripción.</p></div>
+<div class="saldo" id="saldo" hidden><span id="s-tokens"></span><span id="s-plan"></span><button class="mini" id="b-planes" type="button">Planes</button><button class="mini" id="b-salir" type="button">Salir</button></div></div>
 
 <section class="panel" id="p-entrar" hidden>
   <form class="fila" id="f-entrar">
+    <input type="email" id="email" placeholder="Tu email" autocomplete="email" required>
     <input type="password" id="clave" placeholder="Clave de la beta" autocomplete="current-password" required>
     <button>Entrar</button>
   </form>
@@ -53,6 +66,7 @@ button:disabled{opacity:.5;cursor:default}
     <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=…" required>
     <button>Analizar</button>
   </form>
+  <p class="nota" id="n-costes"></p>
   <p class="nota" id="n-enlace"></p>
 </section>
 
@@ -60,6 +74,11 @@ button:disabled{opacity:.5;cursor:default}
   <div id="lista"></div>
   <div class="fila" style="margin-top:12px"><button class="sec" id="b-cortar">Cortar los elegidos</button></div>
   <p class="nota" id="n-momentos"></p>
+</section>
+
+<section class="panel" id="p-planes" hidden>
+  <div class="planes" id="planes"></div>
+  <p class="nota">Los tokens del plan se renuevan cada mes; los de los packs no caducan. Si un trabajo falla, se devuelven solos.</p>
 </section>
 
 <section class="panel" id="p-clips" hidden>
@@ -82,20 +101,51 @@ button:disabled{opacity:.5;cursor:default}
   function esperar(id, alAcabar, idNota) {
     api("/api/trabajo?id=" + id).then(function (t) {
       if (t.estado === "en_curso") { nota(idNota, t.paso || "Trabajando…"); return setTimeout(function () { esperar(id, alAcabar, idNota); }, 4000); }
-      if (t.estado === "fallido") return nota(idNota, "No ha salido: " + (t.motivo || "error desconocido"), true);
+      if (t.estado === "fallido") { cargarCuenta(); return nota(idNota, "No ha salido: " + (t.motivo || "error desconocido") + (t.devuelto ? ". Te hemos devuelto los tokens." : ""), true); }
       alAcabar(t);
     }).catch(function (e) { nota(idNota, e.message, true); });
   }
   function texto(el, t) { var d = document.createElement(el); d.textContent = t; return d; }
 
-  api("/api/yo").then(function () { $("p-enlace").hidden = false; })
-    .catch(function () { $("p-entrar").hidden = false; });
+  var planes = null, cuenta = null;
+  function cargarCuenta() {
+    return api("/api/cuenta").then(function (c) {
+      cuenta = c; $("saldo").hidden = false;
+      $("s-tokens").textContent = c.tokens.toLocaleString("es-ES") + " tokens";
+      $("s-plan").textContent = "Plan " + c.plan_nombre;
+      if (planes) pintarPlanes();
+    });
+  }
+  function dentro() { $("p-entrar").hidden = true; $("p-enlace").hidden = false; return cargarCuenta(); }
+  api("/api/planes").then(function (p) {
+    planes = p;
+    var k = p.costes;
+    $("n-costes").textContent = "Analizar: " + k.analizar_por_minuto + " token por minuto de vídeo · elegir momentos: " +
+      k.proponer + " · cada clip: " + k.clip + ".";
+  });
+  api("/api/yo").then(dentro).catch(function () { $("p-entrar").hidden = false; });
+  function pintarPlanes() {
+    var zona = $("planes"); zona.textContent = "";
+    Object.keys(planes.planes).forEach(function (id) {
+      var p = planes.planes[id], caja = document.createElement("div");
+      caja.className = "plan" + (cuenta && cuenta.plan === id ? " actual" : "");
+      caja.appendChild(texto("h3", p.nombre));
+      caja.appendChild(texto("div", p.precio_eur ? p.precio_eur + " €/mes" : "Gratis")).className = "precio";
+      caja.appendChild(texto("div", p.tokens_mes.toLocaleString("es-ES") + " tokens al mes"));
+      var ul = document.createElement("ul");
+      p.incluye.forEach(function (x) { ul.appendChild(texto("li", x)); });
+      caja.appendChild(ul);
+      if (cuenta && cuenta.plan === id) caja.appendChild(texto("p", "Tu plan")).className = "nota";
+      else if (p.precio_eur) { var b = texto("button", "Pago con tarjeta, muy pronto"); b.className = "mini"; b.disabled = true; caja.appendChild(b); }
+      zona.appendChild(caja);
+    });
+  }
+  $("b-planes").onclick = function () { pintarPlanes(); $("p-planes").hidden = !$("p-planes").hidden; };
+  $("b-salir").onclick = function () { api("/api/salir", {}).then(function () { location.reload(); }); };
 
   $("f-entrar").onsubmit = function (e) {
     e.preventDefault();
-    api("/api/entrar", { clave: $("clave").value }).then(function () {
-      $("p-entrar").hidden = true; $("p-enlace").hidden = false;
-    }).catch(function (err) { nota("n-entrar", err.message, true); });
+    api("/api/entrar", { email: $("email").value, clave: $("clave").value }).then(dentro).catch(function (err) { nota("n-entrar", err.message, true); });
   };
 
   $("f-enlace").onsubmit = function (e) {
@@ -103,11 +153,11 @@ button:disabled{opacity:.5;cursor:default}
     var b = e.target.querySelector("button"); b.disabled = true;
     nota("n-enlace", "Bajando el vídeo…");
     api("/api/analizar", { url: $("url").value }).then(function (r) {
-      analisis = r.id;
+      analisis = r.id; cargarCuenta();
       esperar(r.id, function (t) {
         nota("n-enlace", "«" + (t.fuente.titulo || "") + "»: transcrito. Claude está eligiendo los mejores momentos…");
         return api("/api/proponer", { id: analisis, n: 5 }).then(function (p) {
-          momentos = p.momentos; pintarMomentos(); nota("n-enlace", ""); b.disabled = false;
+          momentos = p.momentos; pintarMomentos(); nota("n-enlace", ""); b.disabled = false; cargarCuenta();
         }).catch(function (err) { nota("n-enlace", err.message, true); b.disabled = false; });
       }, "n-enlace");
     }).catch(function (err) { nota("n-enlace", err.message, true); b.disabled = false; });
@@ -124,9 +174,14 @@ button:disabled{opacity:.5;cursor:default}
       cuerpo.appendChild(texto("div", "«" + m.gancho + "»")).className = "gancho";
       fila.appendChild(c); fila.appendChild(cuerpo); lista.appendChild(fila);
     });
-    $("p-momentos").hidden = false;
+    $("p-momentos").hidden = false; actualizarCosteCorte();
   }
 
+  function actualizarCosteCorte() {
+    var n = document.querySelectorAll("#lista input:checked").length;
+    $("b-cortar").textContent = "Cortar " + n + " clip" + (n === 1 ? "" : "s") + (planes ? " · " + n * planes.costes.clip + " tokens" : "");
+  }
+  $("lista").onchange = actualizarCosteCorte;
   $("b-cortar").onclick = function () {
     var elegidos = Array.prototype.filter.call(document.querySelectorAll("#lista input"), function (c) { return c.checked; })
       .map(function (c) { return momentos[+c.dataset.i]; });
@@ -134,6 +189,7 @@ button:disabled{opacity:.5;cursor:default}
     $("b-cortar").disabled = true;
     nota("n-momentos", "Cortando y subtitulando…");
     api("/api/clipear", { id: analisis, momentos: elegidos }).then(function (r) {
+      cargarCuenta();
       esperar(r.id, function (t) { pintarClips(r.id, t.clips); nota("n-momentos", ""); $("b-cortar").disabled = false; }, "n-momentos");
     }).catch(function (err) { nota("n-momentos", err.message, true); $("b-cortar").disabled = false; });
   };
