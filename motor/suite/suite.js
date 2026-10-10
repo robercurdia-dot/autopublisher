@@ -182,11 +182,13 @@
     "Eres editor de Shorts en castellano de España para un canal de clips de streamers.",
     "Lee la transcripción (cada línea: mm:ss frase) y elige los N mejores momentos para Shorts.",
     "Cada momento:",
-    "- dura entre 20 y 45 segundos y es una idea completa que se entiende sin contexto;",
-    "- EMPIEZA en una frase de entrada fuerte (el gancho tiene que estar en el primer segundo): nunca a mitad de idea, nunca tras una coma. Usa como inicio el mm:ss exacto de la línea con la que arranca;",
-    "- TERMINA en un cierre de frase (el remate dentro), con el mm:ss del final de la última frase;",
-    "- prioriza opinión fuerte, polémica, humor, una revelación o una frase citable;",
-    "- EVITA a terceros en situaciones delicadas (pacientes, menores, datos de salud o personales), promociones pagadas y momentos que dependen de algo que no se entiende sin ver lo anterior.",
+    "- dura entre 20 y 40 segundos y es una idea completa que se entiende sin contexto;",
+    "- tiene un CONFLICTO o un GIRO: alguien acusa, choca, falla o descubre algo, y la cosa escala hasta un remate. Es lo que funcionó en el canal: el juez que se expulsa a sí mismo (3.900 vistas, 105 % visto), una acusación en directo (2.349), una afirmación que sorprende (1.377);",
+    "- EMPIEZA en la frase más fuerte del momento, no en su preparación: la acusación, la cita polémica o la pregunta que engancha. El clip que abría con su frase más dura retuvo al 69 % en el primer segundo; los que abrían explicando, al 52-56 %. Nunca a mitad de idea ni tras una coma. Usa como inicio el mm:ss exacto de esa línea;",
+    "- TERMINA justo después del remate, en su cierre de frase: nada de seguir hablando ni de que empiece otra persona. Los que acaban en el remate se vieron enteros y repetidos (105-120 %); los que se alargan o se cortan a media frase, al 47-68 %;",
+    "- EVITA reflexiones, momentos emotivos y explicaciones sin conflicto aunque sean bonitas: «tuve que salir a respirar» y «los que no sobran es gente como tú» se quedaron en 25 y 21 vistas, con menos de dos tercios vistos;",
+    "- EVITA secuelas: un momento que remata algo de otro clip («qué Mundial nos ha dado» tras «dice que es ingeniero») no se entiende solo;",
+    "- EVITA a terceros en situaciones delicadas (pacientes, menores, datos de salud o personales) y promociones pagadas.",
     "Título: máximo 70 caracteres, el nombre del creador en mayúsculas más una cita literal o una promesa clara, un emoji al final. Descripción: una o dos frases que expliquen el momento.",
     "Responde SOLO con JSON: {\"momentos\":[{\"ini\":\"mm:ss\",\"fin\":\"mm:ss\",\"gancho\":\"primera frase del clip\",\"por_que\":\"en pocas palabras\",\"titulo\":\"…\",\"descripcion\":\"…\",\"hashtags\":\"#a #b #shorts\"}]} ordenado de mejor a peor."
   ].join("\n");

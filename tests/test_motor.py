@@ -151,6 +151,19 @@ class TestFlujoEditor(unittest.TestCase):
         c = m.cola()["cola"]
         self.assertEqual((c[0]["estado"], c[0]["url"]), ("programado", "https://youtube.com/shorts/abc"))
 
+    def test_como_mucho_dos_clips_al_dia(self):
+        # ClipperZero, 8 y 10 oct: con 5-6 clips el mismo día solo el primero recibió
+        # vistas (1358 frente a 115, 52, 36, 26, 22; y 116 frente a 2, 0, 0, 0).
+        video = self.fuente / "original.mp4"
+        a = m.programar(str(video), "Uno", "", "2099-03-01T09:00")
+        m.programar(str(video), "Dos", "", "2099-03-01T19:00")
+        with self.assertRaises(ValueError) as e:
+            m.programar(str(video), "Tres", "", "2099-03-01T13:00")
+        self.assertIn("2099-03-02", str(e.exception))
+        m.programar(str(video), "Tres", "", "2099-03-01T13:00", plataforma="tiktok")
+        m.actualizar_cola(a["id"], "cancelado")
+        m.programar(str(video), "Tres", "", "2099-03-01T13:00")
+
 
 if __name__ == "__main__":
     unittest.main()

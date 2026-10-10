@@ -29,7 +29,7 @@ import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -227,10 +227,18 @@ SUBIR = CLIPS / "subir"
 # La subida por Chrome admite como mucho 10 MB por fichero: se prepara una
 # copia por debajo de este tamaño al programar, con la misma resolución.
 MAX_SUBIDA = 9_000_000
+# Con más clips al día en un canal, el resto no recibe vistas (ClipperZero, 8 y 10 oct 2026).
+MAX_POR_DIA = 2
 
 
 def _cola():
     return json.loads(COLA.read_text()) if COLA.exists() else []
+
+
+def _del_dia(items, dia, plataforma):
+    """Clips vivos (no cancelados ni fallidos) de una plataforma en un día."""
+    return sum(1 for x in items if x.get("plataforma") == plataforma and x["cuando"][:10] == dia
+               and x["estado"] not in ("cancelado", "fallido"))
 
 
 def _guardar_cola(items):
@@ -263,13 +271,20 @@ def programar(archivo, titulo, descripcion, cuando, plataforma="youtube"):
     titulo = (titulo or "").strip()
     if not 0 < len(titulo) <= 100:
         raise ValueError("el título tiene que tener entre 1 y 100 caracteres")
+    items = _cola()
+    dia = cuando[:10]
+    if _del_dia(items, dia, plataforma) >= MAX_POR_DIA:
+        libre = datetime.strptime(dia, "%Y-%m-%d")
+        while _del_dia(items, libre.strftime("%Y-%m-%d"), plataforma) >= MAX_POR_DIA:
+            libre += timedelta(days=1)
+        raise ValueError(f"ya hay {MAX_POR_DIA} clips en {plataforma} el {dia}: con más, el resto "
+                         f"del día no recibe vistas. Primer día libre: {libre:%Y-%m-%d}")
     pid = uuid.uuid4().hex[:8]
     subir = _copia_para_subir(video, pid)
     item = {"id": pid, "plataforma": plataforma, "archivo": str(video), "subir": str(subir),
             "titulo": titulo, "descripcion": (descripcion or "").strip()[:4900],
             "cuando": cuando, "zona": "Europe/Madrid", "estado": "pendiente",
             "creado": time.time(), "url": None, "nota": None}
-    items = _cola()
     items.append(item)
     _guardar_cola(items)
     return item
