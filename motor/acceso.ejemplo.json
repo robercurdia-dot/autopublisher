@@ -1,0 +1,5 @@
+{
+  "_nota": "Copia este fichero como acceso.json. «privado»: solo los emails de la lista pueden registrarse y entrar. «abierto»: cualquiera.",
+  "registro": "privado",
+  "permitidos": ["tu@email.com"]
+}

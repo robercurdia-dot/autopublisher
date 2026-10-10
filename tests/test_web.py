@@ -1,4 +1,4 @@
-"""La suite como web: acceso con clave, cada cuenta solo ve lo suyo, cobro en tokens.
+"""La suite como web: cuentas, seguridad de web normal, cada cuenta solo ve lo suyo y cobro en tokens.
 
     motor/.venv/bin/python -m unittest tests.test_web -v
 """
@@ -17,6 +17,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "motor"))
 import servidor_mcp as m  # noqa: E402
 import servidor_web as w  # noqa: E402
+import cuentas  # noqa: E402
 import tokens  # noqa: E402
 
 
@@ -25,11 +26,12 @@ class TestWeb(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         d = Path(self.tmp.name)
-        self.orig = (m.TRABAJOS, w.ENV, tokens.BD, w.duracion_minutos, m.analizar,
-                     os.environ.get("SUITE_CLAVE"), os.environ.get("ANTHROPIC_API_KEY"))
-        m.TRABAJOS, w.ENV, tokens.BD = d / "trabajos", d / ".env", d / "cuentas.db"
+        self.orig = (m.TRABAJOS, w.ENV, tokens.BD, w.duracion_minutos, m.analizar, cuentas.ACCESO,
+                     os.environ.get("ANTHROPIC_API_KEY"))
+        m.TRABAJOS, w.ENV, tokens.BD, cuentas.ACCESO = d / "trabajos", d / ".env", d / "cuentas.db", d / "acceso.json"
+        cuentas.ACCESO.write_text(json.dumps({"registro": "privado", "permitidos": ["yo@x.com", "otra@x.com"]}))
+        cuentas._fallos.clear()
         m.TRABAJOS.mkdir()
-        os.environ["SUITE_CLAVE"] = "clave-de-prueba"
         os.environ.pop("ANTHROPIC_API_KEY", None)
         # Un análisis ya terminado, de otra persona.
         self.fuente = d / "fuente"
@@ -47,24 +49,24 @@ class TestWeb(unittest.TestCase):
     def tearDown(self):
         self.srv.shutdown()
         self.srv.server_close()
-        m.TRABAJOS, w.ENV, tokens.BD, w.duracion_minutos, m.analizar = self.orig[:5]
-        for k, v in (("SUITE_CLAVE", self.orig[5]), ("ANTHROPIC_API_KEY", self.orig[6])):
-            if v is None:
-                os.environ.pop(k, None)
-            else:
-                os.environ[k] = v
-        w.SESIONES.clear()
+        m.TRABAJOS, w.ENV, tokens.BD, w.duracion_minutos, m.analizar, cuentas.ACCESO = self.orig[:6]
+        if self.orig[6] is None:
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+        else:
+            os.environ["ANTHROPIC_API_KEY"] = self.orig[6]
         self.tmp.cleanup()
 
-    def pedir(self, ruta, datos=None):
+    def pedir(self, ruta, datos=None, cabeceras=None):
         req = urllib.request.Request(self.base + ruta, data=json.dumps(datos).encode() if datos is not None else None,
-                                     headers={"Content-Type": "application/json"})
+                                     headers={"Content-Type": "application/json", **(cabeceras or {})})
         if self.galleta:
             req.add_header("Cookie", self.galleta)
         try:
             with urllib.request.urlopen(req) as r:
                 if r.headers.get("Set-Cookie"):
                     self.galleta = r.headers["Set-Cookie"].split(";")[0]
+                    self.ultima_galleta = r.headers["Set-Cookie"]
+                self.ultimas = r.headers
                 return r.status, json.loads(r.read() or b"null") if "json" in r.headers.get("Content-Type", "") else r.read()
         except urllib.error.HTTPError as e:
             cuerpo = e.read()
@@ -72,7 +74,10 @@ class TestWeb(unittest.TestCase):
             return e.code, json.loads(cuerpo or b"null")
 
     def entrar(self, email="yo@x.com"):
-        return self.pedir("/api/entrar", {"email": email, "clave": "clave-de-prueba"})
+        codigo, r = self.pedir("/api/registro", {"email": email, "clave": "una-clave-larga"})
+        if codigo == 400:
+            codigo, r = self.pedir("/api/entrar", {"email": email, "clave": "una-clave-larga"})
+        return codigo, r
 
     def test_la_pagina_y_los_planes_sin_sesion(self):
         codigo, cuerpo = self.pedir("/")
@@ -81,11 +86,16 @@ class TestWeb(unittest.TestCase):
         codigo, planes = self.pedir("/api/planes")
         self.assertEqual(set(planes["planes"]), {"gratis", "creador", "pro", "agencia"})
 
-    def test_sin_clave_no_se_entra(self):
+    def test_sin_cuenta_no_se_entra(self):
         self.assertEqual(self.pedir("/api/yo")[0], 401)
         self.assertEqual(self.pedir("/api/analizar", {"url": "https://x.com/a"})[0], 401)
-        self.assertEqual(self.pedir("/api/entrar", {"email": "yo@x.com", "clave": "otra"})[0], 403)
-        self.assertEqual(self.pedir("/api/entrar", {"email": "sin-arroba", "clave": "clave-de-prueba"})[0], 400)
+        self.assertEqual(self.pedir("/api/registro", {"email": "extrano@x.com", "clave": "una-clave-larga"})[0], 403)
+        self.assertEqual(self.pedir("/api/entrar", {"email": "yo@x.com", "clave": "una-clave-larga"})[0], 403)
+        self.assertEqual(self.entrar()[0], 200)
+        self.assertIn("HttpOnly", self.ultima_galleta)
+        self.assertIn("SameSite=Lax", self.ultima_galleta)
+        self.assertEqual(self.pedir("/api/salir", {})[0], 200)
+        self.assertEqual(self.pedir("/api/yo")[0], 401)
         self.assertEqual(self.entrar()[0], 200)
         codigo, cuenta = self.pedir("/api/cuenta")
         self.assertEqual((codigo, cuenta["plan"], cuenta["tokens"]), (200, "gratis", 150))
@@ -133,6 +143,25 @@ class TestWeb(unittest.TestCase):
         self.assertEqual(codigo, 400)
         self.assertIn("ANTHROPIC_API_KEY", r["error"])
         self.assertEqual(self.pedir("/api/cuenta")[1]["tokens"], 150)
+
+    def test_cabeceras_de_seguridad(self):
+        self.pedir("/")
+        self.assertIn("default-src 'self'", self.ultimas["Content-Security-Policy"])
+        self.assertEqual(self.ultimas["X-Frame-Options"], "DENY")
+        self.assertEqual(self.ultimas["X-Content-Type-Options"], "nosniff")
+        self.assertNotIn("Python", self.ultimas.get("Server", ""))
+
+    def test_otro_sitio_no_puede_mandar_peticiones(self):
+        self.entrar()
+        codigo, _ = self.pedir("/api/analizar", {"url": "https://www.youtube.com/watch?v=x"},
+                               {"Origin": "https://malo.example"})
+        self.assertEqual(codigo, 403)
+        req = urllib.request.Request(self.base + "/api/entrar", data=b"email=yo@x.com",
+                                     headers={"Content-Type": "application/x-www-form-urlencoded"})
+        with self.assertRaises(urllib.error.HTTPError) as e:
+            urllib.request.urlopen(req)
+        self.assertEqual(e.exception.code, 400, "solo JSON: un formulario de otra web no sirve")
+        e.exception.close()
 
     def test_reglas_de_la_suite(self):
         r = w.reglas()

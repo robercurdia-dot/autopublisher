@@ -8,18 +8,18 @@ arbitrarias: cada cuenta ve únicamente sus propios trabajos.
 
     motor/.venv/bin/python motor/servidor_web.py [--puerto 8787]
 
-Lee de fase0/.env: SUITE_CLAVE (la contraseña de la beta) y ANTHROPIC_API_KEY.
+Cuentas con email y contraseña (motor/cuentas.py); privada o abierta según
+motor/acceso.json. Lee de fase0/.env: ANTHROPIC_API_KEY y, para recuperar
+contraseñas por correo, SMTP_HOST, SMTP_PUERTO, SMTP_USUARIO, SMTP_CLAVE, SMTP_REMITENTE.
 Escucha solo en 127.0.0.1: desde fuera se llega por el túnel de Cloudflare.
 """
 
 import argparse
-import hmac
 import json
 import os
 import re
 import secrets
 import sys
-import threading
 from http import cookies
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clipper"))
+import cuentas  # noqa: E402
 import servidor_mcp as m  # noqa: E402
 import tokens  # noqa: E402
 
@@ -51,10 +52,6 @@ ESQUEMA = {
     "required": ["momentos"],
     "additionalProperties": False,
 }
-
-SESIONES = {}            # token de sesión -> email
-CANDADO = threading.Lock()
-
 
 def _env(nombre):
     if os.environ.get(nombre):
@@ -196,19 +193,40 @@ def lanzar_cobrando(email, coste, concepto, lanzar):
     return {**r, "coste": coste, "saldo": tokens.saldo(email)["tokens"]}
 
 
+ESTATICOS = {"/": ("index.html", "text/html; charset=utf-8"), "/index.html": ("index.html", "text/html; charset=utf-8"),
+             "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/app.css": ("app.css", "text/css; charset=utf-8")}
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; "
+       "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+COOKIE = "sesion"
+
+
 class Manejador(BaseHTTPRequestHandler):
     server_version = "suite"
+    sys_version = ""
 
     def log_message(self, *a):
         pass
 
     # ---------------------------------------------------------------- respuestas
+    def _https(self):
+        return self.headers.get("X-Forwarded-Proto") == "https"
+
+    def _seguridad(self):
+        self.send_header("Content-Security-Policy", CSP)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "same-origin")
+        self.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        if self._https():
+            self.send_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+
     def _json(self, codigo, datos, extra=None):
         cuerpo = json.dumps(datos, ensure_ascii=False).encode()
         self.send_response(codigo)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(cuerpo)))
         self.send_header("Cache-Control", "no-store")
+        self._seguridad()
         for k, v in (extra or {}).items():
             self.send_header(k, v)
         self.end_headers()
@@ -219,6 +237,8 @@ class Manejador(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", tipo)
         self.send_header("Content-Length", str(tam))
+        self.send_header("Cache-Control", "no-cache" if tipo.startswith("text/") else "private, max-age=3600")
+        self._seguridad()
         if descarga:
             self.send_header("Content-Disposition", f'attachment; filename="{descarga}"')
         self.end_headers()
@@ -226,15 +246,43 @@ class Manejador(BaseHTTPRequestHandler):
             while bloque := f.read(1 << 16):
                 self.wfile.write(bloque)
 
+    def _galleta(self, token):
+        """La cookie de sesión: solo para este sitio, sin acceso desde JavaScript."""
+        seguro = "; Secure" if self._https() else ""
+        if token:
+            return {"Set-Cookie": f"{COOKIE}={token}; HttpOnly; SameSite=Lax; Path=/; "
+                                  f"Max-Age={cuentas.DURACION_SESION}{seguro}"}
+        return {"Set-Cookie": f"{COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0{seguro}"}
+
     def _cuerpo(self):
+        if "application/json" not in (self.headers.get("Content-Type") or ""):
+            raise ValueError("se espera JSON")
         largo = int(self.headers.get("Content-Length") or 0)
         if largo > 200_000:
             raise ValueError("petición demasiado grande")
         return json.loads(self.rfile.read(largo) or b"{}")
 
-    def _email(self):
+    def _token(self):
         c = cookies.SimpleCookie(self.headers.get("Cookie") or "")
-        return SESIONES.get(c["sesion"].value) if "sesion" in c else None
+        return c[COOKIE].value if COOKIE in c else None
+
+    def _email(self):
+        return cuentas.sesion(self._token())
+
+    def _ip(self):
+        return (self.headers.get("CF-Connecting-IP") or self.client_address[0])[:64]
+
+    def _mismo_origen(self):
+        """Contra CSRF: un navegador siempre manda Origin en un POST; tiene que ser este sitio."""
+        origen = self.headers.get("Origin")
+        if not origen:
+            return True
+        host = self.headers.get("X-Forwarded-Host") or self.headers.get("Host") or ""
+        return urlparse(origen).netloc == host
+
+    def _base(self):
+        host = self.headers.get("X-Forwarded-Host") or self.headers.get("Host") or "127.0.0.1"
+        return ("https://" if self._https() else "http://") + host
 
     def _mio(self, email, tid):
         if de_quien(tid) != email:
@@ -251,15 +299,17 @@ class Manejador(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
-        if u.path in ("/", "/index.html"):
-            return self._fichero(WEB / "index.html", "text/html; charset=utf-8")
+        if u.path in ESTATICOS:
+            nombre, tipo = ESTATICOS[u.path]
+            return self._fichero(WEB / nombre, tipo)
         if u.path == "/api/planes":
             return self._json(200, planes_publicos())
         email = self._email()
         if u.path == "/api/yo":
-            return self._json(200 if email else 401, {"dentro": bool(email)})
+            return self._json(200 if email else 401, {"dentro": bool(email), "email": email,
+                                                      "registro": cuentas.acceso().get("registro")})
         if not email:
-            return self._json(401, {"error": "entra con tu email y la clave de la beta"})
+            return self._json(401, {"error": "entra en tu cuenta"})
         try:
             if u.path == "/api/cuenta":
                 return self._json(200, {**tokens.saldo(email), "movimientos": tokens.movimientos(email)})
@@ -279,27 +329,36 @@ class Manejador(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if not self._mismo_origen():
+            return self._json(403, {"error": "origen no permitido"})
         try:
             datos = self._cuerpo()
+            # ---------------------------------------------------------- cuenta
+            if u.path == "/api/registro":
+                tok = cuentas.registrar(datos.get("email"), str(datos.get("clave", "")))
+                return self._json(200, {"dentro": True}, self._galleta(tok))
             if u.path == "/api/entrar":
-                clave = _env("SUITE_CLAVE")
-                if not clave or not hmac.compare_digest(str(datos.get("clave", "")), clave):
-                    return self._json(403, {"error": "clave incorrecta"})
-                email = tokens.saldo(datos.get("email"))["email"]
-                tok = secrets.token_urlsafe(32)
-                with CANDADO:
-                    SESIONES[tok] = email
-                seguro = "; Secure" if self.headers.get("X-Forwarded-Proto") == "https" else ""
-                return self._json(200, {"dentro": True}, {
-                    "Set-Cookie": f"sesion={tok}; HttpOnly; SameSite=Strict; Path=/{seguro}"})
+                tok = cuentas.entrar(datos.get("email"), str(datos.get("clave", "")), self._ip())
+                return self._json(200, {"dentro": True}, self._galleta(tok))
+            if u.path == "/api/olvide":
+                try:
+                    cuentas.pedir_reset(datos.get("email"), self._base(), _env)
+                except RuntimeError as e:
+                    return self._json(503, {"error": str(e)})
+                return self._json(200, {"enviado": True})
+            if u.path == "/api/restablecer":
+                tok = cuentas.restablecer(str(datos.get("token", "")), str(datos.get("clave", "")))
+                return self._json(200, {"dentro": True}, self._galleta(tok))
+            if u.path == "/api/salir":
+                cuentas.salir(self._token())
+                return self._json(200, {"dentro": False}, self._galleta(None))
             email = self._email()
             if not email:
-                return self._json(401, {"error": "entra con tu email y la clave de la beta"})
-            if u.path == "/api/salir":
-                with CANDADO:
-                    for k in [k for k, v in SESIONES.items() if v == email]:
-                        SESIONES.pop(k)
-                return self._json(200, {"dentro": False})
+                return self._json(401, {"error": "entra en tu cuenta"})
+            if u.path == "/api/clave":
+                tok = cuentas.cambiar_clave(email, str(datos.get("actual", "")), str(datos.get("nueva", "")))
+                return self._json(200, {"cambiada": True}, self._galleta(tok))
+            # ---------------------------------------------------------- clipper
             if u.path == "/api/analizar":
                 if (motivo := self._ocupado(email)):
                     return self._json(429, {"error": motivo})
@@ -328,7 +387,9 @@ class Manejador(BaseHTTPRequestHandler):
             return self._json(404, {"error": "no existe"})
         except tokens.SinSaldo as e:
             return self._json(402, {"error": f"no te quedan tokens suficientes: {e}"})
-        except PermissionError as e:
+        except cuentas.Bloqueado as e:
+            return self._json(429, {"error": str(e)})
+        except (PermissionError, cuentas.NoPermitido) as e:
             return self._json(403, {"error": str(e)})
         except (ValueError, KeyError, TypeError, json.JSONDecodeError) as e:
             return self._json(400, {"error": str(e)})
