@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clipper</title>
+<style>
+:root{--cielo:#e8f6ff;--agua:#1d9bf0;--agua-osc:#0a5e9c;--hoja:#3fb950;--texto:#10324a;--suave:#4b6b82;--vidrio:rgba(255,255,255,.72);--borde:rgba(255,255,255,.9);--sombra:0 8px 30px rgba(10,94,156,.15)}
+@media (prefers-color-scheme:dark){:root{--cielo:#06233a;--agua:#3bb0ff;--agua-osc:#9fd6ff;--texto:#e6f4ff;--suave:#9cb9cf;--vidrio:rgba(12,52,82,.72);--borde:rgba(120,190,240,.35);--sombra:0 8px 30px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 -apple-system,"Segoe UI",system-ui,sans-serif;color:var(--texto);background:radial-gradient(1200px 600px at 20% -10%,rgba(255,255,255,.9),transparent),linear-gradient(180deg,var(--cielo),#bfe6ff 60%,#d8f5d0);min-height:100vh}
+@media (prefers-color-scheme:dark){body{background:linear-gradient(180deg,#041a2c,#06304d 60%,#0b3a2a)}}
+main{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:-.5px}
+.sub{color:var(--suave);margin:0 0 24px}
+.panel{background:var(--vidrio);border:1px solid var(--borde);border-radius:18px;padding:20px;box-shadow:var(--sombra);backdrop-filter:blur(14px);margin-bottom:16px}
+.fila{display:flex;gap:10px;flex-wrap:wrap}
+input[type=url],input[type=password]{flex:1;min-width:0;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--borde);background:rgba(255,255,255,.85);color:#10324a}
+button{font:inherit;font-weight:600;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.6);color:#fff;background:linear-gradient(180deg,#5cc3ff,var(--agua));box-shadow:inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer}
+button.sec{background:linear-gradient(180deg,#7fdc8b,var(--hoja))}
+button.mini{padding:6px 10px;font-size:13px}
+button:disabled{opacity:.5;cursor:default}
+.nota{color:var(--suave);font-size:14px;margin:10px 0 0}
+.mal{color:#c0392b}
+.momento{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--borde)}
+.momento:first-child{border-top:0}
+.momento input{margin-top:5px;width:18px;height:18px}
+.tiempo{font-variant-numeric:tabular-nums;color:var(--agua-osc);font-size:13px}
+.gancho{font-style:italic;color:var(--suave);font-size:14px}
+.clip{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:16px;padding:16px 0;border-top:1px solid var(--borde)}
+.clip:first-child{border-top:0}
+.clip video{width:100%;border-radius:12px;background:#000;aspect-ratio:9/16}
+.campo{background:rgba(255,255,255,.55);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-wrap;color:#10324a}
+@media (max-width:520px){.clip{grid-template-columns:1fr}.clip video{max-width:220px}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Clipper</h1>
+<p class="sub">Pega un vídeo largo y llévate los mejores momentos en vertical, con subtítulos, título y descripción.</p>
+
+<section class="panel" id="p-entrar" hidden>
+  <form class="fila" id="f-entrar">
+    <input type="password" id="clave" placeholder="Clave de la beta" autocomplete="current-password" required>
+    <button>Entrar</button>
+  </form>
+  <p class="nota" id="n-entrar"></p>
+</section>
+
+<section class="panel" id="p-enlace" hidden>
+  <form class="fila" id="f-enlace">
+    <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=…" required>
+    <button>Analizar</button>
+  </form>
+  <p class="nota" id="n-enlace"></p>
+</section>
+
+<section class="panel" id="p-momentos" hidden>
+  <div id="lista"></div>
+  <div class="fila" style="margin-top:12px"><button class="sec" id="b-cortar">Cortar los elegidos</button></div>
+  <p class="nota" id="n-momentos"></p>
+</section>
+
+<section class="panel" id="p-clips" hidden>
+  <div id="clips"></div>
+  <p class="nota">Descárgalos y súbelos a tu canal con su título y descripción.</p>
+</section>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var analisis = null, momentos = [];
+
+  function api(ruta, datos) {
+    var op = datos ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) } : {};
+    return fetch(ruta, op).then(function (r) {
+      return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); return j; });
+    });
+  }
+  function nota(id, texto, mal) { $(id).textContent = texto; $(id).className = "nota" + (mal ? " mal" : ""); }
+  function esperar(id, alAcabar, idNota) {
+    api("/api/trabajo?id=" + id).then(function (t) {
+      if (t.estado === "en_curso") { nota(idNota, t.paso || "Trabajando…"); return setTimeout(function () { esperar(id, alAcabar, idNota); }, 4000); }
+      if (t.estado === "fallido") return nota(idNota, "No ha salido: " + (t.motivo || "error desconocido"), true);
+      alAcabar(t);
+    }).catch(function (e) { nota(idNota, e.message, true); });
+  }
+  function texto(el, t) { var d = document.createElement(el); d.textContent = t; return d; }
+
+  api("/api/yo").then(function () { $("p-enlace").hidden = false; })
+    .catch(function () { $("p-entrar").hidden = false; });
+
+  $("f-entrar").onsubmit = function (e) {
+    e.preventDefault();
+    api("/api/entrar", { clave: $("clave").value }).then(function () {
+      $("p-entrar").hidden = true; $("p-enlace").hidden = false;
+    }).catch(function (err) { nota("n-entrar", err.message, true); });
+  };
+
+  $("f-enlace").onsubmit = function (e) {
+    e.preventDefault();
+    var b = e.target.querySelector("button"); b.disabled = true;
+    nota("n-enlace", "Bajando el vídeo…");
+    api("/api/analizar", { url: $("url").value }).then(function (r) {
+      analisis = r.id;
+      esperar(r.id, function (t) {
+        nota("n-enlace", "«" + (t.fuente.titulo || "") + "»: transcrito. Claude está eligiendo los mejores momentos…");
+        return api("/api/proponer", { id: analisis, n: 5 }).then(function (p) {
+          momentos = p.momentos; pintarMomentos(); nota("n-enlace", ""); b.disabled = false;
+        }).catch(function (err) { nota("n-enlace", err.message, true); b.disabled = false; });
+      }, "n-enlace");
+    }).catch(function (err) { nota("n-enlace", err.message, true); b.disabled = false; });
+  };
+
+  function pintarMomentos() {
+    var lista = $("lista"); lista.textContent = "";
+    momentos.forEach(function (m, i) {
+      var fila = document.createElement("label"); fila.className = "momento";
+      var c = document.createElement("input"); c.type = "checkbox"; c.checked = true; c.dataset.i = i;
+      var cuerpo = document.createElement("div");
+      cuerpo.appendChild(texto("div", m.titulo)).style.fontWeight = "600";
+      cuerpo.appendChild(texto("div", m.ini + " – " + m.fin)).className = "tiempo";
+      cuerpo.appendChild(texto("div", "«" + m.gancho + "»")).className = "gancho";
+      fila.appendChild(c); fila.appendChild(cuerpo); lista.appendChild(fila);
+    });
+    $("p-momentos").hidden = false;
+  }
+
+  $("b-cortar").onclick = function () {
+    var elegidos = Array.prototype.filter.call(document.querySelectorAll("#lista input"), function (c) { return c.checked; })
+      .map(function (c) { return momentos[+c.dataset.i]; });
+    if (!elegidos.length) return nota("n-momentos", "Elige al menos un momento.", true);
+    $("b-cortar").disabled = true;
+    nota("n-momentos", "Cortando y subtitulando…");
+    api("/api/clipear", { id: analisis, momentos: elegidos }).then(function (r) {
+      esperar(r.id, function (t) { pintarClips(r.id, t.clips); nota("n-momentos", ""); $("b-cortar").disabled = false; }, "n-momentos");
+    }).catch(function (err) { nota("n-momentos", err.message, true); $("b-cortar").disabled = false; });
+  };
+
+  function copiar(boton, valor) {
+    boton.onclick = function () { navigator.clipboard.writeText(valor).then(function () { boton.textContent = "Copiado"; }); };
+  }
+  function pintarClips(id, clips) {
+    var zona = $("clips"); zona.textContent = "";
+    clips.forEach(function (c) {
+      var fila = document.createElement("div"); fila.className = "clip";
+      var v = document.createElement("video"); v.controls = true; v.preload = "metadata"; v.src = "/api/clip?id=" + id + "&n=" + c.n;
+      var info = document.createElement("div");
+      info.appendChild(texto("div", "Título")).className = "tiempo";
+      info.appendChild(texto("div", c.titulo)).className = "campo";
+      var desc = (c.descripcion + "\n" + c.hashtags).trim();
+      info.appendChild(texto("div", "Descripción")).className = "tiempo";
+      info.appendChild(texto("div", desc)).className = "campo";
+      var botones = document.createElement("div"); botones.className = "fila";
+      var b1 = texto("button", "Copiar título"); b1.className = "mini"; copiar(b1, c.titulo);
+      var b2 = texto("button", "Copiar descripción"); b2.className = "mini"; copiar(b2, desc);
+      var a = texto("a", ""); a.href = "/api/clip?id=" + id + "&n=" + c.n + "&descargar=1";
+      var b3 = texto("button", "Descargar"); b3.className = "mini sec"; a.appendChild(b3);
+      botones.appendChild(b1); botones.appendChild(b2); botones.appendChild(a);
+      info.appendChild(botones);
+      fila.appendChild(v); fila.appendChild(info); zona.appendChild(fila);
+    });
+    $("p-clips").hidden = false;
+  }
+})();
+</script>
+</body>
+</html>
