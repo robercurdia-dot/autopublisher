@@ -195,7 +195,8 @@ def lanzar_cobrando(email, coste, concepto, lanzar):
 
 ESTATICOS = {"/": ("index.html", "text/html; charset=utf-8"), "/index.html": ("index.html", "text/html; charset=utf-8"),
              "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/app.css": ("app.css", "text/css; charset=utf-8")}
-CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; "
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; "
+       "font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; "
        "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
 COOKIE = "sesion"
 

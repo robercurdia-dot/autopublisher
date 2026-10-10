@@ -3,58 +3,98 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clipper</title>
+<title>Autopublisher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="/app.css">
 </head>
 <body>
-<main>
-<div class="cabecera"><div><h1>Clipper</h1>
-<p class="sub">Pega un vídeo largo y llévate los mejores momentos en vertical, con subtítulos, título y descripción.</p></div>
-<div class="saldo" id="saldo" hidden><span id="s-tokens"></span><span id="s-plan"></span><button class="mini" id="b-planes" type="button">Planes</button><button class="mini" id="b-salir" type="button">Salir</button></div></div>
+
+<section class="cielo" id="inicio">
+  <div class="nubes" aria-hidden="true"></div>
+  <header class="barra-sup">
+    <nav class="enlaces">
+      <a href="#herramientas" id="n-herramientas">Herramientas</a>
+      <a href="#planes" id="n-planes">Planes</a>
+      <a href="#como" id="n-como">Cómo funciona</a>
+    </nav>
+    <a class="logo" href="#inicio">autopublisher</a>
+    <div class="derecha">
+      <span class="saldo-pildora" id="saldo" hidden><span id="s-tokens"></span><span class="s-sep">·</span><span id="s-plan"></span></span>
+      <button type="button" class="pildora" id="b-cuenta">Entrar</button>
+    </div>
+  </header>
+
+  <h1 class="titular">Un vídeo largo,<br><em>cien Shorts listos</em></h1>
+
+  <div class="menu" id="herramientas">
+    <div class="interruptor" role="tablist">
+      <button type="button" role="tab" class="activo" id="m-crear">Crear</button>
+      <button type="button" role="tab" id="m-publicar">Publicar</button>
+    </div>
+    <div class="barra-herr" id="barra-herr"></div>
+  </div>
+</section>
+
+<main class="trabajo">
 
 <section class="panel acceso" id="p-entrar" hidden>
+  <h2 class="titulo-panel">Tu <em>cuenta</em></h2>
   <div class="pestanas"><button type="button" class="pestana activa" id="t-entrar">Entrar</button><button type="button" class="pestana" id="t-registro">Crear cuenta</button></div>
   <form class="columna" id="f-entrar">
     <input type="email" id="email" placeholder="Email" autocomplete="email" required>
     <input type="password" id="clave" placeholder="Contraseña" autocomplete="current-password" required minlength="10">
-    <button id="b-acceso">Entrar</button>
+    <button class="principal" id="b-acceso">Entrar</button>
   </form>
   <p class="nota"><a href="#" id="a-olvide">He olvidado mi contraseña</a></p>
   <p class="nota" id="n-entrar"></p>
 </section>
 
 <section class="panel acceso" id="p-restablecer" hidden>
+  <h2 class="titulo-panel">Contraseña <em>nueva</em></h2>
   <form class="columna" id="f-restablecer">
-    <input type="password" id="clave-nueva" placeholder="Contraseña nueva (mínimo 10 caracteres)" autocomplete="new-password" required minlength="10">
-    <button>Guardar contraseña</button>
+    <input type="password" id="clave-nueva" placeholder="Mínimo 10 caracteres" autocomplete="new-password" required minlength="10">
+    <button class="principal">Guardar contraseña</button>
   </form>
   <p class="nota" id="n-restablecer"></p>
 </section>
 
+<section class="panel" id="p-pronto" hidden>
+  <h2 class="titulo-panel" id="pronto-titulo"></h2>
+  <p class="nota" id="pronto-texto"></p>
+</section>
+
 <section class="panel" id="p-enlace" hidden>
+  <h2 class="titulo-panel">Clipper <em>con IA</em></h2>
   <form class="fila" id="f-enlace">
-    <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=…" required>
-    <button>Analizar</button>
+    <input type="url" id="url" placeholder="Pega el enlace de un vídeo de YouTube, Twitch o Kick" required>
+    <button class="principal">Analizar</button>
   </form>
   <p class="nota" id="n-costes"></p>
   <p class="nota" id="n-enlace"></p>
 </section>
 
 <section class="panel" id="p-momentos" hidden>
+  <h2 class="titulo-panel">Los mejores <em>momentos</em></h2>
   <div id="lista"></div>
-  <div class="fila arriba"><button class="sec" id="b-cortar">Cortar los elegidos</button></div>
+  <div class="fila arriba"><button class="principal" id="b-cortar">Cortar los elegidos</button></div>
   <p class="nota" id="n-momentos"></p>
 </section>
 
-<section class="panel" id="p-planes" hidden>
-  <div class="planes" id="planes"></div>
-  <p class="nota">Los tokens del plan se renuevan cada mes; los de los packs no caducan. Si un trabajo falla, se devuelven solos.</p>
-</section>
-
 <section class="panel" id="p-clips" hidden>
+  <h2 class="titulo-panel">Tus <em>clips</em></h2>
   <div id="clips"></div>
   <p class="nota">Descárgalos y súbelos a tu canal con su título y descripción.</p>
 </section>
+
+<section class="panel" id="p-planes" hidden>
+  <h2 class="titulo-panel">Planes <em>y tokens</em></h2>
+  <div class="planes" id="planes"></div>
+  <p class="nota">Los tokens del plan se renuevan cada mes; los de los packs no caducan. Si un trabajo falla, se devuelven solos.</p>
+  <p class="nota"><a href="#" id="b-salir" hidden>Cerrar sesión</a></p>
+</section>
+
 </main>
 <script src="/app.js"></script>
 </body>
